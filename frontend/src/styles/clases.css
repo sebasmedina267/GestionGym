@@ -1,0 +1,500 @@
+/* ==================================
+   Kinetic Atmosphere — Clases
+   ================================== */
+
+:root {
+  --k-surface: #0b1326;
+  --k-surface-low: #131b2e;
+  --k-surface-high: #222a3d;
+  --k-surface-highest: #2d3449;
+  --k-surface-variant: rgba(19, 27, 46, 0.8); /* Darker and more solid for the cards */
+  --k-surface-manage: #1a2235; /* Darker slate for the manage button */
+  
+  --k-primary: #bdc2ff;
+  --k-primary-container: rgba(129, 140, 248, 0.2);
+  --k-on-primary: #131e8c;
+  
+  --k-secondary: #4edea3;
+  --k-secondary-container: rgba(0, 165, 114, 0.16);
+  --k-on-secondary: #002113;
+  
+  --k-error: #ffb2b7;
+  --k-error-container: rgba(255, 92, 114, 0.12);
+  
+  --k-on-surface: #dae2fd;
+  --k-on-surface-variant: #c6c5d5;
+  --k-outline: rgba(189, 194, 255, 0.12);
+  
+  --k-shadow: 0px 20px 40px rgba(0, 0, 0, 0.4);
+  --k-glow-primary: 0 0 20px rgba(189, 194, 255, 0.15);
+  --k-glow-secondary: 0 0 20px rgba(78, 222, 163, 0.15);
+  
+  --k-radius-xl: 16px;
+  --k-radius-2xl: 24px;
+}
+
+.clases-kinetic {
+  background-color: var(--k-surface);
+  color: var(--k-on-surface);
+  min-height: 100vh;
+  padding: 40px;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Glass Card Utility - Refined for "Kinetic Atmosphere" high-fidelity look */
+.glass-card {
+  background: var(--k-surface-variant);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05); /* Very subtle borderline */
+  border-radius: 16px; /* Matching the reference rounding */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  background: rgba(19, 27, 46, 0.9);
+  border-color: rgba(189, 194, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Typography Overrides */
+.kinetic-display {
+  font-size: 48px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.kinetic-label {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--k-on-surface-variant);
+}
+
+/* Header Section */
+.kinetic-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 48px;
+}
+
+.kinetic-header__title {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.kinetic-header__subtitle {
+  color: var(--k-on-surface-variant);
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+/* Buttons */
+.kinetic-btn {
+  padding: 12px 24px;
+  border-radius: var(--k-radius-xl);
+  font-weight: 700;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+}
+
+.kinetic-btn--primary {
+  background: var(--k-primary);
+  color: var(--k-on-primary);
+  box-shadow: 0 8px 20px rgba(189, 194, 255, 0.2);
+}
+
+.kinetic-btn--primary:hover {
+  transform: scale(1.02);
+  box-shadow: 0 12px 28px rgba(189, 194, 255, 0.3);
+}
+
+.kinetic-btn--secondary {
+  background: var(--k-secondary);
+  color: var(--k-on-secondary);
+  box-shadow: 0 8px 20px rgba(78, 222, 163, 0.2);
+}
+
+.kinetic-btn--secondary:hover {
+  transform: scale(1.02);
+  box-shadow: 0 12px 28px rgba(78, 222, 163, 0.3);
+}
+
+.kinetic-btn--ghost {
+  background: rgba(189, 194, 255, 0.1);
+  color: var(--k-primary);
+  border: 1px solid rgba(189, 194, 255, 0.2);
+}
+
+.kinetic-btn--ghost:hover {
+  background: rgba(189, 194, 255, 0.15);
+}
+
+/* Metrics Grid */
+.kinetic-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 48px;
+}
+
+.kinetic-metric-card {
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.kinetic-metric-card__icon {
+  position: absolute;
+  right: -20px;
+  bottom: -20px;
+  font-size: 120px;
+  opacity: 0.05;
+  transition: opacity 0.3s ease;
+}
+
+.kinetic-metric-card:hover .kinetic-metric-card__icon {
+  opacity: 0.1;
+}
+
+.kinetic-metric-card__trend {
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Section Common */
+.kinetic-section {
+  margin-bottom: 48px;
+}
+
+.kinetic-section__title {
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.kinetic-section__accent {
+  width: 4px;
+  height: 24px;
+  border-radius: 99px;
+  margin-right: -4px; /* Slight offset tweak */
+}
+
+/* Class List */
+.kinetic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.kinetic-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+}
+
+.kinetic-item__left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.kinetic-item__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  flex-shrink: 0;
+}
+
+.kinetic-item__title {
+  font-size: 1.125rem; /* text-lg */
+  font-weight: 700;
+  margin: 0;
+  color: #ffffff;
+}
+
+.kinetic-item__desc {
+  font-size: 0.875rem; /* text-sm */
+  color: var(--k-on-surface-variant);
+  margin-top: 4px;
+  max-width: 28rem; /* max-w-md */
+  font-weight: 400;
+}
+
+.kinetic-item__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 0 0 160px; /* Fixed width for the button area */
+}
+
+.kinetic-item__stats-group {
+  display: flex;
+  align-items: center;
+  gap: 48px; /* gap-12 */
+}
+
+.kinetic-item__stat {
+  text-align: center;
+  min-width: 90px; /* Spaced out more like the design */
+}
+
+.kinetic-item__stat-label {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: rgba(189, 194, 255, 0.5); /* #bdc2ff/50 */
+  margin-bottom: 4px;
+  display: block;
+}
+
+.kinetic-item__stat-val {
+  font-size: 1.125rem; /* text-lg */
+  font-weight: 700;
+  display: block;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.kinetic-btn--manage {
+  background: var(--k-surface-highest) !important;
+  color: var(--k-on-surface) !important;
+  padding: 0.5rem 1.5rem !important; /* py-2 px-6 */
+  font-size: 0.875rem !important; /* text-sm */
+  border-radius: 8px !important;
+  font-weight: 700 !important;
+  height: auto !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.kinetic-btn--manage:hover {
+  background: var(--k-primary);
+  color: var(--k-on-primary);
+}
+
+/* FAB */
+.kinetic-fab {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  width: 72px; /* Slightly larger like the design */
+  height: 72px;
+  border-radius: 18px; /* Squircle/Rounded corner look matching the cards */
+  background: #c7d2fe; /* High-fidelity light purple */
+  color: #1e1b4b; /* Deep indigo for the icon */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(199, 210, 254, 0.3), 0 0 20px rgba(199, 210, 254, 0.1);
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.kinetic-fab:hover {
+  transform: scale(1.05) translateY(-4px);
+  box-shadow: 0 15px 40px rgba(199, 210, 254, 0.4);
+}
+
+.kinetic-fab__label {
+  position: absolute;
+  right: 80px;
+  background: var(--k-primary);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  color: var(--k-on-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.kinetic-fab:hover .kinetic-fab__label {
+  opacity: 1;
+}
+
+/* Modals Modernization */
+.kinetic-modal {
+  background: var(--k-surface-low) !important;
+  border: 1px solid var(--k-outline) !important;
+  border-radius: var(--k-radius-2xl) !important;
+  color: var(--k-on-surface) !important;
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6) !important;
+}
+
+.kinetic-modal-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--k-outline);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kinetic-modal-body {
+  padding: 24px;
+}
+
+.kinetic-modal-footer {
+  padding: 24px;
+  border-top: 1px solid var(--k-outline);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Form Controls */
+.kinetic-input {
+  background: var(--k-surface-highest) !important;
+  border: 1px solid var(--k-outline) !important;
+  border-radius: 12px !important;
+  color: var(--k-on-surface) !important;
+  padding: 12px 16px !important;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.kinetic-input:focus {
+  border-color: var(--k-primary) !important;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(189, 194, 255, 0.1) !important;
+}
+
+.kinetic-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23bdc2ff'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+
+/* Tabs */
+.kinetic-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--k-outline);
+  margin-bottom: 24px;
+  gap: 32px;
+}
+
+.kinetic-tab {
+  padding: 12px 0;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--k-on-surface-variant);
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.kinetic-tab:hover {
+  color: var(--k-on-surface);
+}
+
+.kinetic-tab--active {
+  color: var(--k-primary);
+}
+
+.kinetic-tab--active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--k-primary);
+  box-shadow: 0 0 10px rgba(189, 194, 255, 0.5);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .kinetic-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Correcciones para el diseño de columnas */
+
+.kinetic-list {
+  gap: 12px; /* Espacio entre filas */
+}
+
+.kinetic-item {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important; /* Alinea todo a la izquierda por defecto */
+  gap: 24px !important; /* Espacio constante entre columnas */
+  padding: 16px 24px !important;
+}
+
+/* Eliminamos los contenedores que agrupan y separan */
+.kinetic-item__left {
+  display: contents; /* Esto hace que sus hijos (icono e info) se comporten como hijos directos del article */
+}
+
+/* Ajustamos la información principal para que crezca */
+.kinetic-item__info {
+  flex: 1; 
+  min-width: 0;
+}
+
+/* Quitamos el ancho fijo de las acciones para que se pegue a la derecha */
+.kinetic-item__actions {
+  flex: 0 0 auto !important; 
+  margin-left: auto; /* Esto empuja los botones al final de la fila */
+  gap: 12px;
+}
+
+/* Aseguramos que las estadísticas tengan un ancho consistente */
+.kinetic-item__stat {
+  min-width: 100px !important;
+  text-align: center;
+}
+
+/* Ajuste para el botón de eliminar (el icono) */
+.kinetic-btn--ghost {
+    padding: 8px !important;
+    min-width: auto !important;
+    line-height: 0;
+}

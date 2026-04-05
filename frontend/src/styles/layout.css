@@ -1,0 +1,261 @@
+/* SKELETON LAYOUT */
+.layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* CONTENT AREA */
+.layout-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+}
+
+.main-content {
+  flex: 1;
+  width: 100%;
+  padding: 48px 64px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  background: radial-gradient(circle at top right, rgba(79, 70, 229, 0.05) 0%, transparent 40%), var(--bg-primary);
+}
+
+/* SIDEBAR RECONSTRUCTION */
+.sidebar {
+  width: 260px;
+  min-height: 100vh;
+  background: var(--bg-primary);
+  border-right: 1px solid var(--border-color);
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  z-index: 50;
+  transition: var(--transition);
+}
+
+.sidebar h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.04em;
+  padding: 0 12px;
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sidebar h2::before {
+  content: "";
+  display: block;
+  width: 14px;
+  height: 28px;
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+  border-radius: 4px;
+  box-shadow: 0 0 12px var(--primary-glow);
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar .menu-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-top: 32px;
+  margin-bottom: 12px;
+  padding: 0 12px;
+}
+
+.sidebar a {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.sidebar a:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.sidebar a.active {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-weight: 600;
+  box-shadow: var(--glass-inset);
+}
+.sidebar a.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 60%;
+  width: 3px;
+  border-radius: 0 4px 4px 0;
+  background: var(--primary);
+  box-shadow: 0 0 8px var(--primary-glow);
+}
+
+/* NAVBAR (HEADER) RECONSTRUCTION */
+.navbar {
+  height: 80px;
+  min-height: 80px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 64px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 40;
+  position: sticky;
+  top: 0;
+  gap: 24px;
+}
+
+.navbar-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.navbar-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.navbar-left h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.gym-name {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  flex-shrink: 0;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.user-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.user-role {
+  font-size: 10px;
+  color: var(--primary-light);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--primary-alpha);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.logout-btn {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--glass-inset);
+}
+
+.logout-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: var(--danger);
+  transform: translateY(-1px);
+}
+
+.admin-icon-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+}
+
+.admin-icon-btn:hover {
+  background: var(--primary-alpha);
+  transform: scale(1.1);
+}
+
+@media (max-width: 1024px) {
+  .main-content { padding: 32px; }
+  .navbar { padding: 0 32px; }
+}
+
+@media (max-width: 768px) {
+  .sidebar { width: 80px; padding: 24px 12px; align-items: center; }
+  .sidebar h2 { font-size: 0; gap: 0; }
+  .sidebar h2::before { width: 24px; height: 24px; border-radius: 8px; }
+  .sidebar .menu-title, .sidebar a span { display: none; }
+  .main-content { padding: 20px; }
+  .navbar { padding: 0 20px; }
+}
