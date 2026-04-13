@@ -1,5 +1,6 @@
 import Sidebar from "./Sidebar";
 import Header from "./Header";
+import "./AppLayout.css";
 
 export default function AppLayout({ children }) {
   return (

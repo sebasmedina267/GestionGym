@@ -6,6 +6,7 @@ import ProfileCard from "./ProfileCard";
 import ActivityLogs from "./ActivityLogs";
 import EmployeesSection from "./EmployeesSection";
 import ProfileModals from "./ProfileModals";
+import "./Styles/ProfilePage.css";
 
 export default function ProfilePage() {
   const {
@@ -46,13 +47,12 @@ export default function ProfilePage() {
           <button 
             className="btn btn-danger" 
             onClick={logout}
-            style={{padding: "8px 16px", borderRadius: "8px", fontWeight: "bold", background: "var(--danger-color)", color: "white", border: "none", cursor: "pointer"}}
           >
             Cerrar Sesión
           </button>
         </Header>
 
-        <div style={{display: "grid", gridTemplateColumns: "1fr 2fr", gap: "24px", marginTop: "24px"}}>
+        <div className="profile-main-grid">
           <ProfileCard 
             admin={admin} 
             isDueno={isDueno} 

@@ -1,0 +1,189 @@
+/* MovimientosTable.css */
+.economia-table-shell {
+    margin-top: 40px;
+}
+
+.economia-filter-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.economia-filter-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.economia-filter-btn {
+  padding: 10px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.economia-filter-btn.active {
+  color: var(--text-primary);
+  border-color: var(--primary);
+  background: rgba(189, 194, 255, 0.1);
+}
+
+.economia-filter-btn.active.ingresos {
+  border-color: #4edea3;
+  background: rgba(78, 222, 163, 0.1);
+  color: #4edea3;
+}
+
+.economia-filter-btn.active.gastos {
+  border-color: #ffb2b7;
+  background: rgba(255, 178, 183, 0.1);
+  color: #ffb2b7;
+}
+
+.economia-filter-btn:hover:not(.active) {
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.economia-table-container {
+  background: rgba(45, 52, 73, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(189, 194, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  overflow-x: auto;
+}
+
+.economia-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.economia-table th {
+  padding: 16px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.economia-table td {
+  padding: 16px;
+  border-bottom: 1px solid rgba(189, 194, 255, 0.05);
+}
+
+.economia-table tbody tr:hover {
+  background: rgba(189, 194, 255, 0.05);
+}
+
+.economia-table-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.economia-table-type.ingreso {
+  background: rgba(78, 222, 163, 0.15);
+  color: #4edea3;
+}
+
+.economia-table-type.gasto {
+  background: rgba(255, 178, 183, 0.15);
+  color: #ffb2b7;
+}
+
+.economia-table-amount {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.economia-table-amount.ingreso { color: #4edea3; }
+.economia-table-amount.gasto { color: #ffb2b7; }
+
+.economia-table-status {
+    color: #4edea3;
+    font-weight: 600;
+}
+
+.economia-table-description {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.economia-table-description-sub {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.economia-table-actions {
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.economia-table tbody tr:hover .economia-table-actions {
+  opacity: 1;
+}
+
+.economia-table-action-btn {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.economia-table-action-btn:hover {
+  background: var(--primary);
+  color: #131e8c;
+}
+
+.economia-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.economia-empty-state-icon {
+  font-size: 4rem;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.economia-empty-state-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.economia-empty-state-text {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}

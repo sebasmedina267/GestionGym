@@ -1,0 +1,38 @@
+/* DashboardPage.css */
+
+.dashboard-page-container {
+  --d2-surface: #0b1326;
+  --d2-surface-low: #131b2e;
+  --d2-surface-high: #222a3d;
+  --d2-surface-highest: #2d3449;
+  --d2-primary: #bdc2ff;
+  --d2-primary-container: #818cf8;
+  --d2-secondary: #4edea3;
+  --d2-tertiary: #ffb2b7;
+  --d2-on-surface: #dae2fd;
+  --d2-on-surface-variant: #c6c5d5;
+  --d2-outline-variant: rgba(189, 194, 255, 0.12);
+  --d2-shadow-ambient: 0px 20px 40px rgba(0, 0, 0, 0.4);
+  --d2-radius-xl: 16px;
+
+  animation: fadeIn 0.35s ease-out;
+  color: var(--d2-on-surface);
+}
+
+.dashboard-layout-grid {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

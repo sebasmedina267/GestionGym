@@ -1,0 +1,117 @@
+/* ProfileModals.css */
+
+.profile-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+}
+
+.profile-modal-content {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 400px;
+  width: 90%;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+.profile-modal-title {
+  margin: 0 0 24px 0;
+  color: var(--text-primary);
+}
+
+.profile-form-group {
+  margin-bottom: 16px;
+}
+
+.profile-form-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.profile-input,
+.profile-textarea,
+.profile-select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-family: inherit;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.profile-input:focus,
+.profile-textarea:focus,
+.profile-select:focus {
+  border-color: var(--primary);
+}
+
+.profile-textarea {
+  resize: vertical;
+}
+
+.profile-select {
+  cursor: pointer;
+}
+
+.profile-modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.profile-btn-modal {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.profile-btn-modal:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-cancel-modal {
+  border-color: var(--border-color);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.btn-confirm-gym {
+  background: linear-gradient(180deg, #10b981 0%, #047857 100%);
+  color: white;
+}
+
+.btn-confirm-edit {
+  background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+}
+
+.btn-confirm-delete {
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+}
+
+.delete-warning-text {
+  margin: 0 0 24px 0;
+  color: var(--danger-color);
+  font-size: 0.9rem;
+}

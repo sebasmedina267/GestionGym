@@ -1,0 +1,95 @@
+/* DashboardPanels.css */
+
+.dashboard-panel-kinetic {
+  background: rgba(19, 27, 46, 0.72);
+  border: 1px solid rgba(189, 194, 255, 0.1);
+  border-radius: var(--d2-radius-xl, 16px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 18px 0;
+}
+
+.dashboard-panel-kicker {
+  margin: 0 0 6px;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: rgba(189, 194, 255, 0.65);
+}
+
+.dashboard-panel-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+  color: #dae2fd;
+}
+
+.dashboard-panel-body {
+  padding: 18px;
+  flex-grow: 1;
+}
+
+.dashboard-panel-pill {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(34, 42, 61, 0.45);
+  border: 1px solid rgba(189, 194, 255, 0.12);
+  color: rgba(189, 194, 255, 0.9);
+  white-space: nowrap;
+}
+
+/* Empty State */
+.dashboard-empty-state {
+  padding: 18px;
+  border-radius: 14px;
+  background: rgba(34, 42, 61, 0.35);
+  border: 1px solid rgba(189, 194, 255, 0.08);
+}
+
+.dashboard-empty-title {
+  margin: 0;
+  font-weight: 850;
+  color: rgba(218, 226, 253, 0.92);
+}
+
+.dashboard-empty-text {
+  margin: 8px 0 0;
+  color: rgba(198, 197, 213, 0.92);
+}
+
+/* Insight Component */
+.dashboard-insight-card {
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(34, 42, 61, 0.35);
+  border: 1px solid rgba(189, 194, 255, 0.08);
+}
+
+.dashboard-insight-kicker {
+  margin: 0 0 8px;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: rgba(78, 222, 163, 0.85);
+}
+
+.dashboard-insight-text {
+  margin: 0;
+  color: rgba(198, 197, 213, 0.92);
+  line-height: 1.5;
+}

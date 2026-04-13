@@ -1,0 +1,30 @@
+.alert-modal-content {
+  text-align: center;
+  min-width: 280px;
+}
+.alert-modal-message {
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+.alert-modal-btn {
+  min-width: 120px;
+}
+
+.confirm-modal-content {
+  text-align: center;
+  min-width: 300px;
+}
+.confirm-modal-message {
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+.confirm-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.confirm-modal-btn {
+  min-width: 100px;
+}

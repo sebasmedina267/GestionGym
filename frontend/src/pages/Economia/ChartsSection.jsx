@@ -1,6 +1,7 @@
 // ChartsSection.jsx
 import React from "react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell } from "recharts";
+import "./Styles/ChartsSection.css";
 
 const COLORS = ["#4edea3", "#bdc2ff", "#ffb2b7", "#a78bfa", "#f59e0b"];
 
@@ -11,7 +12,7 @@ export default function ChartsSection({ resumen, ingresosFuentes, gastosFuentes 
       <div className="economia-info-card">
         <h3>Informe Económico</h3>
         <p className="economia-info-card-subtitle">Comparativa Mensual de Flujos de Caja</p>
-        <div className="economia-chart-container" style={{ display: 'flex', minHeight: 0 }}>
+        <div className="economia-chart-container">
           <ResponsiveContainer width="100%" height={320}>
             <BarChart 
               data={[{ name: "Período Actual", Ingresos: Number(resumen.ingresos), Gastos: Number(resumen.gastos) }]}
@@ -29,7 +30,7 @@ export default function ChartsSection({ resumen, ingresosFuentes, gastosFuentes 
       </div>
 
       {/* Side Charts */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
+      <div className="economia-side-charts">
         {/* Ingresos */}
         <div className="economia-info-card">
           <h3>Fuentes de Ingreso</h3>
@@ -44,7 +45,7 @@ export default function ChartsSection({ resumen, ingresosFuentes, gastosFuentes 
                 <Legend verticalAlign="bottom" height={18} />
               </PieChart>
             </ResponsiveContainer>
-          ) : <div className="economia-empty-state" style={{ padding: "40px 20px" }}>📊 Aún no hay ingresos registrados</div>}
+          ) : <div className="economia-empty-state">📊 Aún no hay ingresos registrados</div>}
         </div>
 
         {/* Gastos */}
@@ -61,7 +62,7 @@ export default function ChartsSection({ resumen, ingresosFuentes, gastosFuentes 
                 <Legend verticalAlign="bottom" height={18} />
               </PieChart>
             </ResponsiveContainer>
-          ) : <div className="economia-empty-state" style={{ padding: "40px 20px" }}>📊 Aún no hay gastos registrados</div>}
+          ) : <div className="economia-empty-state">📊 Aún no hay gastos registrados</div>}
         </div>
       </div>
     </div>

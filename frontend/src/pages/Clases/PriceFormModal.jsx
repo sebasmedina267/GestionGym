@@ -1,5 +1,5 @@
 import React from "react";
-
+import "./Styles/PriceFormModal.css";
 export default function PriceFormModal({
   open, onClose, precioForm, setPrecioForm, handleCreateOrUpdatePrecio
 }) {
@@ -8,30 +8,27 @@ export default function PriceFormModal({
   const isEdit = Boolean(precioForm.id);
 
   return (
-    <div className="fixed inset-0 z-140 flex items-center justify-center p-4 bg-[#0b1326]/90 backdrop-blur-md">
-      <div className="kinetic-modal w-full max-w-md animate-fade-in shadow-2xl">
+    <div className="price-modal-overlay">
+      <div className="price-modal-container">
         
-        <header className="kinetic-modal-header">
-          <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-[#ff5c72]">payments</span>
-            <h2 className="text-xl font-bold text-on-surface">
+        <header className="price-modal-header">
+          <div className="price-header-title">
+            <span className="material-symbols-outlined" style={{color: "#ff5c72"}}>payments</span>
+            <h2>
               {isEdit ? "Editar Plan" : "Nuevo Plan de Precio"}
             </h2>
           </div>
-          <button 
-            className="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-white/10"
-            onClick={onClose}
-          >
+          <button className="price-modal-close" onClick={onClose}>
             <span className="material-symbols-outlined">close</span>
           </button>
         </header>
 
         <form onSubmit={handleCreateOrUpdatePrecio}>
-          <div className="kinetic-modal-body space-y-6">
-            <div className="space-y-2">
-              <label className="kinetic-label tracking-widest block px-1">Nombre del Plan</label>
+          <div className="price-modal-body">
+            <div className="price-field-group">
+              <label className="price-field-label">Nombre del Plan</label>
               <input
-                className="kinetic-input"
+                className="horario-input"
                 type="text"
                 placeholder="Ej. Mensualidad Estándar..."
                 value={precioForm.nombre}
@@ -40,11 +37,11 @@ export default function PriceFormModal({
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="kinetic-label tracking-widest block px-1">Duración</label>
+            <div className="price-grid">
+              <div className="price-field-group">
+                <label className="price-field-label">Duración</label>
                 <input
-                  className="kinetic-input"
+                  className="horario-input"
                   type="number"
                   min="1"
                   value={precioForm.cantidad_unidad}
@@ -52,10 +49,10 @@ export default function PriceFormModal({
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <label className="kinetic-label tracking-widest block px-1">Unidad</label>
+              <div className="price-field-group">
+                <label className="price-field-label">Unidad</label>
                 <select
-                  className="kinetic-input kinetic-select"
+                  className="horario-input horario-select"
                   value={precioForm.tipo_unidad}
                   onChange={(e) => setPrecioForm({ ...precioForm, tipo_unidad: e.target.value })}
                 >
@@ -67,11 +64,11 @@ export default function PriceFormModal({
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="kinetic-label tracking-widest block px-1">Importe (€)</label>
-              <div className="relative">
+            <div className="price-field-group">
+              <label className="price-field-label">Importe (€)</label>
+              <div className="price-input-wrapper">
                 <input
-                  className="kinetic-input pl-10"
+                  className="horario-input price-input-with-icon"
                   type="number"
                   step="0.01"
                   placeholder="0.00"
@@ -79,24 +76,26 @@ export default function PriceFormModal({
                   onChange={(e) => setPrecioForm({ ...precioForm, precio: e.target.value })}
                   required
                 />
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold">€</span>
+                <span className="price-currency-icon">€</span>
               </div>
             </div>
           </div>
 
-          <footer className="kinetic-modal-footer">
+          <footer className="price-modal-footer">
             <button 
-              className="kinetic-btn kinetic-btn--ghost h-11 px-6"
+              className="btn-secondary"
+              style={{height: "2.75rem", padding: "0 1.5rem", background: "transparent"}}
               type="button" 
               onClick={onClose}
             >
               Cancelar
             </button>
             <button 
-              className="kinetic-btn kinetic-btn--secondary h-11 px-8 bg-[#ff5c72]! text-white! shadow-[#ff5c72]/30!"
+              className="btn-primary"
+              style={{height: "2.75rem", padding: "0 2rem", background: "#ff5c72", border: "1px solid #cc4a5b", color: "#fff"}}
               type="submit"
             >
-              <span className="material-symbols-outlined text-lg">check_circle</span>
+              <span className="material-symbols-outlined" style={{fontSize: "1.125rem"}}>check_circle</span>
               {isEdit ? "Guardar Cambios" : "Crear Plan"}
             </button>
           </footer>
