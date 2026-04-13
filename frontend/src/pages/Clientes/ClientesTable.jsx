@@ -1,5 +1,5 @@
 import Table from "../../components/ui/Table";
-
+import "./Styles/ClientesTable.css";
 
 export default function ClientesTable({ data, onEdit, onDelete, onToggle }) {
   const columns = [

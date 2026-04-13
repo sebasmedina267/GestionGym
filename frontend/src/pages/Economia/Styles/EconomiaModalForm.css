@@ -1,0 +1,22 @@
+/* EconomiaModalForm.css */
+.economia-modal-form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.economia-modal-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.economia-modal-footer {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.economia-modal-btn-full {
+    flex: 1;
+}

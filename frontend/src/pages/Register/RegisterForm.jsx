@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "./Styles/RegisterForm.css";
 
 const RegisterForm = ({
     form,
@@ -16,33 +17,29 @@ const RegisterForm = ({
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     return (
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="register-form-wrapper" onSubmit={handleSubmit}>
             {/* Mensajes de Éxito/Error Generales */}
             {errors.general && (
-                <div className="p-3 bg-error-container text-on-error-container rounded-xl text-xs font-medium border border-error/20">
-                    <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-sm">error</span>
-                        {errors.general}
-                    </div>
+                <div className="register-alert register-alert-error">
+                    <span className="material-symbols-outlined" style={{fontSize: "1rem"}}>error</span>
+                    <span>{errors.general}</span>
                 </div>
             )}
             {success && (
-                <div className="p-3 bg-secondary-container/20 text-secondary rounded-xl text-xs font-medium border border-secondary/20">
-                    <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-sm">check_circle</span>
-                        {success}
-                    </div>
+                <div className="register-alert register-alert-success">
+                    <span className="material-symbols-outlined" style={{fontSize: "1rem"}}>check_circle</span>
+                    <span>{success}</span>
                 </div>
             )}
 
             {/* Fila de Nombres */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                    <label className="block text-[10px] font-bold uppercase tracking-[0.1em] text-on-surface-variant px-1">Nombre</label>
-                    <div className="relative">
-                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-lg">person</span>
+            <div className="register-form-row">
+                <div className="register-field-group">
+                    <label className="register-field-label">Nombre</label>
+                    <div className="register-input-container">
+                        <span className="material-symbols-outlined register-input-icon">person</span>
                         <input
-                            className={`w-full bg-surface-container-highest border-none focus:ring-2 ${errors.nombre ? 'focus:ring-error/50 ring-2 ring-error/30' : 'focus:ring-primary/50'} text-on-surface rounded-xl py-3 pl-12 pr-4 transition-all text-sm placeholder:text-outline/50`}
+                            className={`register-input ${errors.nombre ? 'register-input--error' : ''}`}
                             placeholder="Ej. Alex"
                             type="text"
                             value={form.nombre}
@@ -50,14 +47,14 @@ const RegisterForm = ({
                             required
                         />
                     </div>
-                    {errors.nombre && <p className="text-[9px] text-error px-1">{errors.nombre}</p>}
+                    {errors.nombre && <p className="register-error-text">{errors.nombre}</p>}
                 </div>
-                <div className="space-y-1">
-                    <label className="block text-[10px] font-bold uppercase tracking-[0.1em] text-on-surface-variant px-1">Apellido</label>
-                    <div className="relative">
-                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-lg">person</span>
+                <div className="register-field-group">
+                    <label className="register-field-label">Apellido</label>
+                    <div className="register-input-container">
+                        <span className="material-symbols-outlined register-input-icon">person</span>
                         <input
-                            className={`w-full bg-surface-container-highest border-none focus:ring-2 ${errors.apellido ? 'focus:ring-error/50 ring-2 ring-error/30' : 'focus:ring-primary/50'} text-on-surface rounded-xl py-3 pl-12 pr-4 transition-all text-sm placeholder:text-outline/50`}
+                            className={`register-input ${errors.apellido ? 'register-input--error' : ''}`}
                             placeholder="Ej. Sterling"
                             type="text"
                             value={form.apellido}
@@ -65,35 +62,35 @@ const RegisterForm = ({
                             required
                         />
                     </div>
-                    {errors.apellido && <p className="text-[9px] text-error px-1">{errors.apellido}</p>}
+                    {errors.apellido && <p className="register-error-text">{errors.apellido}</p>}
                 </div>
             </div>
 
             {/* Fila de Identidad */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                    <label className="block text-[10px] font-bold uppercase tracking-[0.1em] text-on-surface-variant px-1">Rol de Acceso</label>
-                    <div className="relative">
-                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-lg">admin_panel_settings</span>
+            <div className="register-form-row">
+                <div className="register-field-group">
+                    <label className="register-field-label">Rol de Acceso</label>
+                    <div className="register-input-container">
+                        <span className="material-symbols-outlined register-input-icon">admin_panel_settings</span>
                         <select
-                            className="w-full bg-surface-container-highest border-none focus:ring-2 focus:ring-primary/50 text-on-surface rounded-xl py-3 pl-12 pr-4 appearance-none transition-all text-sm"
+                            className="register-select"
                             value={form.rol}
                             onChange={(e) => handleInputChange("rol", e.target.value)}
                         >
                             <option value="DUENO">Dueño</option>
                             <option value="TRABAJADOR">Empleado</option>
                         </select>
-                        <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-lg">expand_more</span>
+                        <span className="material-symbols-outlined register-select-arrow">expand_more</span>
                     </div>
                 </div>
 
                 {isOwner ? (
-                    <div className="space-y-1">
-                        <label className="block text-[10px] font-bold uppercase tracking-[0.1em] text-on-surface-variant px-1">Nombre del Gimnasio</label>
-                        <div className="relative">
-                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-lg">fitness_center</span>
+                    <div className="register-field-group">
+                        <label className="register-field-label">Nombre del Gimnasio</label>
+                        <div className="register-input-container">
+                            <span className="material-symbols-outlined register-input-icon">fitness_center</span>
                             <input
-                                className={`w-full bg-surface-container-highest border-none focus:ring-2 ${errors.gymNombre ? 'focus:ring-error/50 ring-2 ring-error/30' : 'focus:ring-primary/50'} text-on-surface rounded-xl py-3 pl-12 pr-4 transition-all text-sm placeholder:text-outline/50`}
+                                className={`register-input ${errors.gymNombre ? 'register-input--error' : ''}`}
                                 placeholder="Ej. Iron Haven HQ"
                                 type="text"
                                 value={form.gymNombre}
@@ -101,20 +98,20 @@ const RegisterForm = ({
                                 required
                             />
                         </div>
-                        {errors.gymNombre && <p className="text-[9px] text-error px-1">{errors.gymNombre}</p>}
+                        {errors.gymNombre && <p className="register-error-text">{errors.gymNombre}</p>}
                     </div>
                 ) : (
-                    <div className="space-y-1">
-                        <label className="block text-[10px] font-bold uppercase tracking-[0.1em] text-on-surface-variant px-1">Seleccionar Gimnasio</label>
-                        <div className="relative">
-                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-lg">fitness_center</span>
+                    <div className="register-field-group">
+                        <label className="register-field-label">Seleccionar Gimnasio</label>
+                        <div className="register-input-container">
+                            <span className="material-symbols-outlined register-input-icon">fitness_center</span>
                             {gymsLoading ? (
-                                <div className="w-full bg-surface-container-highest border-none text-on-surface/50 rounded-xl py-3 pl-12 pr-4 flex items-center text-sm">
+                                <div className="register-input" style={{display: "flex", alignItems: "center"}}>
                                     Cargando...
                                 </div>
                             ) : (
                                 <select
-                                    className={`w-full bg-surface-container-highest border-none focus:ring-2 ${errors.gymId ? 'focus:ring-error/50 ring-2 ring-error/30' : 'focus:ring-primary/50'} text-on-surface rounded-xl py-3 pl-12 pr-4 appearance-none transition-all text-sm`}
+                                    className={`register-select ${errors.gymId ? 'register-input--error' : ''}`}
                                     value={form.gymId}
                                     onChange={(e) => handleInputChange("gymId", e.target.value)}
                                     required
@@ -127,21 +124,21 @@ const RegisterForm = ({
                                     ))}
                                 </select>
                             )}
-                            {!gymsLoading && <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-lg">expand_more</span>}
+                            {!gymsLoading && <span className="material-symbols-outlined register-select-arrow">expand_more</span>}
                         </div>
-                        {errors.gymId && <p className="text-[9px] text-error px-1">{errors.gymId}</p>}
+                        {errors.gymId && <p className="register-error-text">{errors.gymId}</p>}
                     </div>
                 )}
             </div>
 
             {/* Fila de Contraseña */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                    <label className="block text-[10px] font-bold uppercase tracking-[0.1em] text-on-surface-variant px-1">Contraseña</label>
-                    <div className="relative">
-                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-lg">lock</span>
+            <div className="register-form-row">
+                <div className="register-field-group">
+                    <label className="register-field-label">Contraseña</label>
+                    <div className="register-input-container">
+                        <span className="material-symbols-outlined register-input-icon">lock</span>
                         <input
-                            className={`w-full bg-surface-container-highest border-none focus:ring-2 ${errors.password ? 'focus:ring-error/50 ring-2 ring-error/30' : 'focus:ring-primary/50'} text-on-surface rounded-xl py-3 pl-12 pr-12 transition-all text-sm placeholder:text-outline/50`}
+                            className={`register-input ${errors.password ? 'register-input--error' : ''}`}
                             placeholder="••••••••"
                             type={showPassword ? "text" : "password"}
                             value={form.password}
@@ -150,20 +147,20 @@ const RegisterForm = ({
                         />
                         <span
                             onClick={() => setShowPassword(!showPassword)}
-                            className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline text-lg cursor-pointer"
+                            className="material-symbols-outlined register-password-toggle"
                         >
                             {showPassword ? "visibility_off" : "visibility"}
                         </span>
                     </div>
-                    {errors.password && <p className="text-[9px] text-error px-1">{errors.password}</p>}
+                    {errors.password && <p className="register-error-text">{errors.password}</p>}
                 </div>
 
-                <div className="space-y-1">
-                    <label className="block text-[10px] font-bold uppercase tracking-[0.1em] text-on-surface-variant px-1">Confirmar</label>
-                    <div className="relative">
-                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-lg">verified_user</span>
+                <div className="register-field-group">
+                    <label className="register-field-label">Confirmar</label>
+                    <div className="register-input-container">
+                        <span className="material-symbols-outlined register-input-icon">verified_user</span>
                         <input
-                            className={`w-full bg-surface-container-highest border-none focus:ring-2 ${errors.confirmPassword ? 'focus:ring-error/50 ring-2 ring-error/30' : 'focus:ring-primary/50'} text-on-surface rounded-xl py-3 pl-12 pr-12 transition-all text-sm placeholder:text-outline/50`}
+                            className={`register-input ${errors.confirmPassword ? 'register-input--error' : ''}`}
                             placeholder="••••••••"
                             type={showConfirmPassword ? "text" : "password"}
                             value={form.confirmPassword}
@@ -172,26 +169,25 @@ const RegisterForm = ({
                         />
                         <span
                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline text-lg cursor-pointer"
+                            className="material-symbols-outlined register-password-toggle"
                         >
                             {showConfirmPassword ? "visibility_off" : "visibility"}
                         </span>
                     </div>
-                    {errors.confirmPassword && <p className="text-[9px] text-error px-1">{errors.confirmPassword}</p>}
+                    {errors.confirmPassword && <p className="register-error-text">{errors.confirmPassword}</p>}
                 </div>
             </div>
 
             {/* Dirección Opcional */}
             {isOwner && (
-                <div className="space-y-1">
-                    <div className="flex justify-between items-center px-1">
-                        <label className="block text-[10px] font-bold uppercase tracking-[0.1em] text-on-surface-variant">Dirección del Gimnasio</label>
-                        <span className="text-[9px] text-outline italic">Opcional</span>
-                    </div>
-                    <div className="relative">
-                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-lg">location_on</span>
+                <div className="register-field-group">
+                    <label className="register-field-label">
+                        Dirección del Gimnasio <span className="register-field-label--optional">(Opcional)</span>
+                    </label>
+                    <div className="register-input-container">
+                        <span className="material-symbols-outlined register-input-icon">location_on</span>
                         <input
-                            className="w-full bg-surface-container-highest border-none focus:ring-2 focus:ring-primary/50 text-on-surface rounded-xl py-3 pl-12 pr-4 transition-all text-sm placeholder:text-outline/50"
+                            className="register-input"
                             placeholder="Ej. Calle Rendimiento 123"
                             type="text"
                             value={form.gymDireccion}
@@ -202,18 +198,16 @@ const RegisterForm = ({
             )}
 
             {/* CTA */}
-            <div className="pt-4 space-y-4">
-                <button
-                    className="w-full bg-secondary hover:bg-secondary/90 text-on-secondary-container font-bold py-4 rounded-xl shadow-[0px_5px_15px_rgba(78,222,163,0.2)] transition-all flex items-center justify-center gap-3 active:scale-95 group"
-                    type="submit"
-                    disabled={loading}
-                >
-                    <span className="uppercase tracking-widest text-xs">
-                        {loading ? "Registrando..." : "Registrar Administrador"}
-                    </span>
-                    <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform text-lg">arrow_forward</span>
-                </button>
-            </div>
+            <button
+                className="register-submit-btn"
+                type="submit"
+                disabled={loading}
+            >
+                <span>
+                    {loading ? "Registrando..." : "Registrar Administrador"}
+                </span>
+                {!loading && <span className="material-symbols-outlined btn-icon-animate" style={{fontSize: "1.25rem"}}>arrow_forward</span>}
+            </button>
         </form>
     );
 };

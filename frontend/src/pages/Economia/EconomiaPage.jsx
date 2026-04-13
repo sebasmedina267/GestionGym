@@ -9,7 +9,7 @@ import ChartsSection from "./ChartsSection";
 import MovimientosTable from "./MovimientosTable";
 import EconomiaModalForm from "./EconomiaModalForm";
 import api from "../../api/axios";
-import "../../styles/economia.css";
+import "./Styles/EconomiaPage.css";
 
 export default function EconomiaPage() {
   const { gym } = useGym();
@@ -64,14 +64,14 @@ export default function EconomiaPage() {
   return (
     <AppLayout title="Economía">
       {/* BOTONES ARRIBA DEL TODO */}
-      <div style={{ display: "flex", gap: "16px", marginBottom: "32px" }}>
+      <div className="economia-btn-group">
         <button className="btn-primary" onClick={() => handleOpenForm("INGRESO")}>Registrar Ingreso</button>
         <button className="btn-danger" onClick={() => handleOpenForm("GASTO")}>Registrar Gasto</button>
         <button className="btn-secondary" onClick={() => exportEconomiaPDF(pdfRef.current, "economia.pdf")}>Exportar PDF</button>
       </div>
 
       {/* CONTENIDO PRINCIPAL */}
-      <div ref={pdfRef} style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "32px" }}>
+      <div ref={pdfRef} className="economia-redesign-container">
         <ResumenSection resumen={resumen} calcMargin={calcMargin} />
         <ChartsSection resumen={resumen} ingresosFuentes={ingresosFuentes} gastosFuentes={gastosFuentes} />
         <MovimientosTable movimientos={sortedMovimientos} filtroTipo={filtroTipo} setFiltroTipo={setFiltroTipo} />

@@ -1,5 +1,6 @@
 import React from 'react';
 import Modal from "../../components/ui/Modal";
+import './Styles/PagosModals.css';
 
 const METODOS_PAGO = ['EFECTIVO', 'TARJETA', 'TRANSFERENCIA', 'CHEQUE', 'CRIPTOMONEDA'];
 
@@ -24,19 +25,13 @@ export default function PagosModals({
         onClose={() => setAlertModal({ ...alertModal, open: false })}
         title={alertModal.title}
       >
-        <div style={{ minWidth: "300px", textAlign: "center", padding: "1rem" }}>
-          <p style={{ 
-            fontSize: "1rem", 
-            color: "var(--on-surface)", 
-            marginBottom: "2rem",
-            lineHeight: "1.6"
-          }}>
+        <div className="pagos-modals-alert-container">
+          <p className="pagos-modals-alert-message">
             {alertModal.message}
           </p>
           <button
-            className="kinetic-btn-primary"
+            className="kinetic-btn-primary pagos-modals-alert-btn"
             onClick={() => setAlertModal({ ...alertModal, open: false })}
-            style={{ width: "auto", minWidth: "120px", padding: "0.75rem 2rem", margin: "0 auto" }}
           >
             Entendido
           </button>
@@ -52,27 +47,23 @@ export default function PagosModals({
         }}
         title="Registrar Pago"
       >
-        <div style={{ padding: "0.5rem" }}>
+        <div className="pagos-modals-payment-container">
           {clientePendiente && (
-            <div className="glass-card neon-glow-primary" style={{ 
-              marginBottom: "1.5rem", 
-              background: "rgba(129, 140, 248, 0.05)",
-              border: "1px solid rgba(129, 140, 248, 0.2)"
-            }}>
-              <label className="label-caps" style={{ fontSize: "0.6rem" }}>Cliente</label>
-              <p style={{ margin: "0 0 1rem 0", fontSize: "1.125rem", fontWeight: "800", color: "var(--on-surface)" }}>
+            <div className="glass-card neon-glow-primary pagos-modals-cliente-card">
+              <label className="label-caps pagos-modals-cliente-label">Cliente</label>
+              <p className="pagos-modals-cliente-name">
                 {clientePendiente.cliente_nombre} {clientePendiente.cliente_apellido}
               </p>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem" }}>
-                <span style={{ fontSize: "1.5rem", fontWeight: "900", color: "var(--secondary)" }}>
+              <div className="pagos-modals-importe-wrapper">
+                <span className="pagos-modals-importe-value">
                   €{Number(clasePrecio).toFixed(2)}
                 </span>
-                <span className="label-caps" style={{ color: "var(--secondary)", margin: 0 }}>Importe Total</span>
+                <span className="label-caps pagos-modals-importe-label">Importe Total</span>
               </div>
             </div>
           )}
 
-          <div style={{ marginBottom: "2rem" }}>
+          <div className="pagos-modals-metodo-container">
             <label className="label-caps">Método de Pago</label>
             <select
               className="kinetic-select"
@@ -87,15 +78,9 @@ export default function PagosModals({
             </select>
           </div>
 
-          <div style={{ display: "flex", gap: "1rem" }}>
+          <div className="pagos-modals-actions">
             <button
-              className="kinetic-btn-primary"
-              style={{ 
-                flex: 1, 
-                background: "rgba(255, 255, 255, 0.05)", 
-                color: "var(--on-surface-variant)",
-                border: "1px solid rgba(189, 194, 255, 0.1)"
-              }}
+              className="kinetic-btn-primary pagos-modals-btn-cancel"
               onClick={() => {
                 setShowMetodoModal(false);
                 setClientePendiente(null);
@@ -104,10 +89,9 @@ export default function PagosModals({
               Cancelar
             </button>
             <button
-              className="kinetic-btn-primary"
+              className="kinetic-btn-primary pagos-modals-btn-confirm"
               onClick={handleConfirmarPago}
               disabled={pagando}
-              style={{ flex: 2, opacity: pagando ? 0.6 : 1 }}
             >
               {pagando ? (
                 <>

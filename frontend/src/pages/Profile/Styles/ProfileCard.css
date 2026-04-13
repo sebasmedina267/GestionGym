@@ -1,0 +1,98 @@
+/* ProfileCard.css */
+
+.profile-card {
+  background: var(--bg-secondary);
+  padding: 32px;
+  border-radius: 12px;
+  border: var(--glass-border);
+  height: fit-content;
+  text-align: center;
+}
+
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--primary-alpha);
+  margin: 0 auto 16px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-avatar-letters {
+  font-size: 2.5rem;
+  color: var(--primary);
+}
+
+.profile-name {
+  margin: 0 0 8px 0;
+  color: var(--text-primary);
+}
+
+.profile-id {
+  margin: 0 0 24px 0;
+  color: var(--text-secondary);
+}
+
+.profile-badge {
+  display: inline-block;
+  padding: 8px 16px;
+  background: var(--bg-tertiary);
+  border-radius: 20px;
+  color: var(--primary-light);
+  font-weight: bold;
+  font-size: 0.9rem;
+  border: 1px solid var(--border-color);
+}
+
+.profile-details-section {
+  margin-top: 32px;
+  text-align: left;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color);
+}
+
+.profile-details-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.profile-gym-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.profile-gym-item {
+  background: var(--bg-tertiary);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.profile-add-gym-btn {
+  margin-top: 16px;
+  padding: 10px 16px;
+  background: linear-gradient(180deg, #10b981 0%, #047857 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.profile-add-gym-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.profile-add-gym-btn:active {
+  transform: translateY(0);
+}

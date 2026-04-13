@@ -1,0 +1,191 @@
+/* SelectGymPage.css */
+
+.select-gym-container {
+  min-height: 100vh;
+  background-color: #0b1326;
+  color: #dae2fd;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.select-gym-ambient-1 {
+  position: absolute;
+  top: -10%;
+  left: -5%;
+  width: 600px;
+  height: 600px;
+  background: rgba(189, 194, 255, 0.08);
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+}
+
+.select-gym-ambient-2 {
+  position: absolute;
+  bottom: -10%;
+  right: -5%;
+  width: 500px;
+  height: 500px;
+  background: rgba(78, 222, 163, 0.08);
+  border-radius: 50%;
+  filter: blur(100px);
+  pointer-events: none;
+}
+
+.select-gym-header {
+  text-align: center;
+  margin-bottom: 60px;
+  position: relative;
+  z-index: 10;
+}
+
+.select-gym-title {
+  font-size: 3rem;
+  font-weight: 950;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  margin: 0;
+  color: #dae2fd;
+}
+
+.select-gym-subtitle {
+  font-size: 1.125rem;
+  color: #94a3b8;
+  margin-top: 12px;
+  font-weight: 500;
+}
+
+.select-gym-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  width: 100%;
+  max-width: 1200px;
+  position: relative;
+  z-index: 10;
+}
+
+@media (min-width: 768px) {
+  .select-gym-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .select-gym-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.gym-selection-card {
+  background: rgba(30, 37, 55, 0.4);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(189, 194, 255, 0.05);
+  border-radius: 2rem;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.gym-selection-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  background: rgba(37, 45, 67, 0.6);
+  border-color: rgba(189, 194, 255, 0.2);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 20px rgba(189, 194, 255, 0.1);
+}
+
+.gym-card-icon {
+  width: 64px;
+  height: 64px;
+  background: rgba(189, 194, 255, 0.1);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary, #bdc2ff);
+  transition: all 0.5s ease;
+}
+
+.gym-selection-card:hover .gym-card-icon {
+  background: var(--primary, #bdc2ff);
+  color: #0b1326;
+  transform: rotate(10deg);
+}
+
+.gym-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gym-card-name {
+  font-size: 1.75rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  margin: 0;
+  color: #dae2fd;
+}
+
+.gym-card-address {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-select-gym {
+  margin-top: 12px;
+  width: 100%;
+  background: rgba(189, 194, 255, 0.05);
+  border: 1px solid rgba(189, 194, 255, 0.1);
+  color: #bdc2ff;
+  padding: 16px;
+  border-radius: 16px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 0.75rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.gym-selection-card:hover .btn-select-gym {
+  background: var(--primary, #bdc2ff);
+  color: #0b1326;
+  box-shadow: 0 0 20px rgba(189, 194, 255, 0.4);
+}
+
+/* Loading state */
+.loading-gyms-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.loading-gyms-spinner {
+  width: 64px;
+  height: 64px;
+  border: 4px solid rgba(189, 194, 255, 0.1);
+  border-top-color: #bdc2ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

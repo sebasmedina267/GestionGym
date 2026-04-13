@@ -1,0 +1,81 @@
+.pagos-modals-alert-container {
+  min-width: 300px;
+  text-align: center;
+  padding: 1rem;
+}
+
+.pagos-modals-alert-message {
+  font-size: 1rem;
+  color: var(--on-surface);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.pagos-modals-alert-btn {
+  width: auto;
+  min-width: 120px;
+  padding: 0.75rem 2rem;
+  margin: 0 auto;
+}
+
+.pagos-modals-payment-container {
+  padding: 0.5rem;
+}
+
+.pagos-modals-cliente-card {
+  margin-bottom: 1.5rem;
+  background: rgba(129, 140, 248, 0.05);
+  border: 1px solid rgba(129, 140, 248, 0.2);
+}
+
+.pagos-modals-cliente-label {
+  font-size: 0.6rem;
+}
+
+.pagos-modals-cliente-name {
+  margin: 0 0 1rem 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--on-surface);
+}
+
+.pagos-modals-importe-wrapper {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.pagos-modals-importe-value {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--secondary);
+}
+
+.pagos-modals-importe-label {
+  color: var(--secondary);
+  margin: 0;
+}
+
+.pagos-modals-metodo-container {
+  margin-bottom: 2rem;
+}
+
+.pagos-modals-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.pagos-modals-btn-cancel {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--on-surface-variant);
+  border: 1px solid rgba(189, 194, 255, 0.1);
+}
+
+.pagos-modals-btn-confirm {
+  flex: 2;
+}
+
+.pagos-modals-btn-confirm:disabled {
+  opacity: 0.6;
+}

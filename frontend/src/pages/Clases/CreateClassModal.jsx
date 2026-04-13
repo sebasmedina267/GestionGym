@@ -1,4 +1,5 @@
 import React from "react";
+import "./Styles/CreateClassModal.css";
 
 export default function CreateClassModal({
   open, onClose, selectedClase, form, setForm, handleCreateClase, handleUpdateClase
@@ -8,32 +9,29 @@ export default function CreateClassModal({
   const isEdit = Boolean(selectedClase);
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-[#0b1326]/90 backdrop-blur-md">
-      <div className="kinetic-modal w-full max-w-md animate-fade-in shadow-2xl">
+    <div className="create-class-overlay">
+      <div className="create-class-container">
         
-        <header className="kinetic-modal-header">
-          <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-primary">
+        <header className="create-class-header">
+          <div className="create-header-title">
+            <span className="material-symbols-outlined" style={{color: "var(--primary)"}}>
               {isEdit ? 'edit_square' : 'add_circle'}
             </span>
-            <h2 className="text-xl font-bold text-on-surface">
+            <h2>
               {isEdit ? "Editar Clase" : "Nueva Clase"}
             </h2>
           </div>
-          <button 
-            className="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-white/10"
-            onClick={onClose}
-          >
-            <span className="material-symbols-outlined text-lg">close</span>
+          <button className="create-modal-close" onClick={onClose}>
+            <span className="material-symbols-outlined" style={{fontSize: "1.25rem"}}>close</span>
           </button>
         </header>
 
         <form onSubmit={isEdit ? handleUpdateClase : handleCreateClase}>
-          <div className="kinetic-modal-body space-y-6">
-            <div className="space-y-2">
-              <label className="kinetic-label tracking-widest block px-1">Nombre de la Clase</label>
+          <div className="create-modal-body">
+            <div className="create-field-group">
+              <label className="create-field-label">Nombre de la Clase</label>
               <input
-                className="kinetic-input"
+                className="create-input"
                 type="text"
                 placeholder="Ej. CrossFit Elite, Yoga Flow..."
                 value={form.nombre}
@@ -42,10 +40,10 @@ export default function CreateClassModal({
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="kinetic-label tracking-widest block px-1">Descripción (Opcional)</label>
+            <div className="create-field-group">
+              <label className="create-field-label">Descripción (Opcional)</label>
               <textarea
-                className="kinetic-input min-h-[120px] resize-none"
+                className="create-input create-textarea"
                 placeholder="Describa los objetivos y el enfoque de la sesión..."
                 value={form.descripcion}
                 onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
@@ -53,19 +51,21 @@ export default function CreateClassModal({
             </div>
           </div>
 
-          <footer className="kinetic-modal-footer">
+          <footer className="create-modal-footer">
             <button 
-              className="kinetic-btn kinetic-btn--ghost h-11 px-6"
+              className="btn-secondary"
+              style={{height: "2.75rem", padding: "0 1.5rem", background: "transparent"}}
               type="button" 
               onClick={onClose}
             >
               Cancelar
             </button>
             <button 
-              className="kinetic-btn kinetic-btn--secondary h-11 px-8"
+              className="btn-primary"
+              style={{height: "2.75rem", padding: "0 2rem"}}
               type="submit"
             >
-              <span className="material-symbols-outlined text-lg">
+              <span className="material-symbols-outlined" style={{fontSize: "1.125rem"}}>
                 {isEdit ? 'save' : 'check_circle'}
               </span>
               {isEdit ? "Guardar Cambios" : "Crear Clase"}

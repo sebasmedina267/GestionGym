@@ -1,51 +1,38 @@
+import "./Styles/GymCard.css";
+
 export default function GymCard({ gym, resolvePhoto, onEdit, dimmed = false }) {
   const photoUrl = resolvePhoto(gym.foto);
   return (
-    <div style={{
-      background: "var(--bg-secondary)",
-      border: "1px solid var(--border-color)",
-      borderRadius: "14px",
-      overflow: "hidden",
-      opacity: dimmed ? 0.7 : 1,
-      transition: "transform 0.2s, box-shadow 0.2s",
-    }}
-      onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.3)"; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
-    >
+    <div className={`gym-card ${dimmed ? "gym-card--dimmed" : ""}`}>
       {/* Foto del gym */}
-      <div style={{ height: "160px", background: "var(--bg-tertiary)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div className="gym-card__image-container">
         {photoUrl ? (
           <img
             src={photoUrl}
             alt={`Foto de ${gym.nombre}`}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            className="gym-card__image"
             onError={e => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }}
           />
         ) : null}
-        <div style={{
-          display: photoUrl ? "none" : "flex",
-          alignItems: "center", justifyContent: "center",
-          width: "100%", height: "100%",
-          fontSize: "3rem", color: "var(--text-tertiary)"
-        }}>
+        <div className="gym-card__placeholder">
           🏋️
         </div>
       </div>
 
       {/* Info */}
-      <div style={{ padding: "16px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+      <div className="gym-card__content">
+        <div className="gym-card__header">
           <div>
-            <h4 style={{ margin: "0 0 4px 0", fontSize: "1.05rem", fontWeight: 700, color: "var(--text-primary)" }}>
+            <h4 className="gym-card__title">
               {gym.nombre}
             </h4>
             {gym.ciudad && (
-              <p style={{ margin: "0 0 2px 0", fontSize: "0.85rem", color: "var(--primary)", fontWeight: 500 }}>
+              <p className="gym-card__city">
                 📍 {gym.ciudad}
               </p>
             )}
             {gym.direccion && (
-              <p style={{ margin: 0, fontSize: "0.82rem", color: "var(--text-secondary)" }}>
+              <p className="gym-card__address">
                 {gym.direccion}
               </p>
             )}
@@ -53,11 +40,7 @@ export default function GymCard({ gym, resolvePhoto, onEdit, dimmed = false }) {
           {onEdit && (
             <button
               onClick={() => onEdit(gym)}
-              style={{
-                background: "var(--bg-tertiary)", border: "1px solid var(--border-color)",
-                color: "var(--text-primary)", padding: "6px 12px", borderRadius: "8px",
-                cursor: "pointer", fontSize: "0.8rem", flexShrink: 0, marginLeft: "8px"
-              }}
+              className="gym-card__edit-btn"
             >
               ✏️ Editar
             </button>

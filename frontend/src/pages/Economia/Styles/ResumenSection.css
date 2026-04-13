@@ -1,0 +1,134 @@
+/* ResumenSection.css */
+.economia-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 32px;
+  margin-bottom: 40px;
+}
+
+.glass-card {
+  background: rgba(45, 52, 73, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(189, 194, 255, 0.1);
+  padding: 32px;
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+  animation: slideUp 0.5s ease-out backwards;
+}
+
+.glass-card:hover {
+  background: rgba(45, 52, 73, 0.6);
+  border-color: rgba(189, 194, 255, 0.2);
+}
+
+.glass-card-blur {
+  position: absolute;
+  width: 192px;
+  height: 192px;
+  border-radius: 50%;
+  filter: blur(80px);
+  -webkit-filter: blur(80px);
+  z-index: 0;
+}
+
+.glass-card-blur.green {
+  background: rgba(78, 222, 163, 0.05);
+  right: -32px;
+  bottom: -32px;
+}
+
+.glass-card-blur.red {
+  background: rgba(255, 178, 183, 0.05);
+  right: -32px;
+  bottom: -32px;
+}
+
+.glass-card-blur.purple {
+  background: rgba(189, 194, 255, 0.05);
+  right: -32px;
+  bottom: -32px;
+}
+
+.glass-card-content {
+  position: relative;
+  z-index: 1;
+}
+
+.glass-card-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.glass-card-badge-icon {
+  padding: 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.glass-card-badge-icon.green {
+  background: rgba(78, 222, 163, 0.2);
+  color: #4edea3;
+}
+
+.glass-card-badge-icon.red {
+  background: rgba(255, 178, 183, 0.2);
+  color: #ffb2b7;
+}
+
+.glass-card-badge-icon.purple {
+  background: rgba(189, 194, 255, 0.2);
+  color: #bdc2ff;
+}
+
+.glass-card-badge-text {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.glass-card-badge-text.green { color: #4edea3; }
+.glass-card-badge-text.red { color: #ffb2b7; }
+.glass-card-badge-text.purple { color: #bdc2ff; }
+
+.glass-card-label {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(198, 197, 213, 0.7);
+  margin-bottom: 8px;
+}
+
+.glass-card-value {
+  font-size: 2.25rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.glass-card-value.green { color: #4edea3; }
+.glass-card-value.red { color: #ffb2b7; }
+.glass-card-value.purple { color: #bdc2ff; }
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
