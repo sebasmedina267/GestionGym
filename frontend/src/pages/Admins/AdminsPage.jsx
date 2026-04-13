@@ -8,7 +8,7 @@ import CreateAdminModal from "./CreateAdminModal";
 import EditAdminModal from "./EditAdminModal";
 import DeleteAdminModal from "./DeleteAdminModal";
 import CreateGymModal from "./CreateGymModal";
-import "../../styles/clientes.css";
+import "./Styles/AdminsPage.css";
 
 export default function AdminsPage() {
   const logic = useAdminsLogic();
@@ -17,9 +17,9 @@ export default function AdminsPage() {
     return (
       <AppLayout>
         <div className="clientes-page">
-          <div style={{textAlign: "center", padding: "60px"}}>
-            <h1 style={{color: "var(--danger-color)"}}>Acceso Restringido</h1>
-            <p style={{color: "var(--text-secondary)"}}>Solo los Dueños (Superadmins) pueden gestionar el Staff.</p>
+          <div className="admins-page-restricted">
+            <h1 className="admins-page-restricted-title">Acceso Restringido</h1>
+            <p className="admins-page-restricted-desc">Solo los Dueños (Superadmins) pueden gestionar el Staff.</p>
           </div>
         </div>
       </AppLayout>
@@ -30,7 +30,7 @@ export default function AdminsPage() {
     <AppLayout>
       <div className="clientes-page">
         <Header title="Gestión de Staff">
-          <div style={{display: "flex", gap: "8px", alignItems: "center"}}>
+          <div className="admins-page-header-actions">
             <Button variant={logic.viewAll ? "danger" : "secondary"} onClick={() => logic.setViewAll(!logic.viewAll)}>
               {logic.viewAll ? "👥 Todos" : `📍 ${logic.gym?.nombre || "Seleccionar Gym"}`}
             </Button>

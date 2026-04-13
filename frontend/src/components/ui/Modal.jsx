@@ -8,6 +8,7 @@ export default function Modal({
   size = "md",
   hideHeader = false,
   className = "",
+  clean = false, // Added clean prop
 }) {
   useEffect(() => {
     const handleKey = (e) => {
@@ -25,6 +26,21 @@ export default function Modal({
     lg: "max-w-lg",
     xl: "max-w-2xl",
   };
+
+  /**
+   * If 'clean' is true, we don't render the wrapper '.modal' div, 
+   * the header, or the content padding. This allows the children 
+   * to provide their own full-bleed containers (for the Kinetic Architect look).
+   */
+  if (clean) {
+    return (
+      <div className={`modal-overlay ${className}`} onClick={onClose} style={{ zIndex: 2000 }}>
+        <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+          {children}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="modal-overlay" onClick={onClose}>

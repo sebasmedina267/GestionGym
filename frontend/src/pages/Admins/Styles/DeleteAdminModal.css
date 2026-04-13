@@ -1,0 +1,25 @@
+.delete-admin-modal-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.delete-admin-text {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.delete-admin-warning {
+  color: var(--danger-color);
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.delete-admin-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.delete-admin-btn-confirm {
+  flex: 1;
+}

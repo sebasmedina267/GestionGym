@@ -1,0 +1,21 @@
+/* EconomiaPage.css */
+.economia-redesign-container {
+  padding: 28px 40px;
+  background: var(--bg-primary);
+  min-height: 100vh;
+}
+
+.economia-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 40px;
+}
+
+.economia-btn-group {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+/* Base button styles if needed, but the page uses btn-primary, btn-danger, btn-secondary */

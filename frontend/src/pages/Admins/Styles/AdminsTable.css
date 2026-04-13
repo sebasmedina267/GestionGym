@@ -1,0 +1,123 @@
+/* AdminsTable.css */
+
+.admins-table-container {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.admins-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admins-table-head {
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.admins-table-th {
+  padding: 16px;
+  text-align: left;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.admins-table-th-center {
+  text-align: center;
+}
+
+.admins-table-row {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.admins-table-row:nth-child(odd) {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.admins-table-row:nth-child(even) {
+  background-color: transparent;
+}
+
+.admins-table-td {
+  padding: 16px;
+  color: var(--text-primary);
+}
+
+.admins-table-td-secondary {
+  padding: 16px;
+  color: var(--text-secondary);
+}
+
+.admins-table-td-center {
+  padding: 16px;
+  text-align: center;
+}
+
+.admins-table-photo-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.admins-table-photo-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+}
+
+.admins-table-role {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.admins-table-role-owner {
+  background: var(--primary-alpha);
+  color: var(--primary-light);
+}
+
+.admins-table-role-standard {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.admins-table-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.admins-table-btn-edit {
+  background: var(--primary-alpha);
+  color: var(--primary-light);
+  margin-right: 8px;
+}
+
+.admins-table-btn-edit:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.admins-table-btn-delete {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger-color);
+}
+
+.admins-table-btn-delete:hover {
+  background: var(--danger-color);
+  color: white;
+}

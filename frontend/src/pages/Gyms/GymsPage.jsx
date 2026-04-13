@@ -6,7 +6,7 @@ import GymsAssignModal from "./GymsAssignModal";
 import GymsFormModal from "./GymsFormModal";
 import GymsNotifyModal from "./GymsNotifyModal";
 import { useGymsLogic, EMPTY_GYM_FORM } from "./useGymsLogic";
-import "../../styles/clientes.css";
+import "./Styles/GymsPage.css";
 
 export default function GymsPage() {
   const {
@@ -50,10 +50,10 @@ export default function GymsPage() {
   if (!isDueno) {
     return (
       <AppLayout>
-        <div className="clientes-page">
-          <div style={{ textAlign: "center", padding: "60px" }}>
-            <h1 style={{ color: "var(--danger-color)" }}>Acceso Restringido</h1>
-            <p style={{ color: "var(--text-secondary)" }}>Solo los Dueños pueden gestionar gimnasios.</p>
+        <div className="gyms-redesign-container">
+          <div className="gyms-restricted">
+            <h1>Acceso Restringido</h1>
+            <p>Solo los Dueños pueden gestionar gimnasios.</p>
           </div>
         </div>
       </AppLayout>
@@ -62,9 +62,9 @@ export default function GymsPage() {
 
   return (
     <AppLayout>
-      <div className="clientes-page">
+      <div className="gyms-redesign-container">
         <Header title="Mis Gimnasios">
-          <div style={{ display: "flex", gap: "12px" }}>
+          <div className="gyms-header-actions">
             <Button variant="primary" onClick={() => { setErrors({}); setOpenAssignGym(true); }}>
               + Asignar Gimnasio
             </Button>
@@ -75,31 +75,31 @@ export default function GymsPage() {
         </Header>
 
         {loading ? (
-          <div className="loading">Cargando gimnasios...</div>
+          <div className="gyms-loading">Cargando gimnasios...</div>
         ) : (
           <>
             {/* MIS GIMNASIOS */}
-            <div style={{ marginTop: "24px" }}>
-              <h3 style={{ color: "var(--text-primary)", marginBottom: "16px" }}>Mis Gimnasios</h3>
+            <div className="gyms-section">
+              <h3 className="gyms-section-title">Mis Gimnasios</h3>
               {myGyms && myGyms.length > 0 ? (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "16px" }}>
+                <div className="gyms-grid">
                   {myGyms.map((gym) => (
                     <GymCard key={gym.id} gym={gym} resolvePhoto={resolvePhoto} onEdit={openEdit} />
                   ))}
                 </div>
               ) : (
-                <p style={{ color: "var(--text-secondary)" }}>No tienes gimnasios asignados aún.</p>
+                <p className="gyms-section-desc">No tienes gimnasios asignados aún.</p>
               )}
             </div>
 
             {/* GIMNASIOS DISPONIBLES */}
             {availableGyms.length > 0 && (
-              <div style={{ marginTop: "40px" }}>
-                <h3 style={{ color: "var(--text-primary)", marginBottom: "16px" }}>Gimnasios Disponibles</h3>
-                <p style={{ color: "var(--text-secondary)", marginBottom: "12px" }}>
+              <div className="gyms-section--available">
+                <h3 className="gyms-section-title">Gimnasios Disponibles</h3>
+                <p className="gyms-section-desc">
                   Puedes asignar {availableGyms.length} gimnasio{availableGyms.length !== 1 ? "s" : ""}
                 </p>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "16px" }}>
+                <div className="gyms-grid">
                   {availableGyms.map((gym) => (
                     <GymCard key={gym.id} gym={gym} resolvePhoto={resolvePhoto} onEdit={openEdit} dimmed />
                   ))}

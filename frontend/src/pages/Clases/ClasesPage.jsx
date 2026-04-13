@@ -8,9 +8,8 @@ import AssignMonitorModal from "./AssignMonitorModal";
 import PriceFormModal from "./PriceFormModal";
 import InscriptionsModal from "./InscriptionsModal";
 import { AlertModal, ConfirmModal } from "./AlertConfirmModals";
-
 import { useClasesLogic } from "./useClasesLogic";
-import "../../styles/clases.css";
+import "./Styles/ClasesPage.css";
 
 export default function ClasesPage() {
   const { gym } = useGym();
@@ -350,12 +349,8 @@ export default function ClasesPage() {
                       </button>
 
                       <button
-                        className="kinetic-btn kinetic-btn--ghost"
+                        className="kinetic-btn kinetic-btn--ghost kinetic-btn--delete"
                         onClick={() => handleDeleteClase(c)}
-                        style={{
-                          color: "#ff6b6b",
-                          borderColor: "rgba(255,0,0,0.3)",
-                        }}
                       >
                         Eliminar
                       </button>

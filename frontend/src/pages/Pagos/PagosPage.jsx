@@ -6,7 +6,7 @@ import PagosFiltros from "./PagosFiltros";
 import PagosTabla from "./PagosTabla";
 import PagosResumen from "./PagosResumen";
 import PagosModals from "./PagosModals";
-import "../../styles/pagos.css";
+import "./Styles/PagosPage.css";
 
 export default function PagosPage() {
   const logic = usePagosLogic();
@@ -51,12 +51,12 @@ export default function PagosPage() {
             />
           </div>
         ) : (
-          <div className="glass-card neon-glow-primary" style={{ marginTop: "40px", padding: "80px", textAlign: "center" }}>
-            <span style={{ fontSize: "4rem", display: "block", marginBottom: "24px", filter: "drop-shadow(0 0 15px rgba(129, 140, 248, 0.4))" }}>
-              <span className="material-symbols-outlined" style={{ fontSize: "inherit" }}>payments</span>
+          <div className="glass-card neon-glow-primary pagos-empty-state">
+            <span className="pagos-empty-icon-wrapper">
+              <span className="material-symbols-outlined pagos-empty-icon">payments</span>
             </span>
-            <h2 style={{ fontSize: "1.75rem", marginBottom: "12px" }}>Selecciona una Disciplina</h2>
-            <p style={{ color: "var(--on-surface-variant)", maxWidth: "500px", margin: "0 auto", fontSize: "1rem", lineHeight: "1.6" }}>
+            <h2 className="pagos-empty-title">Selecciona una Disciplina</h2>
+            <p className="pagos-empty-desc">
               Elige una clase en el filtro superior para acceder a su lista de alumnos, revisar quién ha pagado este mes, y generar ingresos mediante cobros rápidos.
             </p>
           </div>

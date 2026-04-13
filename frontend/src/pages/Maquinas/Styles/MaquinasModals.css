@@ -1,0 +1,264 @@
+/* MaquinasModals.css */
+
+.maquina-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.maquina-form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .maquina-form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.maquina-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.maquina-form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.maquina-form-label {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #64748b;
+  margin-left: 4px;
+}
+
+.maquina-form-input,
+.maquina-form-select,
+.maquina-form-textarea {
+  background: #131b2e;
+  border: 1px solid rgba(189, 194, 255, 0.1);
+  color: var(--text-primary);
+  padding: 14px 20px;
+  border-radius: 12px;
+  outline: none;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.maquina-form-input:focus,
+.maquina-form-select:focus,
+.maquina-form-textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 10px rgba(189, 194, 255, 0.1);
+}
+
+.maquina-form-input.error {
+  border-color: #ef4444;
+}
+
+.error-text-kinetic {
+  font-size: 10px;
+  color: #ef4444;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+.maquina-dropzone {
+  border: 2px dashed rgba(189, 194, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.maquina-dropzone:hover {
+  border-color: var(--primary);
+  background: rgba(189, 194, 255, 0.05);
+}
+
+.maquina-dropzone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+}
+
+.maquina-dropzone-icon {
+  font-size: 2.5rem;
+}
+
+.maquina-dropzone-text {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.maquina-preview-wrapper {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.maquina-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.btn-remove-preview {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(239, 68, 68, 0.8);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-remove-preview:hover {
+  background: #ef4444;
+}
+
+.maquina-modal-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.btn-modal-action {
+  flex: 1;
+  padding: 16px;
+  border-radius: 16px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.btn-modal-cancel {
+  background: #252d43;
+  color: var(--text-primary);
+}
+
+.btn-modal-confirm {
+  background: var(--primary);
+  color: #0b1326;
+  box-shadow: 0 0 20px rgba(189, 194, 255, 0.3);
+}
+
+.btn-modal-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Kinetic Modals Styles for MaquinasPage */
+.maquina-confirm-container {
+  min-width: 400px;
+  padding: 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.maquina-confirm-top {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.confirm-icon-kinetic {
+  font-size: 3.75rem;
+  color: #ef4444;
+}
+
+.confirm-title-kinetic {
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.confirm-msg-kinetic {
+  color: #94a3b8;
+  font-weight: 500;
+  margin: 0;
+}
+
+.maquina-alert-container {
+  min-width: 360px;
+  padding: 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.alert-icon-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+}
+
+.alert-circle-error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.alert-circle-success {
+  background: rgba(78, 222, 163, 0.1);
+  color: #4edea3;
+}
+
+.alert-title-kinetic {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.alert-btn-kinetic {
+  background: var(--primary);
+  color: #0b1326;
+  font-weight: 900;
+  padding: 16px 48px;
+  border-radius: 16px;
+  align-self: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(189, 194, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.alert-btn-kinetic:hover {
+  transform: scale(1.05);
+}
+
+.alert-btn-kinetic:active {
+  transform: scale(0.95);
+}

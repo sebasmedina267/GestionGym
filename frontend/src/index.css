@@ -1,7 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @import "./styles/variables.css";
-@import "./styles/layout.css";
 
 /* Base Resets */
 :root {
@@ -215,13 +214,13 @@ input:focus, select:focus, textarea:focus {
 .modal-overlay, .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(7, 15, 26, 0.85); /* Deep charcoal background */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 2000; /* Ensure it's above all page content */
   animation: fadeIn 0.3s ease-out;
 }
 
@@ -347,4 +346,89 @@ tbody tr:hover {
 @keyframes modalScaleUp {
   from { transform: scale(0.92) translateY(20px); opacity: 0; filter: blur(4px); }
   to { transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }
+}
+
+/* -------------------------------------
+   KINETIC ARCHITECT DESIGN SYSTEM
+-------------------------------------- */
+
+.ka-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.ka-label {
+  display: block;
+  text-align: left;
+  font-family: var(--ka-font-label);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ka-on-surface-variant);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ka-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ka-input-icon {
+  position: absolute;
+  left: 1rem;
+  color: var(--ka-on-surface-variant);
+  opacity: 0.5;
+  transition: color 0.2s, opacity 0.2s;
+  pointer-events: none;
+}
+
+.ka-input-wrapper:focus-within .ka-input-icon {
+  color: var(--ka-primary);
+  opacity: 1;
+}
+
+.ka-input {
+  width: 100%;
+  background: var(--ka-surface-container-lowest) !important;
+  border: 1px solid rgba(62, 72, 79, 0.2) !important;
+  border-radius: var(--ka-radius-md) !important;
+  padding: 0.875rem 1rem !important;
+  color: var(--ka-on-surface) !important;
+  font-family: var(--ka-font-body) !important;
+  transition: all 0.2s !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.ka-input.has-icon {
+  padding-left: 3rem !important;
+}
+
+.ka-input:focus {
+  border-color: var(--ka-primary) !important;
+  box-shadow: 0 0 0 1px var(--ka-primary), 0 0 8px rgba(142, 213, 255, 0.1) !important;
+}
+
+.ka-input::placeholder {
+  color: rgba(189, 200, 209, 0.3);
+}
+
+.error-text-kinetic {
+  color: var(--danger);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+/* Reset for Kinetic Modals */
+.kinetic-modal-reset {
+  max-width: none !important;
+  width: auto !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  overflow: visible !important;
 }
