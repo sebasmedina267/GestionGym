@@ -18,7 +18,7 @@ export default function ClassDetailModal({
   return (
     <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-[#0b1326]/80 backdrop-blur-md">
       <div className="kinetic-modal w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden animate-fade-in shadow-2xl">
-        
+
         {/* Header */}
         <header className="kinetic-modal-header py-6 px-8">
           <div className="flex items-center gap-6">
@@ -35,7 +35,7 @@ export default function ClassDetailModal({
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button 
+            <button
               className="kinetic-btn kinetic-btn--ghost h-10 px-4"
               onClick={() => {
                 setForm({ nombre: selectedClase.nombre, descripcion: selectedClase.descripcion || "" });
@@ -45,7 +45,7 @@ export default function ClassDetailModal({
               <span className="material-symbols-outlined text-lg">edit</span>
               Editar Info
             </button>
-            <button 
+            <button
               className="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-white/10 transition-all border border-white/10"
               onClick={onClose}
             >
@@ -77,7 +77,7 @@ export default function ClassDetailModal({
 
         {/* Body */}
         <div className="kinetic-modal-body flex-1 overflow-y-auto px-8 py-6">
-          
+
           {activeTab === "horarios" && (
             <div className="space-y-8 animate-fade-in">
               <div className="flex justify-between items-center">
@@ -85,7 +85,7 @@ export default function ClassDetailModal({
                   <span className="kinetic-section__accent bg-primary" />
                   Turnos de la clase
                 </h3>
-                <button 
+                <button
                   className="kinetic-btn kinetic-btn--secondary h-10 px-6"
                   onClick={() => {
                     setHorarioForm({ id: null, dia: 0, hora_inicio: 8, minuto_inicio: 0, hora_fin: 9, minuto_fin: 0 });
@@ -116,13 +116,13 @@ export default function ClassDetailModal({
                         </div>
                       </div>
                       <div className="flex flex-col gap-2">
-                        <button 
+                        <button
                           className="kinetic-btn kinetic-btn--secondary h-9 text-xs"
                           onClick={() => openInscripciones(h)}
                         >
                           Alumnos
                         </button>
-                        <button 
+                        <button
                           className="kinetic-btn kinetic-btn--ghost h-9 text-xs"
                           onClick={() => openEditHorario(h)}
                         >
@@ -147,7 +147,7 @@ export default function ClassDetailModal({
                   <span className="kinetic-section__accent bg-secondary" />
                   Staff asignado
                 </h3>
-                <button 
+                <button
                   className="kinetic-btn kinetic-btn--secondary h-10 px-6"
                   onClick={() => setShowMonitorModal(true)}
                 >
@@ -169,7 +169,7 @@ export default function ClassDetailModal({
                           <p className="text-[10px] font-black uppercase text-secondary/70 tracking-widest">Instructor Elite</p>
                         </div>
                       </div>
-                      <button 
+                      <button
                         className="w-10 h-10 rounded-xl border border-error/20 text-error hover:bg-error/10 transition-colors flex items-center justify-center"
                         onClick={() => handleRemoverMonitor(m.id)}
                       >
@@ -193,7 +193,7 @@ export default function ClassDetailModal({
                   <span className="kinetic-section__accent bg-[#ff5c72]" />
                   Planes de suscripción
                 </h3>
-                <button 
+                <button
                   className="kinetic-btn kinetic-btn--secondary h-10 px-6"
                   onClick={() => {
                     setPrecioForm({ id: null, nombre: "", tipo_unidad: "MES", cantidad_unidad: 1, precio: "" });
@@ -217,13 +217,13 @@ export default function ClassDetailModal({
                         </div>
                       </div>
                       <div className="flex flex-col gap-2">
-                        <button 
+                        <button
                           className="kinetic-btn kinetic-btn--ghost h-9 text-xs"
                           onClick={() => openEditPrecio(p)}
                         >
                           Editar
                         </button>
-                        <button 
+                        <button
                           className="kinetic-btn kinetic-btn--ghost h-9 text-xs text-error border-error/20 hover:bg-error/10"
                           onClick={() => handleEliminarPrecio(p.id)}
                         >
@@ -243,10 +243,10 @@ export default function ClassDetailModal({
 
           {activeTab === "stats" && (
             <div className="animate-fade-in">
-              <StatsComponents 
-                stats={stats} 
-                generoData={generoData} 
-                edadData={edadData} 
+              <StatsComponents
+                stats={stats}
+                generoData={generoData}
+                edadData={edadData}
               />
             </div>
           )}
@@ -259,7 +259,7 @@ export default function ClassDetailModal({
             <p className="kinetic-label">ID de Sesión</p>
             <p className="text-xs font-bold text-on-surface-variant">CLS-{selectedClase.id.toString().padStart(4, '0')}</p>
           </div>
-          <button 
+          <button
             className="kinetic-btn kinetic-btn--ghost h-11 px-8"
             onClick={onClose}
           >

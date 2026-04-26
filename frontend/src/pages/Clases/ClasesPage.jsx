@@ -292,13 +292,12 @@ export default function ClasesPage() {
                 >
                   <div className="kinetic-item__left">
                     <div
-                      className={`kinetic-item__icon ${
-                        c.nombre.toLowerCase().includes("pilates")
+                      className={`kinetic-item__icon ${c.nombre.toLowerCase().includes("pilates")
                           ? "bg-[#312e81] text-[#c7d2fe]"
                           : c.nombre.toLowerCase().includes("boxing")
                             ? "bg-[#064e3b] text-[#6ee7b7]"
                             : "bg-[#1e293b] text-[#94a3b8]"
-                      }`}
+                        }`}
                     >
                       <span
                         className="material-symbols-outlined notranslate"
