@@ -1,0 +1,122 @@
+/* EmployeesSection.css */
+
+.employees-section-container {
+  margin-top: 48px;
+}
+
+.employees-section-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.employees-loading {
+  color: var(--text-tertiary);
+}
+
+.employees-empty-state {
+  background: var(--bg-secondary);
+  padding: 32px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  text-align: center;
+  color: var(--text-tertiary);
+}
+
+.employees-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.employee-card {
+  background: var(--bg-secondary);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 0.3s ease;
+}
+
+.employee-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.employee-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.employee-card-name {
+  margin: 0 0 4px 0;
+  color: var(--text-primary);
+}
+
+.employee-card-email {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.employee-role-badge {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.role-dueno {
+  background: var(--primary-alpha);
+  color: var(--primary-light);
+}
+
+.role-trabajador {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.employee-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.employee-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.btn-edit-employee {
+  background: var(--primary-alpha);
+  color: var(--primary-light);
+  border-color: var(--primary-light);
+}
+
+.btn-edit-employee:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-delete-employee {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+
+.btn-delete-employee:hover {
+  background: var(--danger-color);
+  color: white;
+}

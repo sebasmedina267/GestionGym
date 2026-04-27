@@ -6,7 +6,7 @@ import api from "../../api/axios";
 import { useClientes } from "./useClientes";
 import ClienteModal from "./ClienteModal";
 import ClientesTable from "./ClientesTable";
-import "../../styles/clientes.css";
+import "./Styles/ClientesPage.css";
 
 export default function ClientesPage() {
   const { gym } = useGym();

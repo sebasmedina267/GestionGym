@@ -1,0 +1,208 @@
+.maquina-form-container {
+  display: flex;
+  flex-direction: column;
+  background: var(--ka-surface-container);
+  border-radius: var(--ka-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--ka-shadow);
+  border: 1px solid rgba(62, 72, 79, 0.1);
+  max-width: 700px;
+  width: 100%;
+  max-height: 85vh;
+  margin: 0 auto;
+}
+
+/* HEADER */
+.maquina-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+}
+
+.maquina-form-title {
+  font-family: var(--ka-font-headline);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--ka-on-surface);
+  letter-spacing: -0.02em;
+}
+
+.maquina-close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--ka-on-surface-variant);
+  transition: color 0.2s;
+}
+
+.maquina-close-btn:hover {
+  color: var(--ka-primary);
+}
+
+/* GRID */
+.maquina-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  padding: 1rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+@media (max-width: 640px) {
+  .maquina-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.maquina-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.maquina-form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+/* LABELS */
+.maquina-form-label {
+  font-family: var(--ka-font-label);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--ka-on-surface-variant);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* INPUTS */
+.maquina-form-input,
+.maquina-form-select,
+.maquina-form-textarea {
+  background: var(--ka-surface-container-lowest);
+  border: 1px solid rgba(62, 72, 79, 0.2);
+  border-radius: var(--ka-radius-md);
+  padding: 0.55rem 0.8rem;
+  color: var(--ka-on-surface);
+  font-family: var(--ka-font-body);
+  transition: all 0.2s;
+  outline: none;
+  font-size: 0.85rem;
+}
+
+.maquina-form-input:focus,
+.maquina-form-select:focus,
+.maquina-form-textarea:focus {
+  border-color: var(--ka-primary);
+  box-shadow: 0 0 0 1px var(--ka-primary);
+}
+
+.maquina-form-input.error {
+  border-color: var(--danger);
+}
+
+.maquina-form-textarea {
+  resize: none;
+  min-height: 55px;
+}
+
+/* DROPZONE */
+.maquina-dropzone {
+  position: relative;
+  height: 5rem;
+  border-radius: var(--ka-radius-lg);
+  border: 2px dashed rgba(62, 72, 79, 0.3);
+  background: var(--ka-surface-container-lowest);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  overflow: hidden;
+}
+
+.maquina-dropzone:hover {
+  border-color: var(--ka-primary);
+  background: rgba(142, 213, 255, 0.05);
+}
+
+.maquina-dropzone-icon {
+  font-size: 1.8rem !important;
+  color: var(--ka-on-surface-variant);
+}
+
+.maquina-dropzone-text {
+  font-size: 0.75rem;
+  color: var(--ka-on-surface-variant);
+  font-weight: 500;
+}
+
+.maquina-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.btn-remove-preview {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.8);
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+}
+
+/* ACTIONS */
+.maquina-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--ka-surface-container-high);
+}
+
+.btn-modal-action {
+  padding: 0.5rem 1.2rem;
+  border-radius: var(--ka-radius-md);
+  font-family: var(--ka-font-headline);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  font-size: 0.85rem;
+}
+
+.btn-modal-cancel {
+  background: transparent;
+  border: 1px solid var(--ka-outline-variant);
+  color: var(--ka-on-surface);
+}
+
+.btn-modal-cancel:hover {
+  background: var(--ka-surface-variant);
+}
+
+.btn-modal-confirm {
+  background: linear-gradient(135deg, var(--ka-primary), var(--ka-primary-container));
+  color: var(--ka-on-primary);
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
+}
+
+.btn-modal-confirm:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.3);
+}
+
+.btn-modal-confirm:active {
+  transform: scale(0.98);
+}

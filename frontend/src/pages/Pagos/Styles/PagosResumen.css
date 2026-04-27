@@ -1,0 +1,128 @@
+.pagos-resumen-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.pagos-resumen-card {
+  position: relative;
+  overflow: hidden;
+  padding: 2rem;
+}
+
+.pagos-resumen-bg-blur {
+  position: absolute;
+  right: -2.5rem;
+  top: -2.5rem;
+  width: 10rem;
+  height: 10rem;
+  background-color: rgba(129, 140, 248, 0.1);
+  border-radius: 9999px;
+  filter: blur(24px);
+  pointer-events: none;
+}
+
+.pagos-resumen-amount-wrapper {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.pagos-resumen-amount {
+  font-size: 2.5rem;
+  margin: 0;
+  color: var(--on-surface);
+}
+
+.pagos-resumen-currency {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.pagos-resumen-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.pagos-resumen-stat-box {
+  background: rgba(189, 194, 255, 0.05);
+  padding: 1rem;
+  border-radius: 0.75rem;
+}
+
+.pagos-resumen-stat-box.debtors {
+  background: rgba(255, 178, 183, 0.05);
+}
+
+.pagos-resumen-stat-label {
+  font-size: 0.6rem;
+  margin-bottom: 0.25rem;
+}
+
+.pagos-resumen-stat-label.debtors {
+  color: var(--tertiary);
+}
+
+.pagos-resumen-stat-value {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.pagos-resumen-stat-value.debtors {
+  color: var(--tertiary);
+}
+
+.pagos-resumen-chart-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.pagos-resumen-chart-icon {
+  font-size: 14px;
+}
+
+.pagos-resumen-chart-container {
+  height: 200px;
+  position: relative;
+}
+
+.pagos-resumen-bar-container {
+  height: 180px;
+}
+
+.pagos-resumen-chart-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.pagos-resumen-percent {
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.pagos-resumen-percent.success {
+  color: var(--secondary);
+}
+
+.pagos-resumen-percent.normal {
+  color: var(--primary);
+}
+
+.pagos-resumen-percent-label {
+  font-size: 0.5rem;
+  margin: 0;
+}
+
+.pagos-resumen-flex-1 {
+  flex: 1;
+}

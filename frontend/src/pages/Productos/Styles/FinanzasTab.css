@@ -1,0 +1,326 @@
+/* FinanzasTab.css */
+
+.finanzas-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  animation: finanzasFadeIn 0.5s ease-out;
+}
+
+.finanzas-dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .finanzas-dashboard-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.chart-main-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 2rem;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.chart-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.chart-accent-line {
+  width: 4px;
+  height: 1.25rem;
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+.chart-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.chart-canvas-wrapper {
+  height: 350px;
+  width: 100%;
+}
+
+.recent-activity-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 2rem;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+}
+
+.activity-header {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-tertiary);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.activity-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.activity-main-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.activity-prod-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.activity-meta {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+
+.activity-amount-group {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.activity-value {
+  font-size: 0.875rem;
+  font-weight: 900;
+}
+
+.value-pos { color: var(--secondary); }
+.value-neg { color: #ef4444; }
+
+.activity-qty {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.empty-activity {
+  text-align: center;
+  padding: 2rem 0;
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+}
+
+@keyframes finanzasFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* KINETIC ATMOSPHERE - FINANZAS */
+.finanzasContainer {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+}
+
+@media (min-width: 1200px) {
+  .finanzasContainer {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.chartCard {
+  background-color: var(--p-surface-container-low);
+  border-radius: 3.5rem; /* MATCH CAPSULE */
+  padding: 3rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+}
+
+.chartTitle {
+  font-size: 1.5rem;
+  font-weight: 850;
+  margin-bottom: 2.5rem;
+  color: var(--p-on-surface);
+  letter-spacing: -0.03em;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.historyCard {
+  background-color: var(--p-surface-container-low);
+  border-radius: 3.5rem; /* MATCH CAPSULE */
+  padding: 3rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  max-height: 650px;
+  overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+}
+
+/* Scrollbar styling for historyCard */
+.historyCard::-webkit-scrollbar {
+  width: 4px;
+}
+.historyCard::-webkit-scrollbar-track {
+  background: transparent;
+}
+.historyCard::-webkit-scrollbar-thumb {
+  background: rgba(189, 194, 255, 0.1);
+  border-radius: 10px;
+}
+
+.historyItem {
+  padding: 1.25rem 1.5rem;
+  background-color: var(--p-surface-container-high);
+  border-radius: 0 1.5rem 1.5rem 0;
+  margin-bottom: 1.25rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: default;
+}
+
+.historyItem:hover {
+  transform: translateX(8px);
+  background-color: var(--p-surface-container-highest);
+}
+
+.historyItemVenta {
+  border-left: 5px solid var(--p-secondary);
+}
+
+.historyItemCompra {
+  border-left: 5px solid var(--p-tertiary);
+}
+
+.overflowHidden {
+  overflow: hidden;
+}
+
+.pPrimaryIcon {
+  color: var(--p-primary);
+}
+
+.chartWrapper {
+  height: 400px;
+  padding: 0 10px;
+}
+
+.noDataSmall {
+  font-size: 0.8rem;
+  color: var(--p-on-surface-variant);
+  text-align: center;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.historyItemHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.historyItemProdName {
+  font-weight: 850;
+  font-size: 1rem;
+  color: var(--p-on-surface);
+  letter-spacing: -0.02em;
+}
+
+.historyItemDate {
+  color: var(--p-primary);
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.historyItemBody {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.historyItemMeta {
+  color: var(--p-on-surface-variant);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.historyItemAmount {
+  font-weight: 950;
+  font-size: 1.15rem;
+}
+
+.amountVenta {
+  color: var(--p-secondary);
+  text-shadow: 0 0 10px rgba(78, 222, 163, 0.2);
+}
+
+.amountCompra {
+  color: var(--p-tertiary);
+  text-shadow: 0 0 10px rgba(255, 92, 114, 0.2);
+}
+
+/* Recharts Customizations */
+.chartTooltip {
+  background: rgba(11, 19, 38, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 1.5rem !important;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  padding: 12px 16px !important;
+}
+
+.tooltipItem {
+  font-weight: 700 !important;
+}
+
+.legendLabel {
+  color: var(--p-on-surface-variant);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+

@@ -1,13 +1,11 @@
 import React from 'react';
+import './Styles/PagosFiltros.css';
 
 export default function PagosFiltros({ claseId, setClaseId, clases, mes, setMes, clasePrecio }) {
   return (
-    <div className="glass-card" style={{
-      display: "flex", gap: "2rem", marginBottom: "2rem",
-      alignItems: "center", flexWrap: "wrap", justifyContent: "space-between"
-    }}>
-      <div style={{ display: "flex", gap: "1.5rem", flex: 1 }}>
-        <div style={{ flex: 1, minWidth: "200px" }}>
+    <div className="glass-card pagos-filtros-container">
+      <div className="pagos-filtros-group">
+        <div className="pagos-filtros-item">
           <label className="label-caps">Disciplina / Clase</label>
           <select 
             className="kinetic-select" 
@@ -20,7 +18,7 @@ export default function PagosFiltros({ claseId, setClaseId, clases, mes, setMes,
             ))}
           </select>
         </div>
-        <div style={{ flex: 1, minWidth: "200px" }}>
+        <div className="pagos-filtros-item">
           <label className="label-caps">Mes de Cobro</label>
           <input 
             type="month" 
@@ -32,17 +30,9 @@ export default function PagosFiltros({ claseId, setClaseId, clases, mes, setMes,
       </div>
 
       {clasePrecio && (
-        <div className="neon-glow-secondary" style={{
-          background: "rgba(78, 222, 163, 0.1)",
-          border: "1px solid rgba(78, 222, 163, 0.3)",
-          padding: "0.75rem 1.5rem",
-          borderRadius: "1rem",
-          display: "flex",
-          alignItems: "center",
-          gap: "1rem"
-        }}>
-          <span className="label-caps" style={{ color: "var(--secondary)", margin: 0 }}>Precio Clase</span>
-          <span style={{ fontSize: "1.5rem", fontWeight: "900", color: "var(--secondary)" }}>
+        <div className="neon-glow-secondary pagos-filtros-precio-clase">
+          <span className="label-caps pagos-filtros-precio-label">Precio Clase</span>
+          <span className="pagos-filtros-precio-valor">
             €{Number(clasePrecio).toFixed(2)}
           </span>
         </div>

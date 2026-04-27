@@ -4,18 +4,18 @@ import DashboardHeader from "./DashboardHeader";
 import DashboardStatsGrid from "./DashboardStatsGrid";
 import DashboardAgenda from "./DashboardAgenda";
 import DashboardInsights from "./DashboardInsights";
-import "../../styles/dashboard.css";
+import "./Styles/DashboardPage.css";
 
 export default function DashboardPage() {
   const { gym, clases, stats } = useDashboardLogic();
 
   return (
     <AppLayout>
-      <div className="dashboard-v2">
+      <div className="dashboard-page-container">
         <DashboardHeader gym={gym} />
         <DashboardStatsGrid stats={stats} />
 
-        <section className="dashboard-v2__grid">
+        <section className="dashboard-layout-grid">
           <DashboardAgenda clases={clases} />
           <DashboardInsights stats={stats} />
         </section>

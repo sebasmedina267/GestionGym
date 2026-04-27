@@ -1,0 +1,124 @@
+/* PriceFormModal.css */
+
+.price-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 140;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(11, 19, 38, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: priceModalFadeIn 0.3s ease-out;
+}
+
+.price-modal-container {
+  width: 100%;
+  max-width: 448px;
+  background: rgba(30, 37, 55, 0.4);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(189, 194, 255, 0.1);
+  border-radius: 2rem;
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.price-modal-header {
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.price-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.price-header-title h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.price-modal-close {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.price-modal-close:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.price-modal-body {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.price-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.price-field-label {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-tertiary);
+  padding: 0 0.25rem;
+}
+
+.price-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.price-currency-icon {
+  position: absolute;
+  left: 1rem;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+.price-input-with-icon {
+  padding-left: 2.5rem !important;
+}
+
+.price-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.price-modal-footer {
+  padding: 1.5rem 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+@keyframes priceModalFadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}

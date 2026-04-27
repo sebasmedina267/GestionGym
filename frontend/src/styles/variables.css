@@ -58,4 +58,28 @@
   --glass-border: 1px solid rgba(255, 255, 255, 0.08);
 
   --transition: 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+
+  /* Kinetic Architect Design System */
+  --ka-surface: #0c141f;
+  --ka-surface-container-lowest: #070f1a;
+  --ka-surface-container-low: #141c28;
+  --ka-surface-container: #18202c;
+  --ka-surface-container-high: #222a37;
+  --ka-surface-container-highest: #2d3542;
+  --ka-primary: #8ed5ff;
+  --ka-primary-container: #38bdf8;
+  --ka-on-primary: #00354a;
+  --ka-tertiary: #4ee6aa;
+  --ka-outline-variant: #3e484f;
+  --ka-on-surface: #dbe3f3;
+  --ka-on-surface-variant: #bdc8d1;
+  
+  --ka-font-headline: 'Lexend', sans-serif;
+  --ka-font-body: 'Inter', sans-serif;
+  --ka-font-label: 'Inter', sans-serif;
+
+  --ka-shadow: 0px 24px 48px rgba(7, 15, 26, 0.5);
+  --ka-radius-xl: 1.5rem;
+  --ka-radius-lg: 0.75rem;
+  --ka-radius-md: 0.5rem;
 }

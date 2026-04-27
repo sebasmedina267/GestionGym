@@ -2,6 +2,7 @@ import React from 'react';
 import Modal from "../../components/ui/Modal";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
+import './Styles/CreateGymModal.css';
 
 export default function CreateGymModal({
   showCreateGym,
@@ -14,16 +15,10 @@ export default function CreateGymModal({
 }) {
   return (
     <Modal open={showCreateGym} onClose={() => {setShowCreateGym(false); setFormGym({ nombre: "", direccion: "" })}} title="Crear Nueva Sucursal">
-      <div style={{display: "flex", flexDirection: "column", gap: "16px"}}>
-        <div style={{
-          background: "linear-gradient(135deg, var(--primary-alpha) 0%, rgba(99, 102, 241, 0.05) 100%)",
-          padding: "20px",
-          borderRadius: "12px",
-          border: "1px solid var(--primary-alpha)",
-          textAlign: "center"
-        }}>
-          <div style={{fontSize: "40px", marginBottom: "8px"}}>🏋️</div>
-          <p style={{color: "var(--text-secondary)", margin: "0", fontSize: "0.9rem"}}>Completa los datos para crear una nueva sucursal</p>
+      <div className="create-gym-modal-container">
+        <div className="create-gym-header">
+          <div className="create-gym-icon">🏋️</div>
+          <p className="create-gym-desc">Completa los datos para crear una nueva sucursal</p>
         </div>
 
         <Input
@@ -41,11 +36,11 @@ export default function CreateGymModal({
           placeholder="Ej: Calle Principal 123"
         />
 
-        <div style={{display: "flex", gap: "12px"}}>
+        <div className="create-gym-actions">
           <Button variant="secondary" onClick={() => {setShowCreateGym(false); setFormGym({ nombre: "", direccion: "" })}}>
             Cancelar
           </Button>
-          <Button variant="primary" loading={saving} onClick={handleCreateGym} style={{flex: 1}}>
+          <Button variant="primary" loading={saving} onClick={handleCreateGym} className="create-gym-btn-confirm">
             Crear Sucursal
           </Button>
         </div>

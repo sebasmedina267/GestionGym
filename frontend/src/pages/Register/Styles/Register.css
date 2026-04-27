@@ -1,0 +1,97 @@
+/* Register.css */
+
+.register-page-container {
+  min-height: 100vh;
+  background-color: #0b1326;
+  color: #dae2fd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.register-ambient-glow-1 {
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 50%;
+  height: 50%;
+  border-radius: 50%;
+  background: rgba(189, 194, 255, 0.1);
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.register-ambient-glow-2 {
+  position: absolute;
+  bottom: -10%;
+  right: -10%;
+  width: 50%;
+  height: 50%;
+  border-radius: 50%;
+  background: rgba(78, 222, 163, 0.05);
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.register-texture-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h40v40H0V0zm2 2h36v36H2V2z' fill='%23fff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+}
+
+.register-main-content {
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+  z-index: 10;
+  margin: 40px 0;
+  animation: registerFadeIn 0.5s ease-out;
+}
+
+.register-glass-card {
+  background: rgba(30, 37, 55, 0.4);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(189, 194, 255, 0.1);
+  border-radius: 2.5rem;
+  padding: 40px;
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+}
+
+.register-brand-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.register-brand-title {
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: #dae2fd;
+  margin-bottom: 4px;
+}
+
+.register-brand-subtitle {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  opacity: 0.8;
+}
+
+@keyframes registerFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 640px) {
+  .register-glass-card {
+    padding: 24px;
+    border-radius: 1.5rem;
+  }
+}
