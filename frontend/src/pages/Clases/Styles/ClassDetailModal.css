@@ -2,7 +2,10 @@
 
 .class-detail-overlay {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 100;
   display: flex;
   align-items: center;
@@ -12,6 +15,21 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   animation: classModalFadeIn 0.3s ease-out;
+  /* Dejar espacio para la sidebar en desktop */
+  margin-left: 288px;
+}
+
+@media (max-width: 768px) {
+  .class-detail-overlay {
+    margin-left: 80px;
+  }
+}
+
+@media (max-width: 640px) {
+  .class-detail-overlay {
+    margin-left: 0;
+    padding: 1rem;
+  }
 }
 
 .class-detail-container {
