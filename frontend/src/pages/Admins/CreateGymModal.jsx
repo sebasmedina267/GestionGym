@@ -1,7 +1,6 @@
 import React from 'react';
 import Modal from "../../components/ui/Modal";
 import Input from "../../components/ui/Input";
-import Button from "../../components/ui/Button";
 import './Styles/CreateGymModal.css';
 
 export default function CreateGymModal({
@@ -13,36 +12,77 @@ export default function CreateGymModal({
   handleCreateGym,
   saving
 }) {
+
+  const closeAndReset = () => {
+    setShowCreateGym(false);
+    setFormGym({ nombre: "", direccion: "" });
+  };
+
   return (
-    <Modal open={showCreateGym} onClose={() => {setShowCreateGym(false); setFormGym({ nombre: "", direccion: "" })}} title="Crear Nueva Sucursal">
+    <Modal
+      open={showCreateGym}
+      onClose={closeAndReset}
+      clean
+    >
       <div className="create-gym-modal-container">
-        <div className="create-gym-header">
-          <div className="create-gym-icon">🏋️</div>
-          <p className="create-gym-desc">Completa los datos para crear una nueva sucursal</p>
+        {/* Header with Background */}
+        <div className="create-gym-header-bg">
+          <button className="create-gym-close-top" onClick={closeAndReset}>
+            <span className="material-symbols-outlined">close</span>
+          </button>
+          
+          <div className="create-gym-icon-wrapper">
+            <div className="create-gym-icon-circle">
+              <span className="create-gym-icon">🏢</span>
+            </div>
+          </div>
         </div>
 
-        <Input
-          label="Nombre de la Sucursal"
-          value={formGym.nombre}
-          onChange={(v) => setFormGym({ ...formGym, nombre: v })}
-          error={errors.nombre}
-          placeholder="Ej: Gimnasio Centro"
-        />
+        <div className="create-gym-form">
+          <div className="create-gym-title-area">
+            <h3 className="create-gym-title">Nueva Sucursal</h3>
+            <p className="create-gym-subtitle">Gestión de Ubicaciones</p>
+          </div>
 
-        <Input
-          label="Dirección (Opcional)"
-          value={formGym.direccion}
-          onChange={(v) => setFormGym({ ...formGym, direccion: v })}
-          placeholder="Ej: Calle Principal 123"
-        />
+          <form className="create-gym-grid" onSubmit={(e) => { e.preventDefault(); handleCreateGym(); }}>
+            <Input
+              label="Nombre de la Sucursal"
+              value={formGym.nombre}
+              onChange={(v) => setFormGym({ ...formGym, nombre: v })}
+              error={errors.nombre}
+              variant="kinetic"
+              placeholder="Ej: Gimnasio Centro"
+            />
 
-        <div className="create-gym-actions">
-          <Button variant="secondary" onClick={() => {setShowCreateGym(false); setFormGym({ nombre: "", direccion: "" })}}>
-            Cancelar
-          </Button>
-          <Button variant="primary" loading={saving} onClick={handleCreateGym} className="create-gym-btn-confirm">
-            Crear Sucursal
-          </Button>
+            <div className="create-gym-full-width">
+              <Input
+                label="Dirección (Opcional)"
+                value={formGym.direccion}
+                onChange={(v) => setFormGym({ ...formGym, direccion: v })}
+                error={errors.direccion}
+                variant="kinetic"
+                placeholder="Ej: Calle Principal 123"
+                icon="location_on"
+              />
+            </div>
+
+            <div className="create-gym-full-width create-gym-form-actions">
+              <button 
+                type="button" 
+                className="btn-gym-cancel" 
+                onClick={closeAndReset}
+              >
+                Cancelar
+              </button>
+              <button 
+                type="submit" 
+                className="btn-gym-submit"
+                disabled={saving}
+              >
+                {saving ? "Creando..." : "Crear Sucursal"}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </Modal>

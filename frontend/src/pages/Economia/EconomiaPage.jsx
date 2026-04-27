@@ -20,8 +20,11 @@ export default function EconomiaPage() {
   const [filtroTipo, setFiltroTipo] = useState("TODOS");
   const [openModal, setOpenModal] = useState(false);
   const [formType, setFormType] = useState(null);
-  const [form, setForm] = useState({ descripcion: "", importe: "", fecha: new Date().toISOString().split("T")[0] });
+  const [form, setForm] = useState({ descripcion: "", importe: "", fecha: new Date().toISOString().split("T")[0], categoria: "" });
   const [saving, setSaving] = useState(false);
+
+  const categoriasIngreso = ["Servicios", "Ventas", "Inversión", "Otros"];
+  const categoriasGasto = ["Alquiler", "Servicios", "Salarios", "Mantenimiento", "Otros"];
 
   const [desde, hasta] = useMemo(() => {
     const [year, m] = mes.split("-");
@@ -41,7 +44,7 @@ export default function EconomiaPage() {
 
   const handleOpenForm = (type) => {
     setFormType(type);
-    setForm({ descripcion: "", importe: "", fecha: new Date().toISOString().split("T")[0] });
+    setForm({ descripcion: "", importe: "", fecha: new Date().toISOString().split("T")[0], categoria: "" });
     setOpenModal(true);
   };
 
@@ -85,6 +88,7 @@ export default function EconomiaPage() {
         setForm={setForm}
         saving={saving}
         onSubmit={handleSubmitForm}
+        categorias={formType === "INGRESO" ? categoriasIngreso : categoriasGasto}
       />
     </AppLayout>
   );

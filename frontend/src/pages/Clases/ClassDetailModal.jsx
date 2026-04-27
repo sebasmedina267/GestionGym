@@ -17,7 +17,7 @@ export default function ClassDetailModal({
   if (!open || !selectedClase) return null;
 
   return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-[#0b1326]/80 backdrop-blur-md">
+    <div className="class-detail-overlay">
       <div className="kinetic-modal w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden animate-fade-in shadow-2xl">
 
         {/* Header */}
