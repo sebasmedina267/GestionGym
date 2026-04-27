@@ -2,6 +2,7 @@ import React from 'react';
 import Modal from "../../components/ui/Modal";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
+import './Styles/EditAdminModal.css';
 
 export default function EditAdminModal({
   showEdit,
@@ -18,21 +19,18 @@ export default function EditAdminModal({
   return (
     <Modal open={showEdit} onClose={() => setShowEdit(false)} title="Editar Empleado">
       {selectedAdmin && (
-        <div style={{display: "flex", flexDirection: "column", gap: "16px"}}>
-          <div style={{textAlign: "center"}}>
-            <div style={{width: "100px", height: "100px", borderRadius: "50%", background: "var(--bg-tertiary)", margin: "0 auto 16px", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden"}}>
+        <div className="edit-admin-modal-container">
+          <div className="edit-admin-photo-container">
+            <div className="edit-admin-photo-preview">
               {editForm.photoPreview ? (
-                <img src={editForm.photoPreview} alt="Preview" style={{width: "100%", height: "100%", objectFit: "cover"}} />
+                <img src={editForm.photoPreview} alt="Preview" className="edit-admin-photo-img" />
               ) : (
-                <span style={{fontSize: "40px"}}>📷</span>
+                <span className="edit-admin-photo-icon">📷</span>
               )}
             </div>
-            <label style={{padding: "8px 16px", background: "var(--primary-alpha)", color: "var(--primary-light)", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "600", fontSize: "0.85rem", display: "inline-block", transition: "all 0.3s ease"}}
-              onMouseEnter={(e) => {e.target.style.background = "var(--primary)"; e.target.style.color = "white"}}
-              onMouseLeave={(e) => {e.target.style.background = "var(--primary-alpha)"; e.target.style.color = "var(--primary-light)"}}
-            >
+            <label className="edit-admin-photo-btn">
               📸 Cambiar Foto
-              <input type="file" accept="image/*" onChange={handleEditPhotoChange} style={{display: "none"}} />
+              <input type="file" accept="image/*" onChange={handleEditPhotoChange} className="edit-admin-photo-input" />
             </label>
           </div>
 
@@ -51,15 +49,11 @@ export default function EditAdminModal({
           />
 
           <div>
-            <label style={{display: "block", marginBottom: "8px", color: "var(--text-secondary)", fontSize: "0.85rem"}}>Asignar a Sucursal</label>
+            <label className="edit-admin-select-label">Asignar a Sucursal</label>
             <select
               value={editForm.gymId}
               onChange={(e) => setEditForm({ ...editForm, gymId: e.target.value })}
-              style={{
-                width: "100%", padding: "12px", borderRadius: "8px", 
-                background: "var(--bg-tertiary)", color: "var(--text-primary)", 
-                border: "1px solid var(--border-color)"
-              }}
+              className="edit-admin-select"
             >
               <option value="">Selecciona un gimnasio</option>
               {gyms?.map((g) => (
@@ -70,9 +64,9 @@ export default function EditAdminModal({
             </select>
           </div>
 
-          <div style={{display: "flex", gap: "12px"}}>
+          <div className="edit-admin-actions">
             <Button variant="secondary" onClick={() => setShowEdit(false)}>Cancelar</Button>
-            <Button variant="primary" loading={saving} onClick={handleEditSave} style={{flex: 1}}>
+            <Button variant="primary" loading={saving} onClick={handleEditSave} className="edit-admin-btn-save">
               Guardar Cambios
             </Button>
           </div>

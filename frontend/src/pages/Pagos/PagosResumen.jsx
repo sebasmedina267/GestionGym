@@ -11,6 +11,7 @@ import {
   YAxis,
   Cell as BarCell,
 } from "recharts";
+import './Styles/PagosResumen.css';
 
 const COLORS = ["#4edea3", "#ffb2b7", "#ff5c72"]; // Pagado, Pendiente, Otros
 
@@ -24,40 +25,38 @@ export default function PagosResumen({
   ];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+    <div className="pagos-resumen-container">
       {/* Summary Revenue Card */}
-      <div className="glass-card neon-glow-primary" style={{ 
-        position: "relative", overflow: "hidden", padding: "2rem" 
-      }}>
-        <div className="absolute -right-10 -top-10 w-40 h-40 bg-[#818cf8]/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="glass-card neon-glow-primary pagos-resumen-card">
+        <div className="pagos-resumen-bg-blur"></div>
         <label className="label-caps">Resumen de la Clase</label>
-        <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem", marginBottom: "1.5rem" }}>
-          <h2 style={{ fontSize: "2.5rem", margin: 0, color: "var(--on-surface)" }}>
+        <div className="pagos-resumen-amount-wrapper">
+          <h2 className="pagos-resumen-amount">
             {classStats.totalPagado.toFixed(2)}
           </h2>
-          <span style={{ fontSize: "1.25rem", fontWeight: "700", color: "var(--primary)" }}>€</span>
+          <span className="pagos-resumen-currency">€</span>
         </div>
         
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-          <div style={{ background: "rgba(189, 194, 255, 0.05)", padding: "1rem", borderRadius: "0.75rem" }}>
-            <p className="label-caps" style={{ fontSize: "0.6rem", marginBottom: "0.25rem" }}>Alumnos</p>
-            <p style={{ margin: 0, fontSize: "1.25rem", fontWeight: "900" }}>{classStats.totalAlumnos}</p>
+        <div className="pagos-resumen-stats-grid">
+          <div className="pagos-resumen-stat-box">
+            <p className="label-caps pagos-resumen-stat-label">Alumnos</p>
+            <p className="pagos-resumen-stat-value">{classStats.totalAlumnos}</p>
           </div>
-          <div style={{ background: "rgba(255, 178, 183, 0.05)", padding: "1rem", borderRadius: "0.75rem" }}>
-            <p className="label-caps" style={{ fontSize: "0.6rem", marginBottom: "0.25rem", color: "var(--tertiary)" }}>Deudores</p>
-            <p style={{ margin: 0, fontSize: "1.25rem", fontWeight: "900", color: "var(--tertiary)" }}>{classStats.pendientesCount}</p>
+          <div className="pagos-resumen-stat-box debtors">
+            <p className="label-caps pagos-resumen-stat-label debtors">Deudores</p>
+            <p className="pagos-resumen-stat-value debtors">{classStats.pendientesCount}</p>
           </div>
         </div>
       </div>
 
       {/* Morosidad Donut Chart */}
       <div className="glass-card">
-        <h4 className="label-caps" style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.5rem" }}>
-          <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>pie_chart</span>
+        <h4 className="label-caps pagos-resumen-chart-title">
+          <span className="material-symbols-outlined pagos-resumen-chart-icon">pie_chart</span>
           Índice de Morosidad
         </h4>
         
-        <div style={{ height: "200px", position: "relative" }}>
+        <div className="pagos-resumen-chart-container">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie 
@@ -81,31 +80,24 @@ export default function PagosResumen({
             </PieChart>
           </ResponsiveContainer>
           
-          <div style={{
-            position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
-            textAlign: "center", pointerEvents: "none"
-          }}>
-            <span style={{ 
-              fontSize: "1.5rem", 
-              fontWeight: "900", 
-              color: classStats.totalAlumnos > 0 && classStats.pendientesCount === 0 ? "var(--secondary)" : "var(--primary)"
-            }}>
+          <div className="pagos-resumen-chart-center">
+            <span className={`pagos-resumen-percent ${classStats.totalAlumnos > 0 && classStats.pendientesCount === 0 ? 'success' : 'normal'}`}>
               {classStats.totalAlumnos > 0 ? 
                 Math.round(((classStats.totalAlumnos - classStats.pendientesCount) / classStats.totalAlumnos) * 100) : 0}%
             </span>
-            <p className="label-caps" style={{ fontSize: "0.5rem", margin: 0 }}>Cobrado</p>
+            <p className="label-caps pagos-resumen-percent-label">Cobrado</p>
           </div>
         </div>
       </div>
 
       {/* Methods Bar Chart */}
-      <div className="glass-card" style={{ flex: 1 }}>
-        <h4 className="label-caps" style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.5rem" }}>
-          <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>bar_chart</span>
+      <div className="glass-card pagos-resumen-flex-1">
+        <h4 className="label-caps pagos-resumen-chart-title">
+          <span className="material-symbols-outlined pagos-resumen-chart-icon">bar_chart</span>
           Métodos de Pago
         </h4>
         
-        <div style={{ height: "180px" }}>
+        <div className="pagos-resumen-bar-container">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={metodoPagoStats} layout="vertical" margin={{ left: -15, right: 10 }}>
               <XAxis type="number" hide />

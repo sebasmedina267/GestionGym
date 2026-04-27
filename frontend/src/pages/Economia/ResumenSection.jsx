@@ -1,4 +1,5 @@
 import React from "react";
+import "./Styles/ResumenSection.css";
 
 const ResumenCard = ({ label, value, badgeText, color, icon }) => (
   <div className="glass-card">

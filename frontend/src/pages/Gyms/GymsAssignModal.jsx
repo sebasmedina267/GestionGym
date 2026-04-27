@@ -1,5 +1,6 @@
 import Modal from "../../components/ui/Modal";
 import Button from "../../components/ui/Button";
+import "./Styles/GymsAssignModal.css";
 
 export default function GymsAssignModal({
   open,
@@ -14,18 +15,14 @@ export default function GymsAssignModal({
 }) {
   return (
     <Modal open={open} onClose={() => { onClose(); setErrors({}); }} title="Asignar Gimnasio">
-      <div style={{ marginBottom: "16px" }}>
-        <label style={{ display: "block", marginBottom: "8px", color: "var(--text-secondary)", fontSize: "0.85rem" }}>
+      <div className="gyms-assign-field">
+        <label className="gyms-assign-label">
           Selecciona un Gimnasio
         </label>
         <select
           value={assignForm.gymId}
           onChange={(e) => { setAssignForm({ gymId: e.target.value }); setErrors({}); }}
-          style={{
-            width: "100%", padding: "12px", borderRadius: "8px",
-            background: "var(--bg-tertiary)", color: "var(--text-primary)",
-            border: errors.gymId ? "2px solid var(--danger-color)" : "1px solid var(--border-color)"
-          }}
+          className={`gyms-assign-select ${errors.gymId ? "gyms-assign-select--error" : ""}`}
         >
           <option value="">-- Selecciona un gimnasio --</option>
           {availableGyms.map((g) => (
@@ -34,9 +31,9 @@ export default function GymsAssignModal({
             </option>
           ))}
         </select>
-        {errors.gymId && <p style={{ color: "var(--danger-color)", fontSize: "0.85rem", marginTop: "4px" }}>{errors.gymId}</p>}
+        {errors.gymId && <p className="gyms-assign-error">{errors.gymId}</p>}
       </div>
-      <Button variant="primary" loading={saving} onClick={handleAssignGym} style={{ width: "100%" }}>
+      <Button variant="primary" loading={saving} onClick={handleAssignGym} className="gyms-assign-btn">
         Asignar
       </Button>
     </Modal>

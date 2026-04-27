@@ -1,0 +1,162 @@
+/* Kinetic Architect Redesign - Movimiento Modal */
+
+.movModalShell {
+  background: var(--ka-surface-container-high);
+  border-radius: var(--ka-radius-xl);
+  overflow: hidden;
+  box-shadow: var(--ka-shadow);
+  border: 1px solid rgba(62, 72, 79, 0.1);
+  width: 100%;
+  max-width: 500px;
+}
+
+.movProductHeader {
+  padding: 2rem 2rem 1.5rem 2rem;
+  border-bottom: 1px solid rgba(62, 72, 79, 0.05);
+}
+
+.movProductName {
+  font-family: var(--ka-font-headline);
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--ka-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+
+.movProductStockRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.movStockIcon {
+  font-size: 1rem;
+  color: var(--ka-on-surface-variant);
+  opacity: 0.5;
+}
+
+.movStockText {
+  font-size: 0.75rem;
+  font-family: var(--ka-font-label);
+  color: var(--ka-on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.movStockValue {
+  color: var(--ka-tertiary);
+  font-weight: 700;
+}
+
+.movFormGrid {
+  padding: 1.5rem 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+/* Summary Box */
+.movSummaryBox {
+  margin: 0 2rem 1.5rem 2rem;
+  padding: 1.25rem;
+  border-radius: var(--ka-radius-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.movSummaryBox::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--ka-primary);
+  opacity: 0.05;
+}
+
+.movSummaryBox.venta {
+  border: 1px solid rgba(142, 213, 255, 0.2);
+}
+
+.movSummaryBox.compra {
+  border: 1px solid rgba(78, 230, 170, 0.2);
+}
+
+.movSummaryLabel {
+  position: relative;
+  font-family: var(--ka-font-label);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.movSummaryLabel.venta { color: var(--ka-primary); }
+.movSummaryLabel.compra { color: var(--ka-tertiary); }
+
+.movSummaryValue {
+  position: relative;
+  font-family: var(--ka-font-headline);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--ka-on-surface);
+  letter-spacing: -0.02em;
+}
+
+/* Footer & Buttons */
+.movFooter {
+  padding: 0 2rem 2rem 2rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.movBtnCancel {
+  flex: 1;
+  padding: 0.875rem;
+  border-radius: var(--ka-radius-lg);
+  border: 1px solid var(--ka-outline-variant);
+  background: transparent;
+  color: var(--ka-on-surface-variant);
+  font-family: var(--ka-font-headline);
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.movBtnCancel:hover {
+  background: var(--ka-surface-container-highest);
+}
+
+.movBtnConfirm {
+  flex: 2;
+  padding: 0.875rem;
+  border-radius: var(--ka-radius-lg);
+  border: none;
+  font-family: var(--ka-font-headline);
+  font-weight: 800;
+  font-size: 0.875rem;
+  color: var(--ka-on-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 8px 16px rgba(56, 189, 248, 0.2);
+}
+
+.movBtnConfirm.venta {
+  background: linear-gradient(to right, var(--ka-primary), var(--ka-primary-container));
+}
+
+.movBtnConfirm.compra {
+  background: linear-gradient(to right, var(--ka-tertiary), #22c990);
+}
+
+.movBtnConfirm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(56, 189, 248, 0.3);
+}
+
+.movBtnConfirm:active {
+  transform: translateY(0);
+}

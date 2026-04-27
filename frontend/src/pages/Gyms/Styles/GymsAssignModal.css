@@ -1,0 +1,35 @@
+/* GymsAssignModal.css */
+
+.gyms-assign-field {
+  margin-bottom: 16px;
+}
+
+.gyms-assign-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.gyms-assign-select {
+  width: 100%;
+  padding: 12px;
+  borderRadius: 8px;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.gyms-assign-select--error {
+  border: 2px solid var(--danger-color);
+}
+
+.gyms-assign-error {
+  color: var(--danger-color);
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+.gyms-assign-btn {
+  width: 100%;
+}

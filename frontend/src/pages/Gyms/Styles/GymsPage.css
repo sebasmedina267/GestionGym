@@ -1,0 +1,49 @@
+/* GymsPage.css */
+
+.gyms-restricted {
+  text-align: center;
+  padding: 60px;
+}
+
+.gyms-restricted h1 {
+  color: var(--danger-color);
+}
+
+.gyms-restricted p {
+  color: var(--text-secondary);
+}
+
+.gyms-header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.gyms-section {
+  margin-top: 24px;
+}
+
+.gyms-section--available {
+  margin-top: 40px;
+}
+
+.gyms-section-title {
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.gyms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.gyms-section-desc {
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.gyms-loading {
+  padding: 24px;
+  text-align: center;
+  color: var(--text-secondary);
+}

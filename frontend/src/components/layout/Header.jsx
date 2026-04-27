@@ -1,18 +1,21 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { useGym } from "../../hooks/useGym";
 import api from "../../api/axios";
+import "./Header.css";
 
 export default function Header() {
   const { admin, logout } = useContext(AuthContext);
   const { gym, setGym } = useGym();
   const navigate = useNavigate();
-  const isDueno = admin?.roles?.includes('DUENO');
+  const isDueno = admin?.roles?.includes("DUENO");
   const [gyms, setGyms] = useState([]);
   const [showGymSelect, setShowGymSelect] = useState(false);
+  const dropdownRef = useRef(null);
 
   const fullName = [admin?.nombre, admin?.apellido].filter(Boolean).join(" ");
+  const initials = [admin?.nombre?.[0], admin?.apellido?.[0]].filter(Boolean).join("").toUpperCase() || "A";
 
   // Cargar gyms disponibles si es dueño
   useEffect(() => {
@@ -29,178 +32,140 @@ export default function Header() {
     }
   }, [isDueno]);
 
+  // Cerrar dropdown al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowGymSelect(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const handleSelectGym = (selectedGym) => {
     setGym(selectedGym);
     setShowGymSelect(false);
-    window.location.reload(); // Recargar para aplicar cambios
+    window.location.reload();
   };
 
   return (
-    <header className="navbar">
-      <div className="navbar-left">
-        <h3 style={{
-          background: "linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%)",
-          backgroundClip: "text",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          fontSize: "24px",
-          fontWeight: 700,
-          marginBottom: "4px",
-          letterSpacing: "-0.03em"
-        }}>
-          💪 FitFlow Management
-        </h3>
-      </div>
-
-      <div className="navbar-center" style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-        {isDueno ? (
-          <div style={{ position: "relative" }}>
-            <button
-              className="gym-selector-btn"
-              onClick={() => setShowGymSelect(!showGymSelect)}
-              style={{
-                padding: "8px 16px",
-                borderRadius: "8px",
-                border: "1px solid var(--border-color)",
-                background: "var(--bg-secondary)",
-                color: "var(--text-primary)",
-                cursor: "pointer",
-                fontWeight: 600,
-                transition: "all 0.3s ease",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                fontSize: "13px"
-              }}
-            >
-              🏭 {gym ? gym.nombre : "Seleccionar gimnasio"}
-              <span style={{ fontSize: "12px" }}>▼</span>
-            </button>
-            {showGymSelect && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "100%",
-                  left: 0,
-                  marginTop: "8px",
-                  background: "var(--bg-tertiary)",
-                  border: "1px solid var(--border-color)",
-                  borderRadius: "8px",
-                  minWidth: "200px",
-                  maxHeight: "300px",
-                  overflowY: "auto",
-                  zIndex: 1000,
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                }}
+    <>
+      <header className="header">
+        {/* Center: Gym Selector */}
+        <div className="header-center">
+          {isDueno ? (
+            <div className="gym-selector-wrapper" ref={dropdownRef}>
+              <button
+                className="gym-selector-pill"
+                onClick={() => setShowGymSelect(!showGymSelect)}
+                aria-haspopup="listbox"
+                aria-expanded={showGymSelect}
               >
-                {gyms.length > 0 ? (
-                  gyms.map((g) => (
-                    <button
-                      key={g.id}
-                      onClick={() => handleSelectGym(g)}
-                      style={{
-                        width: "100%",
-                        padding: "12px 16px",
-                        textAlign: "left",
-                        border: "none",
-                        background: gym?.id === g.id ? "var(--primary-alpha)" : "transparent",
-                        color: "var(--text-primary)",
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        fontSize: "13px"
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.background = "var(--bg-secondary)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.background = gym?.id === g.id ? "var(--primary-alpha)" : "transparent";
-                      }}
-                    >
-                      {gym?.id === g.id ? "✅" : "🏭"} {g.nombre}
-                    </button>
-                  ))
-                ) : (
-                  <div style={{ padding: "12px 16px", color: "var(--text-secondary)" }}>
-                    Sin gimnasios disponibles
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        ) : (
-          <span className="gym-name" style={{ fontWeight: 600, fontSize: "13px" }}>
-            🏭 {gym ? gym.nombre : "Sin gimnasio seleccionado"}
-          </span>
-        )}
-      </div>
+                <span
+                  className="material-symbols-outlined"
+                  style={{ color: "#bdc2ff", fontSize: "20px" }}
+                >
+                  factory
+                </span>
+                {gym ? gym.nombre : "Seleccionar gimnasio"}
+                <span className="material-symbols-outlined gym-chevron">
+                  expand_more
+                </span>
+              </button>
 
-      <div className="navbar-right">
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          {isDueno && (
-            <button
-              className="admin-icon-btn"
-              onClick={() => navigate("/admins")}
-              title="Administración"
-              aria-label="Ir a administración"
-              style={{
-                background: "var(--primary-alpha)",
-                border: "1px solid var(--primary-light)",
-                borderRadius: "8px",
-                padding: "8px 12px",
-                cursor: "pointer",
-                fontSize: "18px",
-                transition: "all 0.3s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = "var(--primary)";
-                e.target.style.color = "#fff";
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = "var(--primary-alpha)";
-                e.target.style.color = "inherit";
-              }}
-            >
-              ⚙️
-            </button>
+              {showGymSelect && (
+                <div className="gym-dropdown-menu">
+                  {gyms.length > 0 ? (
+                    gyms.map((g) => (
+                      <button
+                        key={g.id}
+                        className={`gym-dropdown-item${gym?.id === g.id ? " selected" : ""}`}
+                        onClick={() => handleSelectGym(g)}
+                        role="option"
+                        aria-selected={gym?.id === g.id}
+                      >
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "18px", color: gym?.id === g.id ? "#4edea3" : "#454653" }}
+                        >
+                          {gym?.id === g.id ? "check_circle" : "factory"}
+                        </span>
+                        {g.nombre}
+                      </button>
+                    ))
+                  ) : (
+                    <div className="gym-dropdown-empty">
+                      Sin gimnasios disponibles
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="gym-selector-pill gym-selector-pill-disabled">
+              <span
+                className="material-symbols-outlined"
+                style={{ color: "#bdc2ff", fontSize: "20px" }}
+              >
+                factory
+              </span>
+              {gym ? gym.nombre : "Sin gimnasio seleccionado"}
+            </div>
           )}
-          <div className="user-details">
-            <span className="user-name">{fullName || "Administrador"}</span>
-            <span className="user-role">{admin?.rol || ""}</span>
-          </div>
         </div>
 
-        <button
-          className="logout-btn"
-          onClick={logout}
-          style={{
-            padding: "8px 16px",
-            borderRadius: "8px",
-            background: "linear-gradient(180deg, #ef4444 0%, #dc2626 100%)",
-            color: "white",
-            border: "none",
-            cursor: "pointer",
-            fontWeight: 700,
-            transition: "all 0.3s ease",
-            fontSize: "13px",
-            textTransform: "uppercase",
-            letterSpacing: "0.05em",
-            boxShadow: "0 4px 12px rgba(239, 68, 68, 0.3)",
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.transform = "translateY(-2px)";
-            e.target.style.boxShadow = "0 6px 20px rgba(239, 68, 68, 0.5)";
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.transform = "translateY(0)";
-            e.target.style.boxShadow = "0 4px 12px rgba(239, 68, 68, 0.3)";
-          }}
-        >
-          🚪 Cerrar sesión
-        </button>
-      </div>
-    </header>
+        {/* Right: Actions + Profile + Logout */}
+        <div className="header-right">
+          {/* Icon actions */}
+          <div className="header-icon-actions">
+            {isDueno && (
+              <button
+                className="header-icon-btn"
+                onClick={() => navigate("/admins")}
+                title="Administración"
+                aria-label="Ir a administración"
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>
+                  settings
+                </span>
+              </button>
+            )}
+          </div>
+
+          {/* Divider */}
+          <div className="header-divider" />
+
+          {/* Profile */}
+          <div className="header-profile">
+            <div className="header-profile-text">
+              <p className="header-profile-name">
+                {fullName || "Administrador"}
+              </p>
+              <p className="header-profile-role">
+                {admin?.rol || "Admin"}
+              </p>
+            </div>
+            <div className="avatar-initials">
+              {initials}
+              <div className="online-dot" />
+            </div>
+          </div>
+
+          {/* Logout */}
+          <div className="header-logout-wrapper">
+            <button
+              className="logout-btn-header"
+              onClick={logout}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                logout
+              </span>
+              Cerrar Sesión
+            </button>
+          </div>
+        </div>
+      </header>
+    </>
   );
 }

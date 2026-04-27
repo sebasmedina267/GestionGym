@@ -1,0 +1,18 @@
+.admins-page-restricted {
+  text-align: center;
+  padding: 60px;
+}
+
+.admins-page-restricted-title {
+  color: var(--danger-color);
+}
+
+.admins-page-restricted-desc {
+  color: var(--text-secondary);
+}
+
+.admins-page-header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}

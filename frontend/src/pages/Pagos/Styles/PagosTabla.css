@@ -1,0 +1,188 @@
+.pagos-tabla-card {
+  flex: 1;
+  padding: 0;
+  overflow: hidden;
+}
+
+.pagos-tabla-header {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid rgba(189, 194, 255, 0.1);
+}
+
+.pagos-tabla-title {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--primary);
+}
+
+.pagos-tabla-subtitle {
+  color: var(--on-surface-variant);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+.pagos-tabla-loading {
+  padding: 3rem;
+  text-align: center;
+  color: var(--primary);
+}
+
+.pagos-tabla-empty {
+  padding: 3rem;
+  text-align: center;
+  color: var(--on-surface-variant);
+}
+
+.pagos-tabla-empty p {
+  font-style: italic;
+}
+
+.pagos-tabla-loading-icon {
+  font-size: 2rem;
+}
+
+.pagos-tabla-loading-text {
+  margin-top: 1rem;
+}
+
+/* Table container styling */
+.kinetic-table-container {
+  overflow: hidden;
+  border-radius: 1rem;
+  background: var(--glass-bg);
+}
+
+.kinetic-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.kinetic-table thead {
+  background: var(--surface-container-low);
+}
+
+.kinetic-table th {
+  padding: 1rem 1.5rem;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: rgba(189, 194, 255, 0.5);
+}
+
+.kinetic-table td {
+  padding: 1.25rem 1.5rem;
+  font-size: 0.875rem;
+  border-bottom: 1px solid rgba(45, 52, 73, 0.3);
+}
+
+.kinetic-table tr:last-child td {
+  border-bottom: none;
+}
+
+.kinetic-table tr:hover {
+  background: rgba(34, 42, 61, 0.3);
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.status-badge.paid {
+  background: var(--secondary-container);
+  color: var(--on-secondary-container);
+}
+
+.status-badge.pending {
+  background: var(--error-container);
+  color: var(--on-error-container);
+}
+
+.avatar-initials {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  background: rgba(129, 140, 248, 0.2);
+  color: var(--primary);
+}
+
+.pagos-tabla-alumno {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pagos-tabla-alumno-nombre {
+  font-weight: 500;
+}
+
+.pagos-tabla-col-narrow {
+  width: 80px;
+}
+
+.pagos-tabla-col-right {
+  text-align: right;
+  min-width: 100px;
+}
+
+.pagos-tabla-cell-center {
+  text-align: center;
+}
+
+.pagos-tabla-check {
+  color: var(--secondary);
+  font-weight: bold;
+}
+
+.pagos-tabla-add-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 2px solid var(--primary-container);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.pagos-tabla-add-btn:hover {
+  background: rgba(129, 140, 248, 0.2);
+}
+
+.pagos-tabla-add-icon {
+  font-size: 16px;
+  color: var(--primary);
+  opacity: 0.5;
+}
+
+.pagos-tabla-text-small {
+  color: var(--on-surface-variant);
+  font-size: 0.75rem;
+}
+
+.pagos-tabla-amount {
+  text-align: right;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.pagos-tabla-amount.paid {
+  color: var(--on-surface);
+}
+
+.pagos-tabla-amount.pending {
+  color: var(--tertiary);
+}

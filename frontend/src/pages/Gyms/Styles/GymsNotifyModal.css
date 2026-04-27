@@ -1,0 +1,17 @@
+/* GymsNotifyModal.css */
+
+.gyms-notify-content {
+  text-align: center;
+  min-width: 280px;
+}
+
+.gyms-notify-message {
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.gyms-notify-btn {
+  min-width: 120px;
+}
