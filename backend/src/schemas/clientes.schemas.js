@@ -6,6 +6,7 @@ export const crearClienteSchema = {
     apellido: z.string().min(2),
     edad: z.number().int().min(0).max(120).optional(),
     sexo: z.enum(["M", "F", "O"]).optional(),
+    email: z.string().email().optional(),
   }),
 };
 

@@ -13,7 +13,8 @@ export default function CreateAdminModal({
   passwordValid,
   gyms,
   saving,
-  handleCreate
+  handleCreate,
+  isDueno
 }) {
 
   const closeAndReset = () => {
@@ -82,6 +83,19 @@ export default function CreateAdminModal({
 
             <div className="create-admin-full-width">
               <Input
+                label="Correo Electrónico"
+                type="email"
+                value={form.email}
+                onChange={(v) => setForm({ ...form, email: v })}
+                error={errors.email}
+                variant="kinetic"
+                placeholder="Ej. empleado@gym.com"
+                icon="mail"
+              />
+            </div>
+
+            <div className="create-admin-full-width">
+              <Input
                 label="Contraseña"
                 type="password"
                 value={form.password}
@@ -120,8 +134,23 @@ export default function CreateAdminModal({
               </div>
             )}
 
-            {/* Select Gym */}
-            <div className="create-admin-full-width ka-form-group">
+            {/* Select Role & Gym in 2 columns */}
+            <div className="ka-form-group">
+              <label className="ka-label">Rol del Empleado</label>
+              <div className="ka-input-wrapper">
+                <select
+                  value={form.rol}
+                  onChange={(e) => setForm({ ...form, rol: e.target.value })}
+                  className="ka-select"
+                >
+                  <option value="EMPLEADO">Empleado (Estándar)</option>
+                  {isDueno && <option value="ENCARGADO">Manager (Encargado)</option>}
+                </select>
+                <span className="material-symbols-outlined" style={{ position: 'absolute', right: '1rem', pointerEvents: 'none', color: 'var(--ka-primary)' }}>expand_more</span>
+              </div>
+            </div>
+
+            <div className="ka-form-group">
               <label className="ka-label">Asignar a Sucursal</label>
               <div className="ka-input-wrapper">
                 <select

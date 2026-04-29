@@ -14,20 +14,19 @@ export function AuthProvider({ children }) {
   /* ============================
      LOGIN
   ============================ */
-  const login = async (nombre, apellido, password) => {
+  const login = async (email, password) => {
     const { data } = await api.post("/auth/login", {
-      nombre,
-      apellido,
+      email,
       password,
     });
 
-    const { admin, gyms, roles, token } = data.data;
+    const { admin: userAdmin, gyms, roles, token } = data.data;
 
-    // ESTRUCTURA LIMPIA
     const userData = {
-      id: admin.id,
-      nombre: admin.nombre,
-      apellido: admin.apellido,
+      id: userAdmin.id,
+      nombre: userAdmin.nombre,
+      apellido: userAdmin.apellido,
+      email: userAdmin.email,
       gyms,
       roles,
     };
@@ -44,12 +43,13 @@ export function AuthProvider({ children }) {
   const registerOwner = async (form) => {
     const { data } = await api.post("/auth/register-owner", form);
 
-    const { admin, gyms, roles, token } = data.data;
+    const { admin: userAdmin, gyms, roles, token } = data.data;
 
     const userData = {
-      id: admin.id,
-      nombre: admin.nombre,
-      apellido: admin.apellido,
+      id: userAdmin.id,
+      nombre: userAdmin.nombre,
+      apellido: userAdmin.apellido,
+      email: userAdmin.email,
       gyms,
       roles,
     };

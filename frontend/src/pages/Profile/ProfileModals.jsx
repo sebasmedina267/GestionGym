@@ -138,7 +138,7 @@ const ProfileModals = ({
                 onChange={(e) => setEditForm({...editForm, rol: e.target.value})}
                 className="profile-select"
               >
-                <option value="TRABAJADOR">👤 Trabajador</option>
+                <option value="EMPLEADO">👤 Empleado</option>
                 <option value="DUENO">👑 Dueño</option>
               </select>
             </div>

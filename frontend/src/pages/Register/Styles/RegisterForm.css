@@ -3,7 +3,7 @@
 .register-form-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 }
 
 .register-alert {
@@ -32,7 +32,7 @@
 .register-form-row {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
+  gap: 10px;
 }
 
 @media (min-width: 768px) {
@@ -151,7 +151,7 @@
   width: 100%;
   background: var(--secondary);
   color: #003924;
-  padding: 16px;
+  padding: 12px;
   border-radius: 12px;
   font-weight: 800;
   text-transform: uppercase;
@@ -165,7 +165,7 @@
   gap: 12px;
   transition: all 0.3s ease;
   box-shadow: 0 5px 15px rgba(78, 222, 163, 0.2);
-  margin-top: 16px;
+  margin-top: 8px;
 }
 
 .register-submit-btn:hover {
@@ -188,4 +188,45 @@
 
 .register-submit-btn:hover .btn-icon-animate {
   transform: translateX(4px);
+}
+
+.register-login-link-container {
+  text-align: center;
+  margin-top: 12px;
+}
+
+.register-login-link-text {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.register-login-link {
+  color: var(--secondary);
+  font-weight: 800;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.register-login-link:hover {
+  text-decoration: underline;
+  color: #3bc98e;
+}
+
+.register-home-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  opacity: 0.7;
+}
+
+.register-home-link:hover {
+  opacity: 1;
+  color: var(--secondary);
 }

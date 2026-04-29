@@ -1,5 +1,6 @@
 import * as productosService from './productos.service.js';
 import { AppError } from '../../utils/AppError.js';
+import { validatePermission } from '../../utils/rolePermissions.js';
 
 /* ============================================================
    HELPERS
@@ -86,11 +87,7 @@ export async function estadisticasProductos(req, res, next) {
 export async function crearProductoBase(req, res, next) {
   try {
     validarAdmin(req);
-
-    // Solo dueño puede crear productos
-    if (!req.admin.roles.includes("DUENO")) {
-      throw new AppError("Solo un dueño puede crear productos", 403);
-    }
+    validatePermission(req.admin.roles, "PRODUCTOS", "CREAR");
 
     if (req.file) {
       req.body.foto = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
@@ -115,10 +112,7 @@ export async function crearProductoBase(req, res, next) {
 export async function actualizarProducto(req, res, next) {
   try {
     validarAdmin(req);
-
-    if (!req.admin.roles.includes("DUENO")) {
-      throw new AppError("Solo un dueño puede actualizar productos", 403);
-    }
+    validatePermission(req.admin.roles, "PRODUCTOS", "EDITAR");
 
     if (req.file) {
       req.body.foto = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
@@ -146,11 +140,7 @@ export async function actualizarProducto(req, res, next) {
 export async function registrarCompra(req, res, next) {
   try {
     validarAdmin(req);
-
-    // Solo dueño puede registrar compras
-    if (!req.admin.roles.includes("DUENO")) {
-      throw new AppError("Solo un dueño puede registrar compras", 403);
-    }
+    validatePermission(req.admin.roles, "PRODUCTOS", "COMPRAR");
 
     const id = validarId(req.params.id, "Producto ID");
 
@@ -174,11 +164,7 @@ export async function registrarCompra(req, res, next) {
 export async function registrarVenta(req, res, next) {
   try {
     validarAdmin(req);
-
-    // Dueño y empleado pueden registrar ventas
-    if (!req.admin.roles.includes("DUENO") && !req.admin.roles.includes("TRABAJADOR")) {
-      throw new AppError("No tienes permiso para registrar ventas", 403);
-    }
+    validatePermission(req.admin.roles, "PRODUCTOS", "VENDER");
 
     const id = validarId(req.params.id, "Producto ID");
 

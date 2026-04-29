@@ -35,6 +35,15 @@ export default function GymForm({ form, setForm, errors, setErrors }) {
         icon="home_pin"
         placeholder="Ej: Ciudad de México"
       />
+      <Input 
+        label="Sitio Web (Opcional)" 
+        value={form.urlWeb} 
+        onChange={update("urlWeb")} 
+        error={errors.urlWeb} 
+        variant="kinetic"
+        icon="language"
+        placeholder="https://gym.com"
+      />
       <Input
         label="URL Foto del Gym"
         type="text"

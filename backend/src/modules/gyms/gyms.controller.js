@@ -67,7 +67,7 @@ export async function createGymForOwner(req, res, next) {
       throw new AppError("Solo un dueño puede crear nuevos gimnasios", 403);
     }
 
-    const { nombre, direccion, ciudad, foto } = req.body;
+    const { nombre, direccion, ciudad, foto, urlWeb } = req.body;
 
     validarCampo(nombre, "Nombre del gym");
 
@@ -75,7 +75,8 @@ export async function createGymForOwner(req, res, next) {
       nombre,
       direccion: direccion || null,
       ciudad: ciudad || null,
-      foto: foto || null
+      foto: foto || null,
+      urlWeb: urlWeb || null
     });
 
     res.status(201).json({ ok: true, data: gym });
@@ -120,7 +121,7 @@ export async function updateGym(req, res, next) {
     validarAdmin(req);
 
     const { id } = req.params;
-    const { nombre, direccion, ciudad, foto } = req.body;
+    const { nombre, direccion, ciudad, foto, urlWeb } = req.body;
 
     if (!id) {
       throw new AppError("ID del gimnasio es obligatorio", 400);
@@ -130,7 +131,8 @@ export async function updateGym(req, res, next) {
       nombre,
       direccion,
       ciudad,
-      foto
+      foto,
+      urlWeb
     });
 
     if (!updatedGym) {

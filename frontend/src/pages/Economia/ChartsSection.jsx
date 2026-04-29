@@ -12,7 +12,7 @@ export default function ChartsSection({ resumen, ingresosFuentes, gastosFuentes 
       <div className="economia-info-card">
         <h3>Informe Económico</h3>
         <p className="economia-info-card-subtitle">Comparativa Mensual de Flujos de Caja</p>
-        <div className="economia-chart-container">
+        <div id="main-economy-chart" className="economia-chart-container">
           <ResponsiveContainer width="100%" height={320}>
             <BarChart 
               data={[{ name: "Período Actual", Ingresos: Number(resumen.ingresos), Gastos: Number(resumen.gastos) }]}
@@ -32,7 +32,7 @@ export default function ChartsSection({ resumen, ingresosFuentes, gastosFuentes 
       {/* Side Charts */}
       <div className="economia-side-charts">
         {/* Ingresos */}
-        <div className="economia-info-card">
+        <div id="ingresos-pie-chart" className="economia-info-card">
           <h3>Fuentes de Ingreso</h3>
           <p className="economia-info-card-subtitle">{ingresosFuentes.length > 0 ? `${ingresosFuentes.length} fuente${ingresosFuentes.length !== 1 ? 's' : ''}` : 'Sin ingresos'}</p>
           {ingresosFuentes.length > 0 ? (
@@ -49,7 +49,7 @@ export default function ChartsSection({ resumen, ingresosFuentes, gastosFuentes 
         </div>
 
         {/* Gastos */}
-        <div className="economia-info-card">
+        <div id="gastos-pie-chart" className="economia-info-card">
           <h3>Fuentes de Gasto</h3>
           <p className="economia-info-card-subtitle">{gastosFuentes.length > 0 ? `${gastosFuentes.length} fuente${gastosFuentes.length !== 1 ? 's' : ''}` : 'Sin gastos'}</p>
           {gastosFuentes.length > 0 ? (

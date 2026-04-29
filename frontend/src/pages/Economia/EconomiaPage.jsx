@@ -70,7 +70,18 @@ export default function EconomiaPage() {
       <div className="economia-btn-group">
         <button className="btn-primary" onClick={() => handleOpenForm("INGRESO")}>Registrar Ingreso</button>
         <button className="btn-danger" onClick={() => handleOpenForm("GASTO")}>Registrar Gasto</button>
-        <button className="btn-secondary" onClick={() => exportEconomiaPDF(pdfRef.current, "economia.pdf")}>Exportar PDF</button>
+        <button 
+          className="btn-secondary" 
+          onClick={() => exportEconomiaPDF({
+            gym,
+            resumen,
+            ingresosFuentes,
+            gastosFuentes,
+            movimientos: sortedMovimientos
+          }, "Reporte_Economia_FitFlow.pdf")}
+        >
+          Exportar Informe PDF
+        </button>
       </div>
 
       {/* CONTENIDO PRINCIPAL */}

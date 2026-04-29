@@ -1,5 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
+console.log('>>> STRIPE_SECRET_KEY cargada:', process.env.STRIPE_SECRET_KEY ? 'SÍ' : 'NO');
+console.log('>>> STRIPE_SECRET_KEY prefix:', process.env.STRIPE_SECRET_KEY?.substring(0, 7));
 
 export const config = {
   port: process.env.PORT || 4000,
@@ -10,4 +12,10 @@ export const config = {
     database: process.env.DB_NAME || 'fitflow2',
   },
   jwtSecret: process.env.JWT_SECRET || 'super_secret_fitflow',
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
+  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
+  stripePrices: {
+    ownerSubscription: 9900, // $99 USD
+    branchSubscription: 4900, // $49 USD
+  },
 };

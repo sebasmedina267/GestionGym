@@ -7,8 +7,7 @@ export const useLoginLogic = () => {
     const navigate = useNavigate();
 
     const [form, setForm] = useState({
-        nombre: "",
-        apellido: "",
+        email: "",
         password: "",
     });
 
@@ -27,7 +26,7 @@ export const useLoginLogic = () => {
         setLoading(true);
         setError(null);
         try {
-            await login(form.nombre, form.apellido, form.password);
+            await login(form.email, form.password);
             navigate("/select-gym");
         } catch (err) {
             console.error("Login error:", err);

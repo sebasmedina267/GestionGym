@@ -1,6 +1,6 @@
 import "./Styles/DashboardHeader.css";
 
-export default function DashboardHeader({ gym }) {
+export default function DashboardHeader({ gym, onExport, onSync }) {
   return (
     <header className="dashboard-hero-header">
       <div>
@@ -16,12 +16,14 @@ export default function DashboardHeader({ gym }) {
         <button
           className="dashboard-hero-btn dashboard-hero-btn--ghost"
           type="button"
+          onClick={onExport}
         >
           Exportar
         </button>
         <button
           className="dashboard-hero-btn dashboard-hero-btn--primary"
           type="button"
+          onClick={onSync}
         >
           Sincronizar
         </button>

@@ -15,33 +15,17 @@ const LoginForm = ({ form, loading, error, handleInputChange, handleSubmit }) =>
         </div>
       )}
 
-      {/* Field: Nombre */}
+      {/* Field: Email */}
       <div className="login-field-group">
-        <label className="login-field-label">Nombre</label>
+        <label className="login-field-label">Correo Electrónico</label>
         <div className="login-input-wrapper">
-          <span className="material-symbols-outlined login-input-icon">person</span>
+          <span className="material-symbols-outlined login-input-icon">mail</span>
           <input
             className="login-input"
-            placeholder="Tu nombre"
-            type="text"
-            value={form.nombre}
-            onChange={(e) => handleInputChange("nombre", e.target.value)}
-            required
-          />
-        </div>
-      </div>
-
-      {/* Field: Apellido */}
-      <div className="login-field-group">
-        <label className="login-field-label">Apellido</label>
-        <div className="login-input-wrapper">
-          <span className="material-symbols-outlined login-input-icon">badge</span>
-          <input
-            className="login-input"
-            placeholder="Tu apellido"
-            type="text"
-            value={form.apellido}
-            onChange={(e) => handleInputChange("apellido", e.target.value)}
+            placeholder="tu@correo.com"
+            type="email"
+            value={form.email}
+            onChange={(e) => handleInputChange("email", e.target.value)}
             required
           />
         </div>

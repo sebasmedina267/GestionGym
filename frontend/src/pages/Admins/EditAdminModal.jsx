@@ -48,6 +48,14 @@ export default function EditAdminModal({
             error={errors.apellido}
           />
 
+          <Input
+            label="Correo Electrónico"
+            type="email"
+            value={editForm.email}
+            onChange={(v) => setEditForm({ ...editForm, email: v })}
+            error={errors.email}
+          />
+
           <div>
             <label className="edit-admin-select-label">Asignar a Sucursal</label>
             <select

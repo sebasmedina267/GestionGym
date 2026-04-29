@@ -7,7 +7,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 16px;
   position: relative;
   overflow-x: hidden;
 }
@@ -52,26 +52,55 @@
   max-width: 600px;
   position: relative;
   z-index: 10;
-  margin: 40px 0;
+  margin: 10px 0;
   animation: registerFadeIn 0.5s ease-out;
 }
 
 .register-glass-card {
+  position: relative;
   background: rgba(30, 37, 55, 0.4);
   backdrop-filter: blur(24px);
   border: 1px solid rgba(189, 194, 255, 0.1);
-  border-radius: 2.5rem;
-  padding: 40px;
+  border-radius: 1.5rem;
+  padding: 24px 32px;
   box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+}
+
+.register-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 0.813rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-bottom: 16px;
+}
+
+.register-back-link:hover {
+  color: var(--secondary);
+  transform: translateX(-4px);
+}
+
+.register-back-link span:first-child {
+  font-size: 1.25rem;
+}
+
+@media (max-width: 640px) {
+  .register-back-link {
+    top: 24px;
+    left: 24px;
+  }
 }
 
 .register-brand-header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 20px;
 }
 
 .register-brand-title {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 900;
   letter-spacing: -0.02em;
   color: #dae2fd;

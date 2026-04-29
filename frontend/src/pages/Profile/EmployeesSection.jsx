@@ -29,8 +29,8 @@ const EmployeesSection = ({ gym, loadingEmpleados, empleados, handleEditEmpleado
                     {emp.email}
                   </p>
                 </div>
-                <span className={`employee-role-badge ${emp.rol === "DUENO" ? "role-dueno" : "role-trabajador"}`}>
-                  {emp.rol || "TRABAJADOR"}
+                <span className={`employee-role-badge ${emp.rol === "DUENO" ? "role-dueno" : "role-empleado"}`}>
+                  {emp.rol || "EMPLEADO"}
                 </span>
               </div>
               

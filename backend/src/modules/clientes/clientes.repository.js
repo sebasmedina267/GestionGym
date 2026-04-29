@@ -34,16 +34,43 @@ function validarDatosCliente({ nombre, apellido, edad, sexo }) {
 
 export async function findByGym(gymId, includeInactivos = true) {
   const [rows] = await pool.query(
-    `SELECT c.*, 
-            GROUP_CONCAT(DISTINCT cl.nombre SEPARATOR ', ') as clases_inscritas
+    `SELECT 
+        c.id as id,
+        c.nombre,
+        c.apellido,
+        c.edad,
+        c.sexo,
+        c.activo,
+        c.email,
+        c.tipo_usuario,
+        'CLIENTE' as tipo_origen,
+        GROUP_CONCAT(DISTINCT cl.nombre SEPARATOR ', ') as clases_inscritas
      FROM clientes c
      LEFT JOIN clientes_clases cc ON c.id = cc.cliente_id
      LEFT JOIN clases_horarios ch ON cc.clase_horario_id = ch.id
      LEFT JOIN clases cl ON ch.clase_id = cl.id
      WHERE c.gym_id = ?
      GROUP BY c.id
-     ORDER BY c.activo DESC, c.nombre ASC`,
-    [gymId]
+
+     UNION ALL
+
+     SELECT 
+        uf.id as id,
+        uf.nombre,
+        uf.apellido,
+        NULL as edad,
+        NULL as sexo,
+        IF(ufg.estado_inscripcion = 'ACTIVO', 1, 0) as activo,
+        uf.email,
+        'USUARIO_APP' as tipo_usuario,
+        'APP' as tipo_origen,
+        NULL as clases_inscritas
+     FROM usuarios_finales uf
+     JOIN usuarios_finales_gimnasios ufg ON uf.id = ufg.usuario_id
+     WHERE ufg.gym_id = ?
+
+     ORDER BY activo DESC, nombre ASC`,
+    [gymId, gymId]
   );
   return rows;
 }
@@ -55,12 +82,12 @@ export async function findByGym(gymId, includeInactivos = true) {
 export async function create(gymId, data) {
   validarDatosCliente(data);
 
-  const { nombre, apellido, edad = null, sexo = null } = data;
+  const { nombre, apellido, edad = null, sexo = null, email = null, password = null, tipo_usuario = 'CLIENTE' } = data;
 
   const [result] = await pool.query(
-    `INSERT INTO clientes (gym_id, nombre, apellido, edad, sexo, activo)
-     VALUES (?, ?, ?, ?, ?, 1)`,
-    [gymId, nombre, apellido, edad, sexo],
+    `INSERT INTO clientes (gym_id, nombre, apellido, edad, sexo, email, password, tipo_usuario, activo)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`,
+    [gymId, nombre, apellido, edad, sexo, email, password, tipo_usuario],
   );
 
   return getById(gymId, result.insertId);
@@ -71,6 +98,21 @@ export async function create(gymId, data) {
 ============================================================ */
 
 export async function update(gymId, id, data) {
+  if (data.tipo_origen === 'APP') {
+    // Es un usuario de la app
+    if (data.activo !== undefined) {
+      const nuevoEstado = data.activo ? 'ACTIVO' : 'PAUSADO';
+      await pool.query(
+        `UPDATE usuarios_finales_gimnasios
+         SET estado_inscripcion = ?
+         WHERE gym_id = ? AND usuario_id = ?`,
+        [nuevoEstado, gymId, id]
+      );
+    }
+    // Para simplificar, no actualizamos nombre/apellido de uf desde aquí
+    return { id, tipo_origen: 'APP', activo: data.activo };
+  }
+
   const cliente = await getById(gymId, id);
   if (!cliente) throw new AppError("Cliente no encontrado", 404);
 

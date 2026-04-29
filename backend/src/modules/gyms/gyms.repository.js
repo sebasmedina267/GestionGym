@@ -37,12 +37,12 @@ export async function getGymById(gymId) {
 /**
  * Crea un gym
  */
-export async function createGym({ nombre, direccion, ciudad, foto }) {
+export async function createGym({ nombre, direccion, ciudad, foto, urlWeb }) {
   if (!nombre) throw new AppError('El nombre del gym es obligatorio', 400);
 
   const [result] = await pool.query(
-    `INSERT INTO gyms (nombre, direccion, ciudad, foto) VALUES (?, ?, ?, ?)`,
-    [nombre, direccion || null, ciudad || null, foto || null]
+    `INSERT INTO gyms (nombre, direccion, ciudad, foto, url_web) VALUES (?, ?, ?, ?, ?)`,
+    [nombre, direccion || null, ciudad || null, foto || null, urlWeb || null]
   );
 
   const [rows] = await pool.query(
@@ -56,7 +56,7 @@ export async function createGym({ nombre, direccion, ciudad, foto }) {
 /**
  * Actualiza un gym
  */
-export async function updateGym(gymId, { nombre, direccion, ciudad, foto }) {
+export async function updateGym(gymId, { nombre, direccion, ciudad, foto, urlWeb }) {
   if (!gymId) throw new AppError('ID del gym es obligatorio', 400);
 
   const fields = [];
@@ -77,6 +77,10 @@ export async function updateGym(gymId, { nombre, direccion, ciudad, foto }) {
   if (foto !== undefined) {
     fields.push('foto = ?');
     values.push(foto);
+  }
+  if (urlWeb !== undefined) {
+    fields.push('url_web = ?');
+    values.push(urlWeb);
   }
 
   if (fields.length === 0) {

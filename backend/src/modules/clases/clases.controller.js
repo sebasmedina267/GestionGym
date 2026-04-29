@@ -1,5 +1,6 @@
 import * as clasesService from "./clases.service.js";
 import { AppError } from "../../utils/AppError.js";
+import { validatePermission } from "../../utils/rolePermissions.js";
 
 export async function listarClases(req, res, next) {
   try {
@@ -14,6 +15,7 @@ export async function listarClases(req, res, next) {
 export async function crearClase(req, res, next) {
   try {
     if (!req.admin) throw new AppError("No autenticado", 401);
+    validatePermission(req.admin.roles, "CLASES", "CREAR");
     const gymId = req.gym.id;
     const clase = await clasesService.crearClase(gymId, req.body, req.admin);
     res.status(201).json({ ok: true, data: clase });
@@ -25,6 +27,7 @@ export async function crearClase(req, res, next) {
 export async function actualizarClase(req, res, next) {
   try {
     if (!req.admin) throw new AppError("No autenticado", 401);
+    validatePermission(req.admin.roles, "CLASES", "EDITAR");
     const gymId = req.gym.id;
     const claseId = Number(req.params.id);
     const clase = await clasesService.actualizarClase(gymId, claseId, req.body, req.admin);
@@ -37,6 +40,7 @@ export async function actualizarClase(req, res, next) {
 export async function eliminarClase(req, res, next) {
   try {
     if (!req.admin) throw new AppError("No autenticado", 401);
+    validatePermission(req.admin.roles, "CLASES", "ELIMINAR");
     const gymId = req.gym.id;
     const claseId = Number(req.params.id);
     await clasesService.eliminarClase(gymId, claseId, req.admin);
@@ -60,6 +64,7 @@ export async function listarHorarios(req, res, next) {
 export async function crearHorario(req, res, next) {
   try {
     if (!req.admin) throw new AppError("No autenticado", 401);
+    validatePermission(req.admin.roles, "CLASES", "CREAR_HORARIO");
     const gymId = req.gym.id;
     const claseId = Number(req.params.id);
     const horario = await clasesService.crearHorario(gymId, claseId, req.body, req.admin);
@@ -72,6 +77,7 @@ export async function crearHorario(req, res, next) {
 export async function eliminarHorario(req, res, next) {
   try {
     if (!req.admin) throw new AppError("No autenticado", 401);
+    validatePermission(req.admin.roles, "CLASES", "ELIMINAR_HORARIO");
     const gymId = req.gym.id;
     const horarioId = Number(req.params.horarioId);
     await clasesService.eliminarHorario(gymId, horarioId, req.admin);
@@ -95,6 +101,7 @@ export async function listarClientesDeHorario(req, res, next) {
 export async function inscribirCliente(req, res, next) {
   try {
     if (!req.admin) throw new AppError("No autenticado", 401);
+    validatePermission(req.admin.roles, "CLASES", "INSCRIBIR_CLIENTE");
     const gymId = req.gym.id;
     const horarioId = Number(req.params.horarioId);
     const clienteId = Number(req.params.clienteId);
@@ -113,6 +120,7 @@ export async function inscribirCliente(req, res, next) {
 export async function desinscribirCliente(req, res, next) {
   try {
     if (!req.admin) throw new AppError("No autenticado", 401);
+    validatePermission(req.admin.roles, "CLASES", "DESINSCRIBIR_CLIENTE");
     const gymId = req.gym.id;
     const horarioId = Number(req.params.horarioId);
     const clienteId = Number(req.params.clienteId);
