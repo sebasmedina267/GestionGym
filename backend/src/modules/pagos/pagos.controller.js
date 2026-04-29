@@ -93,7 +93,7 @@ export async function crearPago(req, res, next) {
     validarAdmin(req);
 
     // Dueño y empleado pueden crear pagos
-    if (!req.admin.roles.includes("DUENO") && !req.admin.roles.includes("TRABAJADOR")) {
+    if (!req.admin.roles.includes("DUENO") && !req.admin.roles.includes("EMPLEADO")) {
       throw new AppError("No tienes permiso para registrar pagos", 403);
     }
 

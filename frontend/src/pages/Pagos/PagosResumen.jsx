@@ -18,7 +18,8 @@ const COLORS = ["#4edea3", "#ffb2b7", "#ff5c72"]; // Pagado, Pendiente, Otros
 export default function PagosResumen({
   classStats,
   metodoPagoStats,
-  chartData
+  chartData,
+  onExport
 }) {
   const displayChartData = chartData.length > 0 ? chartData : [
     { name: 'Sin Datos', value: 1 }
@@ -123,7 +124,7 @@ export default function PagosResumen({
         </div>
       </div>
 
-      <button className="kinetic-btn-primary">
+      <button className="kinetic-btn-primary" onClick={onExport}>
         <span className="material-symbols-outlined">download</span>
         Descargar Reporte
       </button>

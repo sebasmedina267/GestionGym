@@ -1,0 +1,73 @@
+/* Payment Screen Styles - Midnight Capital Theme */
+
+.font-manrope {
+    font-family: 'Manrope', sans-serif;
+}
+
+.glass-panel {
+    background: rgba(26, 31, 46, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.vibrant-gradient {
+    background: linear-gradient(135deg, #7078ff 0%, #464dd3 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.vibrant-gradient::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+}
+
+.vibrant-gradient:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 0 30px rgba(112, 120, 255, 0.4);
+}
+
+/* Chrome, Safari, Edge, Opera - Remove number input spinners */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox - Remove number input spinners */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Custom Scrollbar for the dark theme */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0e1321;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #1a1f2e;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #252a39;
+}

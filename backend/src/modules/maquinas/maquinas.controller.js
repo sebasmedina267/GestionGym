@@ -1,5 +1,6 @@
 import * as maquinasService from './maquinas.service.js';
 import { AppError } from '../../utils/AppError.js';
+import { validatePermission } from '../../utils/rolePermissions.js';
 
 /* ============================================================
    HELPERS
@@ -38,6 +39,7 @@ export async function listarMaquinas(req, res, next) {
 export async function crearMaquina(req, res, next) {
   try {
     validarAdmin(req);
+    validatePermission(req.admin.roles, "MAQUINAS", "CREAR");
 
     if (req.file) {
       req.body.foto = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
@@ -62,6 +64,7 @@ export async function crearMaquina(req, res, next) {
 export async function actualizarMaquina(req, res, next) {
   try {
     validarAdmin(req);
+    validatePermission(req.admin.roles, "MAQUINAS", "EDITAR");
 
     if (req.file) {
       req.body.foto = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
@@ -89,6 +92,7 @@ export async function actualizarMaquina(req, res, next) {
 export async function eliminarMaquina(req, res, next) {
   try {
     validarAdmin(req);
+    validatePermission(req.admin.roles, "MAQUINAS", "ELIMINAR");
 
     const id = validarId(req.params.id, "Máquina ID");
 

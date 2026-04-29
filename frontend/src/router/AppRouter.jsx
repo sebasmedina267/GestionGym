@@ -3,6 +3,7 @@ import ProtectedRoute from "../components/layout/ProtectedRoute";
 
 import LoginPage from "../pages/Login/LoginPage";
 import RegisterPage from "../pages/Register/RegisterPage";
+import StripeCheckoutPage from "../pages/Stripe/StripeCheckoutPage";
 import SelectGymPage from "../pages/SelectGym/SelectGymPage";
 import DashboardPage from "../pages/Dashboard/DashboardPage";
 
@@ -21,6 +22,15 @@ export default function AppRouter() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/stripe-checkout" element={<StripeCheckoutPage />} />
+        <Route
+          path="/branch-payment"
+          element={
+            <ProtectedRoute>
+              <StripeCheckoutPage />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/select-gym"

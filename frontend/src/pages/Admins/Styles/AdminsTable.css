@@ -1,123 +1,215 @@
-/* AdminsTable.css */
+/* AdminsTable.css - High-Tech Data Grid */
 
 .admins-table-container {
-  background: var(--bg-secondary);
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
-  overflow: hidden;
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+}
+
+.table-header-info {
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.table-title-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  opacity: 0.8;
+}
+
+.table-header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.icon-action {
+  font-size: 1.1rem !important;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 0.4rem;
+  transition: all 0.2s;
+}
+
+.icon-action:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.table-scroll-area {
+  overflow-x: auto;
 }
 
 .admins-table {
   width: 100%;
   border-collapse: collapse;
-}
-
-.admins-table-head {
-  background: var(--bg-tertiary);
-  border-bottom: 1px solid var(--border-color);
+  text-align: left;
 }
 
 .admins-table-th {
-  padding: 16px;
-  text-align: left;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.admins-table-th-center {
-  text-align: center;
+  padding: 1rem 1.5rem;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  background: #1e293b;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .admins-table-row {
-  border-bottom: 1px solid var(--border-color);
+  transition: background 0.2s;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
 }
 
-.admins-table-row:nth-child(odd) {
-  background-color: rgba(255, 255, 255, 0.02);
-}
-
-.admins-table-row:nth-child(even) {
-  background-color: transparent;
+.admins-table-row:hover {
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .admins-table-td {
-  padding: 16px;
-  color: var(--text-primary);
+  padding: 1rem 1.5rem;
+  font-size: 0.875rem;
+  color: #cbd5e1;
+  vertical-align: middle;
 }
 
-.admins-table-td-secondary {
-  padding: 16px;
-  color: var(--text-secondary);
+.row-selection-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #4ae176; /* Accent Mint */
+  opacity: 0;
+  transition: opacity 0.2s;
 }
 
-.admins-table-td-center {
-  padding: 16px;
-  text-align: center;
+.admins-table-row:hover .row-selection-bar {
+  opacity: 1;
 }
 
-.admins-table-photo-img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.admins-table-photo-placeholder {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--bg-tertiary);
+/* Avatar Styling */
+.avatar-wrapper {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0d1322;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-secondary);
 }
 
-.admins-table-role {
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 600;
+.staff-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.admins-table-role-owner {
-  background: var(--primary-alpha);
-  color: var(--primary-light);
+.staff-avatar-placeholder {
+  color: #475569;
 }
 
-.admins-table-role-standard {
-  background: var(--bg-tertiary);
-  color: var(--text-secondary);
+/* Pills & Badges */
+.gym-tag-pill {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.4rem;
+  color: #fff;
 }
 
-.admins-table-btn {
-  padding: 6px 12px;
+.role-badge {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 99px;
+  display: inline-block;
+}
+
+.badge-owner { background: rgba(74, 225, 118, 0.1); color: #4ae176; border: 1px solid rgba(74, 225, 118, 0.2); }
+.badge-manager { background: rgba(192, 193, 255, 0.1); color: #c0c1ff; border: 1px solid rgba(192, 193, 255, 0.2); }
+.badge-standard { background: rgba(221, 183, 255, 0.1); color: #ddb7ff; border: 1px solid rgba(221, 183, 255, 0.2); }
+
+/* Action Buttons */
+.action-buttons-group {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.action-btn {
+  background: transparent;
   border: none;
-  border-radius: 6px;
+  padding: 0.4rem;
+  border-radius: 0.4rem;
   cursor: pointer;
-  font-size: 0.8rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.admins-table-btn-edit {
-  background: var(--primary-alpha);
-  color: var(--primary-light);
-  margin-right: 8px;
+.edit-btn { color: #94a3b8; }
+.edit-btn:hover { background: rgba(192, 193, 255, 0.1); color: #c0c1ff; }
+
+.delete-btn { color: #94a3b8; }
+.delete-btn:hover { background: rgba(255, 180, 171, 0.1); color: #ffb4ab; }
+
+.action-btn .material-symbols-outlined {
+  font-size: 1.25rem !important;
 }
 
-.admins-table-btn-edit:hover {
-  background: var(--primary);
-  color: white;
+/* Pagination */
+.table-footer-pagination {
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.admins-table-btn-delete {
-  background: rgba(239, 68, 68, 0.1);
-  color: var(--danger-color);
+.pagination-info {
+  font-size: 0.75rem;
+  color: #94a3b8;
 }
 
-.admins-table-btn-delete:hover {
-  background: var(--danger-color);
-  color: white;
+.pagination-controls {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.page-nav-btn, .page-num-btn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: transparent;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.page-num-btn.active {
+  background: rgba(192, 193, 255, 0.2);
+  border-color: rgba(192, 193, 255, 0.3);
+  color: #c0c1ff;
+  font-weight: 700;
+}
+
+.page-nav-btn:hover, .page-num-btn:not(.active):hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
 }

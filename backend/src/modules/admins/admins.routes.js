@@ -8,7 +8,7 @@ const router = Router();
 
 router.use(authMiddleware);
 
-router.get('/', requireRole('DUENO', 'TRABAJADOR'), adminsController.listAdminsForMyGyms);
+router.get('/', requireRole('DUENO', 'EMPLEADO'), adminsController.listAdminsForMyGyms);
 
 router.put('/:id', requireRole('DUENO'), upload.single('foto'), adminsController.updateAdmin);
 

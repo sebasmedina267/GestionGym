@@ -89,7 +89,7 @@ export const useProfileLogic = () => {
       nombre: empleado.nombre,
       apellido: empleado.apellido,
       email: empleado.email,
-      rol: empleado.rol || "TRABAJADOR"
+      rol: empleado.rol || "EMPLEADO"
     });
     setShowEditEmpleado(true);
   };

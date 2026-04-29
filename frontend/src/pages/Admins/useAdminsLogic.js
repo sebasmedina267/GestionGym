@@ -1,13 +1,18 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useFetch } from "../../hooks/useFetch";
 import { useGym } from "../../hooks/useGym";
 import { useAuth } from "../../hooks/useAuth";
 import api from "../../api/axios";
+import { createBranchSubscriptionPayment } from "../../api/stripe.api";
 
 export const useAdminsLogic = () => {
+  const navigate = useNavigate();
   const { admin } = useAuth();
   const { gym } = useGym();
   const isDueno = admin?.roles?.includes('DUENO');
+  const isEncargado = admin?.roles?.includes('ENCARGADO');
+  const canManageStaff = isDueno || isEncargado;
 
   const { data: admins, loading, refetch } = useFetch("/admins");
   const { data: gyms, refetch: refetchGyms } = useFetch("/gyms");
@@ -23,8 +28,10 @@ export const useAdminsLogic = () => {
   const [form, setForm] = useState({
     nombre: "",
     apellido: "",
+    email: "",
     password: "",
     gymId: "",
+    rol: "EMPLEADO",
     foto: null,
   });
 
@@ -36,7 +43,9 @@ export const useAdminsLogic = () => {
   const [editForm, setEditForm] = useState({
     nombre: "",
     apellido: "",
+    email: "",
     gymId: "",
+    rol: "EMPLEADO",
     foto: null,
     photoPreview: null,
   });
@@ -66,8 +75,9 @@ export const useAdminsLogic = () => {
     id: a.id,
     nombre: a.nombre,
     apellido: a.apellido,
+    email: a.email,
     gymNombre: a.gyms?.map(g => g.nombre).join(", ") || "Sin Gym",
-    rol: a.roles?.includes('DUENO') ? 'Dueño' : 'Empleado'
+    rol: a.roles?.includes('DUENO') ? 'Dueño' : (a.roles?.includes('ENCARGADO') ? 'Manager' : 'Empleado')
   }));
 
   const handlePhotoChange = (e) => {
@@ -98,6 +108,8 @@ export const useAdminsLogic = () => {
 
     if (!form.nombre) newErrors.nombre = "Requerido";
     if (!form.apellido) newErrors.apellido = "Requerido";
+    if (!form.email) newErrors.email = "Requerido";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) newErrors.email = "Email inválido";
     if (!form.password) newErrors.password = "Requerido";
     if (!passwordValid) newErrors.password = "La contraseña no cumple los requisitos";
     if (!form.gymId) newErrors.gymId = "Selecciona un gimnasio";
@@ -108,30 +120,34 @@ export const useAdminsLogic = () => {
     try {
       setSaving(true);
       
-      // Si hay foto, usar FormData. Si no, usar JSON directo
+      const roleToAssign = (isDueno && form.rol) ? form.rol : 'EMPLEADO';
+
       if (form.foto) {
         const formData = new FormData();
         formData.append("nombre", form.nombre);
         formData.append("apellido", form.apellido);
+        formData.append("email", form.email);
         formData.append("password", form.password);
         formData.append("gymId", form.gymId);
+        formData.append("rol", roleToAssign);
         formData.append("foto", form.foto);
 
         await api.post("/auth/register-employee", formData, {
           headers: { "Content-Type": "multipart/form-data" }
         });
       } else {
-        // Enviar como JSON si no hay foto
         await api.post("/auth/register-employee", {
           nombre: form.nombre,
           apellido: form.apellido,
+          email: form.email,
           password: form.password,
-          gymId: Number(form.gymId)
+          gymId: Number(form.gymId),
+          rol: roleToAssign
         });
       }
 
       setOpen(false);
-      setForm({ nombre: "", apellido: "", password: "", gymId: "", foto: null });
+      setForm({ nombre: "", apellido: "", email: "", password: "", gymId: "", rol: "EMPLEADO", foto: null });
       setPhotoPreview(null);
       setPasswordValid(false);
       refetch();
@@ -151,7 +167,9 @@ export const useAdminsLogic = () => {
     setEditForm({
       nombre: adminData.nombre,
       apellido: adminData.apellido,
+      email: adminData.email || "",
       gymId: adminData.gyms?.[0]?.id || "",
+      rol: adminData.roles?.includes('ENCARGADO') ? 'ENCARGADO' : 'EMPLEADO',
       foto: null,
       photoPreview: adminData.foto || null,
     });
@@ -171,7 +189,9 @@ export const useAdminsLogic = () => {
       const formData = new FormData();
       formData.append("nombre", editForm.nombre);
       formData.append("apellido", editForm.apellido);
+      if (editForm.email) formData.append("email", editForm.email);
       if (editForm.gymId) formData.append("gymId", Number(editForm.gymId));
+      if (isDueno && editForm.rol) formData.append("rol", editForm.rol);
       if (editForm.foto) formData.append("foto", editForm.foto);
 
       await api.put(`/admins/${selectedAdmin.id}`, formData);
@@ -218,19 +238,32 @@ export const useAdminsLogic = () => {
 
     try {
       setSaving(true);
-      await api.post("/gyms/create", formGym);
+      
+      // Crear Payment Intent para la sucursal
+      const paymentData = await createBranchSubscriptionPayment({
+        ownerId: admin?.id,
+        email: admin?.email,
+        branchName: formGym.nombre,
+      });
 
+      // Guardar datos en sessionStorage para uso posterior
+      sessionStorage.setItem('branchPaymentData', JSON.stringify({
+        paymentIntentId: paymentData.paymentIntentId,
+        clientSecret: paymentData.clientSecret,
+        branchData: formGym,
+      }));
+
+      // Mostrar alert con instrucciones o redirigir
+      alert('Serás redirigido a la pantalla de pago. Por favor completa el pago de la suscripción ($49 USD/año).');
+      
+      // Cerrar modal
       setShowCreateGym(false);
-      setFormGym({ nombre: "", direccion: "" });
-      setErrors({});
       
-      // Recargar la lista de gymnos
-      await refetchGyms();
-      
-      alert("¡Gimnasio creado exitosamente!");
+      // Redirigir a página de pago
+      navigate('/branch-payment');
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Error al crear gimnasio");
+      alert(err.response?.data?.message || "Error al procesar la suscripción de sucursal");
     } finally {
       setSaving(false);
     }
@@ -238,6 +271,8 @@ export const useAdminsLogic = () => {
 
   return {
     isDueno,
+    isEncargado,
+    canManageStaff,
     gym,
     gyms,
     admins,
