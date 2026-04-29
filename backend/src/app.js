@@ -17,8 +17,12 @@ import productosRoutes from './modules/productos/productos.routes.js';
 import pagosRoutes from './modules/pagos/pagos.routes.js';
 import economiaRoutes from './modules/economia/economia.routes.js';
 import auditRoutes from './modules/audit/audit.routes.js';
+import stripeRoutes from './modules/stripe/stripe.routes.js';
 
 const app = express();
+
+// Middleware para Stripe Webhook (raw body - ANTES de JSON parsing)
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 
 app.use(cors());
 app.use(express.json());
@@ -31,6 +35,7 @@ const __dirname = path.dirname(__filename);
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
 app.use('/api/auth', authRoutes);
+app.use('/api/stripe', stripeRoutes);
 
 app.use('/api/admins', authMiddleware, gymMiddleware, auditMiddleware, adminsRoutes);
 app.use('/api/gyms', authMiddleware, gymsRoutes);

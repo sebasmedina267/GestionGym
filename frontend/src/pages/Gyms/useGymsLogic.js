@@ -2,10 +2,13 @@ import { useState } from "react";
 import { useFetch } from "../../hooks/useFetch";
 import api, { UPLOADS_URL } from "../../api/axios";
 import { useAuth } from "../../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { createBranchSubscriptionPayment } from "../../api/stripe.api";
 
-export const EMPTY_GYM_FORM = { nombre: "", direccion: "", ciudad: "", foto: "" };
+export const EMPTY_GYM_FORM = { nombre: "", direccion: "", ciudad: "", foto: "", urlWeb: "" };
 
 export function useGymsLogic() {
+  const navigate = useNavigate();
   const { admin } = useAuth();
   const isDueno = admin?.roles?.includes("DUENO");
 
@@ -54,14 +57,31 @@ export function useGymsLogic() {
 
     try {
       setSaving(true);
-      await api.post("/gyms/create", createForm);
-      setOpenCreateGym(false);
-      setCreateForm(EMPTY_GYM_FORM);
-      refetch();
-      refetchMy();
-      showNotif("✅ Gimnasio creado", "El gimnasio se ha creado correctamente.", "success");
+      
+      // 1. Crear el Payment Intent en el backend
+      const paymentIntent = await createBranchSubscriptionPayment({
+        ownerId: admin.id,
+        email: admin.email,
+        branchName: createForm.nombre
+      });
+
+      // 2. Guardar datos en sessionStorage para recuperarlos tras el pago
+      sessionStorage.setItem('branchPaymentData', JSON.stringify({
+        paymentIntentId: paymentIntent.paymentIntentId,
+        clientSecret: paymentIntent.clientSecret,
+        branchData: {
+          nombre: createForm.nombre,
+          direccion: createForm.direccion,
+          ciudad: createForm.ciudad,
+          urlWeb: createForm.urlWeb
+        }
+      }));
+
+      // 3. Redirigir a la página de pago
+      navigate("/branch-payment");
+      
     } catch (err) {
-      showNotif("❌ Error", err.response?.data?.message || "Error al crear gimnasio", "error");
+      showNotif("❌ Error", err.response?.data?.message || "Error al iniciar proceso de pago", "error");
     } finally {
       setSaving(false);
     }
@@ -100,6 +120,7 @@ export function useGymsLogic() {
       direccion: gym.direccion || "",
       ciudad: gym.ciudad || "",
       foto: gym.foto || "",
+      urlWeb: gym.url_web || "",
     });
     setErrors({});
     setOpenEditGym(true);
@@ -163,3 +184,4 @@ export function useGymsLogic() {
     handleEditGym,
   };
 }
+

@@ -7,21 +7,30 @@ export function useDashboardLogic() {
   const gymReady = Boolean(gym);
 
   // Fetch data
-  const { data: clientes } = useFetch(
+  const { data: clientes, refetch: refetchClientes } = useFetch(
     gymReady ? `/clientes?gymId=${gym.id}` : null
   );
-  const { data: clases } = useFetch(
+  const { data: clases, refetch: refetchClases } = useFetch(
     gymReady ? `/clases?gymId=${gym.id}` : null
   );
   // Pagos pendientes directamente desde el endpoint correcto
-  const { data: pagosPendientesData } = useFetch(
+  const { data: pagosPendientesData, refetch: refetchPagos } = useFetch(
     gymReady ? `/pagos/pendientes` : null
   );
-  const { data: economiaResumen } = useFetch(
+  const { data: economiaResumen, refetch: refetchEconomia } = useFetch(
     gymReady && gym
       ? `/economia/resumen?gymId=${gym.id}&desde=2000-01-01&hasta=2099-12-31`
       : null
   );
+
+  const refetchAll = async () => {
+    await Promise.all([
+      refetchClientes(),
+      refetchClases(),
+      refetchPagos(),
+      refetchEconomia()
+    ]);
+  };
 
   // Calcular estadísticas
   const stats = useMemo(() => {
@@ -55,5 +64,6 @@ export function useDashboardLogic() {
     gym,
     clases,
     stats,
+    refetchAll
   };
 }

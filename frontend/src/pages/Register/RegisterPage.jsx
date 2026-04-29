@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { useRegisterLogic } from "./useRegisterLogic";
 import RegisterForm from "./RegisterForm";
 import "./Styles/Register.css";
@@ -27,6 +28,10 @@ export default function RegisterPage() {
             <main className="register-main-content">
                 {/* Glassmorphism Card */}
                 <section className="register-glass-card">
+                    <Link to="/login" className="register-back-link">
+                        <span className="material-symbols-outlined">arrow_back</span>
+                        <span>Volver al Login</span>
+                    </Link>
                     <header className="register-brand-header">
                         <h1 className="register-brand-title">Crear Administrador</h1>
                         <p className="register-brand-subtitle">Configura tu centro de gestión y credenciales</p>

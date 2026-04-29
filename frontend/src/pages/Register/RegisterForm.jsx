@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import "./Styles/RegisterForm.css";
 
 const RegisterForm = ({
@@ -7,9 +8,8 @@ const RegisterForm = ({
     loading,
     success,
     isOwner,
-    gymsLoading,
-    gymsList,
     handleInputChange,
+    handleFileChange,
     handleSubmit,
 }) => {
 
@@ -21,13 +21,13 @@ const RegisterForm = ({
             {/* Mensajes de Éxito/Error Generales */}
             {errors.general && (
                 <div className="register-alert register-alert-error">
-                    <span className="material-symbols-outlined" style={{fontSize: "1rem"}}>error</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>error</span>
                     <span>{errors.general}</span>
                 </div>
             )}
             {success && (
                 <div className="register-alert register-alert-success">
-                    <span className="material-symbols-outlined" style={{fontSize: "1rem"}}>check_circle</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>check_circle</span>
                     <span>{success}</span>
                 </div>
             )}
@@ -66,8 +66,24 @@ const RegisterForm = ({
                 </div>
             </div>
 
-            {/* Fila de Identidad */}
+            {/* Fila de Email y Rol */}
             <div className="register-form-row">
+                <div className="register-field-group">
+                    <label className="register-field-label">Correo Electrónico</label>
+                    <div className="register-input-container">
+                        <span className="material-symbols-outlined register-input-icon">mail</span>
+                        <input
+                            className={`register-input ${errors.email ? 'register-input--error' : ''}`}
+                            placeholder="tu@correo.com"
+                            type="email"
+                            value={form.email}
+                            onChange={(e) => handleInputChange("email", e.target.value)}
+                            required
+                        />
+                    </div>
+                    {errors.email && <p className="register-error-text">{errors.email}</p>}
+                </div>
+
                 <div className="register-field-group">
                     <label className="register-field-label">Rol de Acceso</label>
                     <div className="register-input-container">
@@ -78,58 +94,76 @@ const RegisterForm = ({
                             onChange={(e) => handleInputChange("rol", e.target.value)}
                         >
                             <option value="DUENO">Dueño</option>
-                            <option value="TRABAJADOR">Empleado</option>
+                            <option value="USUARIO">Usuario (Cliente App)</option>
                         </select>
                         <span className="material-symbols-outlined register-select-arrow">expand_more</span>
                     </div>
                 </div>
-
-                {isOwner ? (
-                    <div className="register-field-group">
-                        <label className="register-field-label">Nombre del Gimnasio</label>
-                        <div className="register-input-container">
-                            <span className="material-symbols-outlined register-input-icon">fitness_center</span>
-                            <input
-                                className={`register-input ${errors.gymNombre ? 'register-input--error' : ''}`}
-                                placeholder="Ej. Iron Haven HQ"
-                                type="text"
-                                value={form.gymNombre}
-                                onChange={(e) => handleInputChange("gymNombre", e.target.value)}
-                                required
-                            />
-                        </div>
-                        {errors.gymNombre && <p className="register-error-text">{errors.gymNombre}</p>}
-                    </div>
-                ) : (
-                    <div className="register-field-group">
-                        <label className="register-field-label">Seleccionar Gimnasio</label>
-                        <div className="register-input-container">
-                            <span className="material-symbols-outlined register-input-icon">fitness_center</span>
-                            {gymsLoading ? (
-                                <div className="register-input" style={{display: "flex", alignItems: "center"}}>
-                                    Cargando...
-                                </div>
-                            ) : (
-                                <select
-                                    className={`register-select ${errors.gymId ? 'register-input--error' : ''}`}
-                                    value={form.gymId}
-                                    onChange={(e) => handleInputChange("gymId", e.target.value)}
-                                    required
-                                >
-                                    <option value="">Elige ubicación</option>
-                                    {gymsList.map((g) => (
-                                        <option key={g.id} value={g.id}>
-                                            {g.nombre}
-                                        </option>
-                                    ))}
-                                </select>
-                            )}
-                            {!gymsLoading && <span className="material-symbols-outlined register-select-arrow">expand_more</span>}
-                        </div>
-                        {errors.gymId && <p className="register-error-text">{errors.gymId}</p>}
-                    </div>
-                )}
             </div>
+
+            {/* Datos específicos de Dueño */}
+            {isOwner && (
+                <>
+                    <div className="register-form-row">
+                        <div className="register-field-group">
+                            <label className="register-field-label">Nombre del Gimnasio</label>
+                            <div className="register-input-container">
+                                <span className="material-symbols-outlined register-input-icon">fitness_center</span>
+                                <input
+                                    className={`register-input ${errors.gymNombre ? 'register-input--error' : ''}`}
+                                    placeholder="Ej. Iron Haven HQ"
+                                    type="text"
+                                    value={form.gymNombre}
+                                    onChange={(e) => handleInputChange("gymNombre", e.target.value)}
+                                    required
+                                />
+                            </div>
+                            {errors.gymNombre && <p className="register-error-text">{errors.gymNombre}</p>}
+                        </div>
+                        <div className="register-field-group">
+                            <label className="register-field-label">Dirección Web <span className="register-field-label--optional">(Opcional)</span></label>
+                            <div className="register-input-container">
+                                <span className="material-symbols-outlined register-input-icon">language</span>
+                                <input
+                                    className="register-input"
+                                    placeholder="https://tufitness.com"
+                                    type="url"
+                                    value={form.gymUrlWeb}
+                                    onChange={(e) => handleInputChange("gymUrlWeb", e.target.value)}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="register-form-row">
+                        <div className="register-field-group">
+                            <label className="register-field-label">Dirección Física <span className="register-field-label--optional">(Opcional)</span></label>
+                            <div className="register-input-container">
+                                <span className="material-symbols-outlined register-input-icon">location_on</span>
+                                <input
+                                    className="register-input"
+                                    placeholder="Ej. Calle Rendimiento 123"
+                                    type="text"
+                                    value={form.gymDireccion}
+                                    onChange={(e) => handleInputChange("gymDireccion", e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div className="register-field-group">
+                            <label className="register-field-label">Foto del Gimnasio <span className="register-field-label--optional">(Opcional)</span></label>
+                            <div className="register-input-container">
+                                <span className="material-symbols-outlined register-input-icon">image</span>
+                                <input
+                                    className="register-input"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => handleFileChange("gymFoto", e.target.files[0])}
+                                    style={{ padding: "8px 12px" }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
 
             {/* Fila de Contraseña */}
             <div className="register-form-row">
@@ -178,25 +212,6 @@ const RegisterForm = ({
                 </div>
             </div>
 
-            {/* Dirección Opcional */}
-            {isOwner && (
-                <div className="register-field-group">
-                    <label className="register-field-label">
-                        Dirección del Gimnasio <span className="register-field-label--optional">(Opcional)</span>
-                    </label>
-                    <div className="register-input-container">
-                        <span className="material-symbols-outlined register-input-icon">location_on</span>
-                        <input
-                            className="register-input"
-                            placeholder="Ej. Calle Rendimiento 123"
-                            type="text"
-                            value={form.gymDireccion}
-                            onChange={(e) => handleInputChange("gymDireccion", e.target.value)}
-                        />
-                    </div>
-                </div>
-            )}
-
             {/* CTA */}
             <button
                 className="register-submit-btn"
@@ -204,10 +219,18 @@ const RegisterForm = ({
                 disabled={loading}
             >
                 <span>
-                    {loading ? "Registrando..." : "Registrar Administrador"}
+                    {loading ? "Registrando..." : (isOwner ? "Ir al Pago (Stripe)" : "Crear Cuenta")}
                 </span>
-                {!loading && <span className="material-symbols-outlined btn-icon-animate" style={{fontSize: "1.25rem"}}>arrow_forward</span>}
+                {!loading && <span className="material-symbols-outlined btn-icon-animate" style={{ fontSize: "1.25rem" }}>arrow_forward</span>}
             </button>
+
+            {/* Link to Login */}
+            <div className="register-login-link-container">
+                <p className="register-login-link-text">
+                    ¿Ya tienes una cuenta? <Link to="/login" className="register-login-link">Inicia sesión</Link>
+                </p>
+
+            </div>
         </form>
     );
 };

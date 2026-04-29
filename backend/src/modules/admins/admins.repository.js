@@ -87,9 +87,9 @@ export async function updateAdmin(adminId, data) {
     );
 
     if (gymAssignments.length === 0) {
-      // Si no tiene ninguna, asignar al nuevo gym como TRABAJADOR
+      // Si no tiene ninguna, asignar al nuevo gym como EMPLEADO
       await pool.query(
-        `INSERT INTO admins_gyms (admin_id, gym_id, rol) VALUES (?, ?, 'TRABAJADOR')`,
+        `INSERT INTO admins_gyms (admin_id, gym_id, rol) VALUES (?, ?, 'EMPLEADO')`,
         [adminId, gymId]
       );
     } else {

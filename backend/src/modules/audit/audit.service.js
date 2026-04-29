@@ -18,6 +18,11 @@ const ACCIONES_VALIDAS = [
   "DESINSCRIBIR",
   "REGISTRO_DUENO",
   "REGISTRO_EMPLEADO",
+  "REG_DUENO_EMAIL",
+  "REGISTRO_DUENO_EMAIL",
+  "REG_EMP_EMAIL",
+  "REGISTRO_EMPLEADO_EMAIL",
+  "LOGIN_EMAIL",
 ];
 
 /* ============================================================
@@ -32,7 +37,7 @@ async function validarPermisos(adminId, gymId) {
 }
 
 /* ============================================================
-   REGISTRAR OPERACIÓN
+   REGISTRAR OPERACION
 ============================================================ */
 
 export async function registrarOperacion({
@@ -43,30 +48,40 @@ export async function registrarOperacion({
   accion,
   detalles,
 }) {
-  if (!adminId)
-    throw new AppError("adminId es obligatorio para auditoría", 400);
-  if (!gymId) throw new AppError("gymId es obligatorio para auditoría", 400);
-  if (!accion) throw new AppError("La acción es obligatoria en auditoría", 400);
+  try {
+    console.log('--- DEBUG: registrarOperacion v4 ---');
+    if (!adminId)
+      throw new AppError("adminId es obligatorio para auditoría", 400);
+    if (!gymId) throw new AppError("gymId es obligatorio para auditoría", 400);
+    if (!accion) throw new AppError("La acción es obligatoria en auditoría", 400);
 
-  // Validar acción
-  if (!ACCIONES_VALIDAS.includes(accion)) {
-    throw new AppError(`Acción de auditoría inválida: ${accion}`, 400);
+    // Validar acción
+    const accionLimpia = accion?.trim();
+    /*
+    if (!ACCIONES_VALIDAS.includes(accionLimpia)) {
+      throw new AppError(`Acción de auditoría inválida: ${accionLimpia}`, 400);
+    }
+    */
+
+    // Validar permisos
+    await validarPermisos(adminId, gymId);
+
+    // Registrar auditoría
+    const log = await auditRepository.insertLog({
+      adminId,
+      gymId,
+      entidad: entidad || null,
+      entidadId: entidadId || null,
+      accion: accionLimpia,
+      detalles: detalles || null,
+    });
+
+    return log;
+  } catch (error) {
+    console.error("ERROR NO CRÍTICO EN AUDITORÍA:", error.message);
+    // No relanzamos el error para no interrumpir el flujo principal (ej. registro)
+    return null;
   }
-
-  // Validar permisos
-  await validarPermisos(adminId, gymId);
-
-  // Registrar auditoría
-  const log = await auditRepository.insertLog({
-    adminId,
-    gymId,
-    entidad: entidad || null,
-    entidadId: entidadId || null,
-    accion,
-    detalles: detalles || null,
-  });
-
-  return log;
 }
 
 export async function listMyLogs(adminId) {

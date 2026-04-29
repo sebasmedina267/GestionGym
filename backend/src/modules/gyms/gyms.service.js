@@ -23,7 +23,7 @@ export async function listAllGyms() {
 /**
  * CREAR GYM PARA UN DUEÑO
  */
-export async function createGymForOwner(adminId, { nombre, direccion, ciudad, foto }) {
+export async function createGymForOwner(adminId, { nombre, direccion, ciudad, foto, urlWeb }) {
   if (!adminId) {
     throw new AppError('ID de administrador requerido', 400);
   }
@@ -35,7 +35,8 @@ export async function createGymForOwner(adminId, { nombre, direccion, ciudad, fo
     nombre,
     direccion: direccion || null,
     ciudad: ciudad || null,
-    foto: foto || null
+    foto: foto || null,
+    urlWeb: urlWeb || null
   });
 
   // Vincular como dueño

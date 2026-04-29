@@ -1,5 +1,6 @@
 import * as economiaService from "./economia.service.js";
 import { AppError } from "../../utils/AppError.js";
+import { validatePermission } from "../../utils/rolePermissions.js";
 
 /* ============================================================
    HELPERS
@@ -23,6 +24,7 @@ function validarFecha(fecha, nombre) {
 export async function resumenEconomico(req, res, next) {
   try {
     validarAdmin(req);
+    validatePermission(req.admin.roles, "ECONOMIA", "VER");
 
     const desde = validarFecha(req.query.desde, "desde");
     const hasta = validarFecha(req.query.hasta, "hasta");
@@ -49,7 +51,7 @@ export async function crearIngresoManual(req, res, next) {
     // Dueño y empleado pueden crear ingresos
     if (
       !req.admin.roles.includes("DUENO") &&
-      !req.admin.roles.includes("TRABAJADOR")
+      !req.admin.roles.includes("EMPLEADO")
     ) {
       throw new AppError("No tienes permiso para registrar ingresos", 403);
     }

@@ -28,6 +28,9 @@ export default function ClientesPage() {
     const payload = { ...form, edad: Number(form.edad) };
 
     if (editing) {
+      if (editing.tipo_origen === 'APP') {
+         payload.tipo_origen = 'APP';
+      }
       await api.patch(`/clientes/${editing.id}`, payload);
     } else {
       await api.post(`/clientes`, payload);
@@ -39,6 +42,10 @@ export default function ClientesPage() {
   };
 
   const handleDelete = async (cliente) => {
+    if (cliente.tipo_origen === 'APP') {
+      alert("No puedes eliminar un usuario de la App desde aquí. Debes cancelar su suscripción.");
+      return;
+    }
     if (!confirm(`Eliminar a ${cliente.nombre}?`)) return;
     await api.delete(`/clientes/${cliente.id}`);
     refetch();
@@ -47,6 +54,7 @@ export default function ClientesPage() {
   const handleToggle = async (cliente) => {
     await api.patch(`/clientes/${cliente.id}`, {
       activo: !cliente.activo,
+      tipo_origen: cliente.tipo_origen
     });
     refetch();
   };
@@ -87,6 +95,10 @@ export default function ClientesPage() {
             <ClientesTable
               data={filtered}
               onEdit={(c) => {
+                if (c.tipo_origen === 'APP') {
+                   alert("Los datos de usuarios de la App son de solo lectura aquí. Solo puedes cambiar su estado.");
+                   return;
+                }
                 setEditing(c);
                 setModalOpen(true);
               }}

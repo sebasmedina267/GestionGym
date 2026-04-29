@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import AppLayout from "../../components/layout/AppLayout";
 import Header from "../../components/ui/Header";
 import { usePagosLogic } from "./usePagosLogic";
@@ -6,10 +6,12 @@ import PagosFiltros from "./PagosFiltros";
 import PagosTabla from "./PagosTabla";
 import PagosResumen from "./PagosResumen";
 import PagosModals from "./PagosModals";
+import { exportEconomiaPDF } from "../Economia/pdfUtils";
 import "./Styles/PagosPage.css";
 
 export default function PagosPage() {
   const logic = usePagosLogic();
+  const pdfRef = useRef();
 
   if (!logic.gymReady) {
     return (
@@ -34,7 +36,7 @@ export default function PagosPage() {
         />
 
         {logic.claseId ? (
-          <div className="pagos-grid">
+          <div className="pagos-grid" ref={pdfRef}>
             <PagosTabla
               clases={logic.clases}
               claseId={logic.claseId}
@@ -48,6 +50,7 @@ export default function PagosPage() {
               classStats={logic.classStats}
               metodoPagoStats={logic.metodoPagoStats}
               chartData={logic.chartData}
+              onExport={() => exportEconomiaPDF(pdfRef.current, `reporte_pagos_${logic.mes}.pdf`)}
             />
           </div>
         ) : (

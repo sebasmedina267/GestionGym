@@ -1,8 +1,7 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { validateForm } from "../../utils/validators";
 import api from "../../api/axios";
 import { useNavigate } from "react-router-dom";
-import { useFetch } from "../../hooks/useFetch";
 
 const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
 
@@ -11,23 +10,17 @@ export const useRegisterLogic = () => {
     const [form, setForm] = useState({
         nombre: "",
         apellido: "",
+        email: "",
         password: "",
         confirmPassword: "",
-        rol: "DUENO",
+        rol: "DUENO", // Ahora será DUENO o USUARIO
         gymNombre: "",
         gymDireccion: "",
-        gymId: "",
+        gymUrlWeb: "",
+        gymFoto: null,
     });
 
     const isOwner = form.rol === "DUENO";
-    const { data: gyms, loading: gymsLoading } = useFetch(
-        !isOwner ? "/gyms" : null
-    );
-
-    const gymsList = useMemo(() => {
-        if (!Array.isArray(gyms)) return [];
-        return gyms;
-    }, [gyms]);
 
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
@@ -38,13 +31,18 @@ export const useRegisterLogic = () => {
             setForm({
                 ...form,
                 rol: value,
-                gymId: "",
                 gymNombre: "",
                 gymDireccion: "",
+                gymUrlWeb: "",
+                gymFoto: null,
             });
         } else {
             setForm({ ...form, [field]: value });
         }
+    };
+
+    const handleFileChange = (field, file) => {
+        setForm({ ...form, [field]: file });
     };
 
     const handleSubmit = async (e) => {
@@ -54,6 +52,7 @@ export const useRegisterLogic = () => {
         const validation = validateForm({
             nombre: { value: form.nombre, required: true },
             apellido: { value: form.apellido, required: true },
+            email: { value: form.email, required: true },
             password: { value: form.password, required: true, min: 8 },
             confirmPassword: {
                 value: form.confirmPassword,
@@ -62,8 +61,14 @@ export const useRegisterLogic = () => {
             },
             ...(isOwner
                 ? { gymNombre: { value: form.gymNombre, required: true } }
-                : { gymId: { value: form.gymId, required: true, number: true } }),
+                : {}),
         });
+
+        // Basic email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(form.email)) {
+            validation.email = "Correo electrónico inválido";
+        }
 
         if (!PASSWORD_REGEX.test(form.password)) {
             validation.password =
@@ -74,10 +79,6 @@ export const useRegisterLogic = () => {
             validation.confirmPassword = "Las contrasenas no coinciden";
         }
 
-        if (!isOwner && !localStorage.getItem("token")) {
-            validation.general = "Debes iniciar sesion como dueno para registrar empleados";
-        }
-
         setErrors(validation);
 
         if (Object.keys(validation).length > 0) return;
@@ -86,36 +87,38 @@ export const useRegisterLogic = () => {
             setLoading(true);
 
             if (isOwner) {
-                await api.post("/auth/register-owner", {
-                    nombre: form.nombre,
-                    apellido: form.apellido,
-                    password: form.password,
-                    gymNombre: form.gymNombre,
-                    gymDireccion: form.gymDireccion || undefined,
+                const formData = new FormData();
+                formData.append("nombre", form.nombre);
+                formData.append("apellido", form.apellido);
+                formData.append("email", form.email);
+                formData.append("password", form.password);
+                formData.append("gymNombre", form.gymNombre);
+                if (form.gymDireccion) formData.append("gymDireccion", form.gymDireccion);
+                if (form.gymUrlWeb) formData.append("gymUrlWeb", form.gymUrlWeb);
+                if (form.gymFoto) formData.append("gymFoto", form.gymFoto);
+
+                await api.post("/auth/register-owner", formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
                 });
 
-                navigate("/login");
-                return;
+                // Redirigir al pago Stripe con el email para activarlo luego
+                navigate("/stripe-checkout", { state: { email: form.email } }); 
+            } else {
+                await api.post("/auth/user/register", {
+                    nombre: form.nombre,
+                    apellido: form.apellido,
+                    email: form.email,
+                    password: form.password,
+                });
+
+                setSuccess("Registro completado exitosamente. Puede iniciar sesión.");
+                setTimeout(() => {
+                    navigate("/login");
+                }, 2000);
             }
 
-            await api.post("/auth/register-employee", {
-                nombre: form.nombre,
-                apellido: form.apellido,
-                password: form.password,
-                gymId: Number(form.gymId),
-            });
-
-            setSuccess("Empleado registrado correctamente");
-            setForm({
-                nombre: "",
-                apellido: "",
-                password: "",
-                confirmPassword: "",
-                rol: "TRABAJADOR",
-                gymNombre: "",
-                gymDireccion: "",
-                gymId: "",
-            });
         } catch (err) {
             setErrors({
                 general:
@@ -133,9 +136,9 @@ export const useRegisterLogic = () => {
         loading,
         success,
         isOwner,
-        gymsLoading,
-        gymsList,
         handleInputChange,
+        handleFileChange,
         handleSubmit,
     };
 };
+
