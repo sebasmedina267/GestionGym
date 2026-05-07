@@ -2,9 +2,15 @@ import { pool } from "../../config/db.js";
 import { AppError } from "../../utils/AppError.js";
 
 /* ============================================================
-   TOTALES
-============================================================ */
+   FINANCIAL AGGREGATION QUERIES
+   ============================================================ */
 
+/**
+ * Calculates the total revenue for a specific branch and time range.
+ * @param {number} gymId - Target branch.
+ * @param {Object} range - Filtering dates ({ desde, hasta }).
+ * @returns {Promise<number>} Total revenue amount.
+ */
 export async function totalIngresos(gymId, { desde, hasta }) {
   let query = "SELECT SUM(importe) AS total FROM ingresos WHERE gym_id = ?";
   const params = [gymId];
@@ -22,6 +28,12 @@ export async function totalIngresos(gymId, { desde, hasta }) {
   return Number(rows[0].total || 0);
 }
 
+/**
+ * Calculates the total expenses for a specific branch and time range.
+ * @param {number} gymId - Target branch.
+ * @param {Object} range - Filtering dates ({ desde, hasta }).
+ * @returns {Promise<number>} Total expense amount.
+ */
 export async function totalGastos(gymId, { desde, hasta }) {
   let query = "SELECT SUM(importe) AS total FROM gastos WHERE gym_id = ?";
   const params = [gymId];
@@ -40,9 +52,14 @@ export async function totalGastos(gymId, { desde, hasta }) {
 }
 
 /* ============================================================
-   INSERTAR INGRESO
-============================================================ */
+   DATA PERSISTENCE: INCOME
+   ============================================================ */
 
+/**
+ * Persists a new income record within a transaction.
+ * @param {Object} data - Record details including gymId, type, amount, etc.
+ * @returns {Promise<Object>} The newly created record.
+ */
 export async function insertIngreso({
   gymId,
   fuente_tipo,
@@ -57,9 +74,10 @@ export async function insertIngreso({
   try {
     await conn.beginTransaction();
 
-    if (!descripcion) throw new AppError("Descripción requerida", 400);
+    // Data Integrity Validation
+    if (!descripcion) throw new AppError("Transaction description is required", 400);
     if (!importe || importe <= 0)
-      throw new AppError("El importe debe ser positivo", 400);
+      throw new AppError("Transaction amount must be a positive number", 400);
 
     const [result] = await conn.query(
       `INSERT INTO ingresos (gym_id, fuente_tipo, fuente_id, descripcion, importe, fecha, admin_id)
@@ -90,9 +108,14 @@ export async function insertIngreso({
 }
 
 /* ============================================================
-   INSERTAR GASTO
-============================================================ */
+   DATA PERSISTENCE: EXPENSES
+   ============================================================ */
 
+/**
+ * Persists a new expense record within a transaction.
+ * @param {Object} data - Record details.
+ * @returns {Promise<Object>} The newly created record.
+ */
 export async function insertGasto({
   gymId,
   fuente_tipo,
@@ -107,9 +130,10 @@ export async function insertGasto({
   try {
     await conn.beginTransaction();
 
-    if (!descripcion) throw new AppError("Descripción requerida", 400);
+    // Data Integrity Validation
+    if (!descripcion) throw new AppError("Expense description is required", 400);
     if (!importe || importe <= 0)
-      throw new AppError("El importe debe ser positivo", 400);
+      throw new AppError("Expense amount must be a positive number", 400);
 
     const [result] = await conn.query(
       `INSERT INTO gastos (gym_id, fuente_tipo, fuente_id, descripcion, importe, fecha, admin_id)
@@ -140,9 +164,10 @@ export async function insertGasto({
 }
 
 /* ============================================================
-   LISTADOS
-============================================================ */
+   HISTORICAL LISTING QUERIES
+   ============================================================ */
 
+/** Retrieves a list of income records sorted by date. */
 export async function listIngresos(gymId, { desde, hasta } = {}) {
   let query = "SELECT * FROM ingresos WHERE gym_id = ?";
   const params = [gymId];
@@ -162,6 +187,7 @@ export async function listIngresos(gymId, { desde, hasta } = {}) {
   return rows;
 }
 
+/** Retrieves a list of expense records sorted by date. */
 export async function listGastos(gymId, { desde, hasta } = {}) {
   let query = "SELECT * FROM gastos WHERE gym_id = ?";
   const params = [gymId];
@@ -182,9 +208,13 @@ export async function listGastos(gymId, { desde, hasta } = {}) {
 }
 
 /* ============================================================
-   ESTADÍSTICAS POR PERIODO
-============================================================ */
+   CHRONOLOGICAL ANALYTICS QUERIES
+   ============================================================ */
 
+/** 
+ * Groups income by the requested time period.
+ * Supports daily, monthly, and yearly aggregation.
+ */
 export async function ingresosPorPeriodo(gymId, periodo) {
   let groupBy = "";
 
@@ -199,7 +229,7 @@ export async function ingresosPorPeriodo(gymId, periodo) {
       groupBy = "YEAR(fecha)";
       break;
     default:
-      throw new AppError("Periodo inválido", 400);
+      throw new AppError("Invalid analytics period", 400);
   }
 
   const [rows] = await pool.query(
@@ -214,6 +244,9 @@ export async function ingresosPorPeriodo(gymId, periodo) {
   return rows;
 }
 
+/** 
+ * Groups expenses by the requested time period.
+ */
 export async function gastosPorPeriodo(gymId, periodo) {
   let groupBy = "";
 
@@ -228,7 +261,7 @@ export async function gastosPorPeriodo(gymId, periodo) {
       groupBy = "YEAR(fecha)";
       break;
     default:
-      throw new AppError("Periodo inválido", 400);
+      throw new AppError("Invalid analytics period", 400);
   }
 
   const [rows] = await pool.query(

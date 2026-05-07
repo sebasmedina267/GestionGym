@@ -2,6 +2,30 @@ import React from "react";
 import Modal from "../../components/ui/Modal";
 import "./Styles/MaquinasFormModal.css";
 
+/**
+ * MaquinasFormModal Component
+ * 
+ * Provides a unified form interface for both creating new machinery records
+ * and updating existing ones.
+ * 
+ * Features:
+ * - Dynamic titles based on 'editing' mode.
+ * - Multi-field data collection (Name, Muscle Group, Quantity, Location, Status).
+ * - Multi-part form support for image uploading with preview.
+ * - Integrated validation feedback (errors display).
+ * - Kinetic visual style aligned with the management dashboard.
+ * 
+ * @param {Object} props - Component properties
+ * @param {boolean} props.open - Controls modal visibility
+ * @param {Function} props.setOpen - Toggles modal state
+ * @param {Object|null} props.editing - The machine object being edited (or null for creation)
+ * @param {Object} props.form - Current state of the form fields
+ * @param {Function} props.setForm - Updates form state
+ * @param {Object} props.errors - Validation errors mapping
+ * @param {boolean} props.saving - Indicates if a backend request is in progress
+ * @param {Function} props.handleSave - Triggers form submission logic
+ * @param {Function} props.resetForm - Clears form data and resets state
+ */
 export default function MaquinasFormModal({ open, setOpen, editing, form, setForm, errors, saving, handleSave, resetForm }) {
   return (
     <Modal
@@ -13,7 +37,7 @@ export default function MaquinasFormModal({ open, setOpen, editing, form, setFor
       clean
     >
       <div className="maquina-form-container">
-        {/* Header */}
+        {/* Header: Displays dynamic title and global close action */}
         <div className="maquina-form-header">
            <h1 className="maquina-form-title">{editing ? "Actualizar Equipo" : "Registrar Máquina"}</h1>
            <button className="maquina-close-btn" onClick={() => { setOpen(false); resetForm(); }}>
@@ -22,7 +46,7 @@ export default function MaquinasFormModal({ open, setOpen, editing, form, setFor
         </div>
 
         <form className="maquina-form-grid" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
-          {/* Nombre */}
+          {/* Identity: Core equipment name */}
           <div className="maquina-form-group full-width">
             <label className="maquina-form-label">Nombre del equipo</label>
             <input
@@ -34,7 +58,7 @@ export default function MaquinasFormModal({ open, setOpen, editing, form, setFor
             {errors.nombre && <p className="error-text-kinetic">{errors.nombre}</p>}
           </div>
 
-          {/* Row: Grupo & Cantidad */}
+          {/* Classification: Usage group and aggregate quantity */}
           <div className="maquina-form-group">
             <label className="maquina-form-label">Grupo Muscular / Uso</label>
             <input
@@ -56,7 +80,7 @@ export default function MaquinasFormModal({ open, setOpen, editing, form, setFor
             />
           </div>
 
-          {/* Row: Ubicación & Estado */}
+          {/* Logistics: Physical location and operational health status */}
           <div className="maquina-form-group">
             <label className="maquina-form-label">Ubicación Física</label>
             <input
@@ -80,7 +104,7 @@ export default function MaquinasFormModal({ open, setOpen, editing, form, setFor
             </select>
           </div>
 
-          {/* Descripción */}
+          {/* Documentation: Extended specifications and technical notes */}
           <div className="maquina-form-group full-width">
             <label className="maquina-form-label">Descripción y Detalles</label>
             <textarea 
@@ -92,7 +116,7 @@ export default function MaquinasFormModal({ open, setOpen, editing, form, setFor
             />
           </div>
 
-          {/* Foto area inside grid or below? Let's put it full width below */}
+          {/* Assets: Visual documentation via equipment photography */}
           <div className="maquina-form-group full-width">
             <label className="maquina-form-label">Fotografía del Equipo</label>
             <div 
@@ -141,6 +165,7 @@ export default function MaquinasFormModal({ open, setOpen, editing, form, setFor
           </div>
         </form>
 
+        {/* Global Actions: Process persistence or cancel the workflow */}
         <div className="maquina-modal-actions">
           <button 
             type="button"

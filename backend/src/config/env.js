@@ -15,7 +15,7 @@ export const config = {
   stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
   stripePrices: {
-    ownerSubscription: 9900, // $99 USD
-    branchSubscription: 4900, // $49 USD
+    ownerSubscription: 9200, // €92 EUR
+    branchSubscription: 4500, // €45 EUR
   },
 };

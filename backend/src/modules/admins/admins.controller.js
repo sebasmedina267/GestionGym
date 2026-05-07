@@ -1,9 +1,14 @@
 import * as adminsService from "./admins.service.js";
 import { AppError } from "../../utils/AppError.js";
 
+/**
+ * Staff Listing Handler
+ * Retrieves all staff members (Admins/Instructors) associated with the 
+ * gyms managed by the requesting administrator.
+ */
 export async function listAdminsForMyGyms(req, res, next) {
   try {
-    if (!req.admin) throw new AppError("No autenticado", 401);
+    if (!req.admin) throw new AppError("Not authenticated", 401);
 
     const admins = await adminsService.listAdminsForMyGyms(req.admin.id);
 
@@ -16,14 +21,19 @@ export async function listAdminsForMyGyms(req, res, next) {
   }
 }
 
+/**
+ * Staff Update Handler
+ * Modifies an existing staff member's record. 
+ * Supports profile image updates via 'req.file'.
+ */
 export async function updateAdmin(req, res, next) {
   try {
-    if (!req.admin) throw new AppError("No autenticado", 401);
+    if (!req.admin) throw new AppError("Not authenticated", 401);
 
     const adminId = parseInt(req.params.id);
     const { nombre, apellido, edad, sexo, direccion, gymId } = req.body;
 
-    // Preparar datos para actualizar
+    // Filter and prepare update payload
     const updateData = {};
     if (nombre) updateData.nombre = nombre;
     if (apellido) updateData.apellido = apellido;
@@ -37,7 +47,7 @@ export async function updateAdmin(req, res, next) {
 
     res.status(200).json({
       ok: true,
-      message: "Administrador actualizado correctamente",
+      message: "Staff member updated successfully",
       data: updated,
     });
   } catch (err) {
@@ -45,9 +55,14 @@ export async function updateAdmin(req, res, next) {
   }
 }
 
+/**
+ * Staff Deletion Handler
+ * Removes a staff member from the system. 
+ * Permission is verified within the service layer.
+ */
 export async function deleteAdmin(req, res, next) {
   try {
-    if (!req.admin) throw new AppError("No autenticado", 401);
+    if (!req.admin) throw new AppError("Not authenticated", 401);
 
     const adminId = parseInt(req.params.id);
 
@@ -55,7 +70,7 @@ export async function deleteAdmin(req, res, next) {
 
     res.status(200).json({
       ok: true,
-      message: "Administrador eliminado correctamente",
+      message: "Staff member removed successfully",
     });
   } catch (err) {
     next(err);

@@ -10,11 +10,24 @@ import {
 } from "recharts";
 import "./Styles/FinanzasTab.css";
 
-
+/**
+ * FinanzasTab Component
+ * 
+ * Provides high-fidelity financial insights into the gym's retail operations.
+ * 
+ * Features:
+ * - Performance Comparison (Bar Chart): Juxtaposes Sales (Revenue) vs. Purchases (Expenses) per SKU.
+ * - Logistical Activity Feed: Chronological ledger of the most recent stock movements.
+ * - Semantic styling for differentiating sales (Green/Positive) and replenishments (Red/Negative).
+ * 
+ * Props:
+ * @param {Array} chartData - Processed dataset for the performance bar chart.
+ * @param {Array} movimientos - Raw chronological list of stock transactions.
+ */
 export default function FinanzasTab({ chartData, movimientos }) {
   return (
     <div className="finanzasContainer">
-      {/* LEFT: Gráfico in Capsule Card */}
+      {/* --- Analytic Pulse: Product Performance Overview --- */}
       <div className={`chartCard overflowHidden`}>
         <h3 className="chartTitle">
           <span className={`material-symbols-outlined pPrimaryIcon`}>monitoring</span>
@@ -56,6 +69,7 @@ export default function FinanzasTab({ chartData, movimientos }) {
                   iconType="circle"
                   formatter={(value) => <span className="legendLabel">{value}</span>}
                 />
+                {/* Revenue Stream: Represents retail sales volume */}
                 <Bar 
                   dataKey="ingresos" 
                   name="Ventas" 
@@ -63,6 +77,7 @@ export default function FinanzasTab({ chartData, movimientos }) {
                   radius={[12, 12, 0, 0]} 
                   barSize={36}
                 />
+                {/* Cost Center: Represents stock acquisition costs */}
                 <Bar 
                   dataKey="gastos" 
                   name="Compras" 
@@ -76,7 +91,7 @@ export default function FinanzasTab({ chartData, movimientos }) {
         )}
       </div>
 
-      {/* RIGHT: Historial in Capsule Card */}
+      {/* --- Logistical Feed: Detailed Activity Ledger --- */}
       <div className="historyCard">
         <h3 className="chartTitle">
           <span className={`material-symbols-outlined pPrimaryIcon`}>history</span>
@@ -87,6 +102,7 @@ export default function FinanzasTab({ chartData, movimientos }) {
           <p className={`loading noDataSmall`}>Sin historial registrado.</p>
         ) : (
           <div className="historyList">
+            {/* Displaying the 15 most recent logistical events for operational clarity */}
             {movimientos.slice(0, 15).map(m => (
               <div 
                 key={m.id} 
@@ -116,4 +132,3 @@ export default function FinanzasTab({ chartData, movimientos }) {
     </div>
   );
 }
-

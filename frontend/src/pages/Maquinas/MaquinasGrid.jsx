@@ -1,6 +1,14 @@
 import Button from "../../components/ui/Button";
 import "./Styles/MaquinasGrid.css";
 
+/**
+ * EstadoBadge Component
+ * 
+ * Renders a visual status indicator with dynamic color coding based on the equipment state.
+ * 
+ * @param {Object} props - Component properties
+ * @param {string} props.estado - The current state of the machine (e.g., 'Disponible', 'En Uso', 'Mantenimiento')
+ */
 const EstadoBadge = ({ estado }) => {
   const badgeClass = {
     "En Uso": "status-uso",
@@ -16,7 +24,23 @@ const EstadoBadge = ({ estado }) => {
   );
 };
 
+/**
+ * MaquinasGrid Component
+ * 
+ * Renders a high-density grid of machinery cards.
+ * Features:
+ * - Conditional image rendering (shows placeholder if no photo is available).
+ * - Status and quantity overlays for quick identification.
+ * - Interactive action triggers for editing and deletion.
+ * - Responsive empty state handling.
+ * 
+ * @param {Object} props - Component properties
+ * @param {Array} props.maquinas - List of machinery records to display
+ * @param {Function} props.openEdit - Handler to trigger the edit modal
+ * @param {Function} props.handleDelete - Handler to trigger the deletion confirmation
+ */
 export default function MaquinasGrid({ maquinas, openEdit, handleDelete }) {
+  // Empty state guard: prevents rendering empty grid layouts
   if (!maquinas || maquinas.length === 0) {
     return (
       <div className="maquinas-empty-kinetic">
@@ -32,7 +56,7 @@ export default function MaquinasGrid({ maquinas, openEdit, handleDelete }) {
           key={maq.id} 
           className="maquina-card-kinetic"
         >
-          {/* Image Container */}
+          {/* Aesthetic Asset Header: Displays machine photo with status/quantity overlays */}
           <div className="maquina-card-header">
             {maq.foto ? (
               <img 
@@ -46,19 +70,19 @@ export default function MaquinasGrid({ maquinas, openEdit, handleDelete }) {
               </div>
             )}
             
-            {/* Gradient Overlay */}
+            {/* Visual enhancement overlay for text readability over images */}
             <div className="maquina-card-overlay"></div>
             
-            {/* Status Badge */}
+            {/* Operational Status Indicator */}
             <EstadoBadge estado={maq.estado} />
             
-            {/* Quantity Badge */}
+            {/* Aggregate Inventory Level Badge */}
             <div className="maquina-qty-badge">
               <span className="qty-label-kinetic">X{maq.cantidad}</span>
             </div>
           </div>
           
-          {/* Content */}
+          {/* Descriptive Content: Key machine identity and location data */}
           <div className="maquina-card-body">
             <div className="maquina-info-title">
               <h3 className="maquina-name-kinetic">
@@ -70,10 +94,13 @@ export default function MaquinasGrid({ maquinas, openEdit, handleDelete }) {
             </div>
             
             <div className="maquina-details-kinetic">
+              {/* Placement data (Zoning within the gym) */}
               <div className="maquina-detail-row">
                 <span className="detail-label-kinetic">Ubicación</span>
                 <span className="detail-value-kinetic">{maq.ubicacion || "Sin asignar"}</span>
               </div>
+              
+              {/* Extended descriptive notes */}
               <div className="maquina-desc-wrapper">
                 <span className="detail-label-kinetic">Descripción</span>
                 <p className="maquina-desc-kinetic" title={maq.descripcion}>
@@ -82,7 +109,7 @@ export default function MaquinasGrid({ maquinas, openEdit, handleDelete }) {
               </div>
             </div>
 
-            {/* Actions */}
+            {/* Operational Controls: Lifecycle actions for branch managers */}
             <div className="maquina-card-actions">
               <button 
                 onClick={() => openEdit(maq)}

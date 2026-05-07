@@ -1,0 +1,328 @@
+/* Step3Pago.css — Estilos compactos para el paso de pago */
+
+.pago-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* ---- Header ---- */
+.pago-header {
+  text-align: center;
+  margin-bottom: 2px;
+}
+
+.pago-title {
+  font-size: 22px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  margin: 0 0 2px;
+}
+
+.pago-subtitle {
+  font-size: 12px;
+  color: #4edea3;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0;
+}
+
+/* ---- Secciones ---- */
+.pago-section {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pago-section-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: #4edea3;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 0 2px;
+}
+
+.pago-label-icon {
+  font-size: 14px !important;
+}
+
+.pago-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.pago-row-key {
+  color: #94a3b8;
+}
+
+.pago-row-val {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.pago-email {
+  color: #4edea3;
+  font-size: 12px;
+}
+
+/* ---- Gym Row ---- */
+.pago-gym-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pago-gym-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(78, 222, 163, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pago-gym-avatar .material-symbols-outlined {
+  font-size: 18px;
+  color: #4edea3;
+}
+
+.pago-gym-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pago-gym-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.pago-gym-addr {
+  font-size: 11px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* ---- Price Card ---- */
+.pago-price-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pago-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.pago-price-label {
+  color: #94a3b8;
+}
+
+.pago-price-amt {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.pago-price-free {
+  color: #4edea3;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.pago-price-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 2px 0;
+}
+
+.pago-price-total-row {
+  align-items: center;
+}
+
+.pago-price-total-label {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.pago-price-total-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.pago-price-total-amt {
+  font-size: 20px;
+  font-weight: 900;
+  color: #4edea3;
+  line-height: 1;
+}
+
+.pago-price-total-period {
+  font-size: 9px;
+  color: #94a3b8;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ---- Método de Pago ---- */
+.pago-method-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(78, 222, 163, 0.25);
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+
+.pago-method-icon {
+  font-size: 20px !important;
+  color: #4edea3;
+}
+
+.pago-method-label {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.pago-method-badges {
+  display: flex;
+  gap: 6px;
+}
+
+.pago-card-badge {
+  font-size: 9px;
+  font-weight: 900;
+  padding: 3px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+.pago-card-visa {
+  background: #1a1f71;
+  color: #ffffff;
+}
+
+.pago-card-mc {
+  background: #eb001b;
+  color: #ffffff;
+}
+
+/* ---- Seguridad ---- */
+.pago-security-row {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.pago-security-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.pago-security-item .material-symbols-outlined {
+  font-size: 14px;
+}
+
+/* ---- Términos ---- */
+.pago-terms {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  color: #94a3b8;
+  cursor: pointer;
+  line-height: 1.5;
+}
+
+.pago-terms input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  accent-color: #4edea3;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.pago-link {
+  color: #4edea3;
+  text-decoration: none;
+}
+
+.pago-link:hover {
+  text-decoration: underline;
+}
+
+/* ---- Botón Pagar ---- */
+.pago-pay-btn {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #4edea3 0%, #3bc98e 100%);
+  color: #0b1326;
+  border: none;
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
+
+.pago-pay-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5aefb0 0%, #46d799 100%);
+  box-shadow: 0 8px 30px rgba(78, 222, 163, 0.5);
+  transform: translateY(-1px);
+}
+
+.pago-pay-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ---- Footer ---- */
+.pago-footer-note {
+  text-align: center;
+  font-size: 9px;
+  font-weight: 700;
+  color: #475569;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 0;
+}

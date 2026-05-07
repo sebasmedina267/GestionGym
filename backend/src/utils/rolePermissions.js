@@ -1,21 +1,25 @@
 import { AppError } from "./AppError.js";
 
 /**
- * Validar que el usuario tiene al menos uno de los roles permitidos
- * @param {Array} userRoles - Roles del usuario
- * @param {Array} allowedRoles - Roles permitidos
- * @throws {AppError} Si el usuario no tiene permiso
+ * Role-Based Access Control (RBAC) Utility
+ * 
+ * Enforces security policies by verifying that the authenticated user possesses 
+ * at least one of the required administrative roles for a given action.
+ * 
+ * @param {Array} userRoles - The collection of roles assigned to the current user.
+ * @param {Array} allowedRoles - Whitelist of roles permitted to perform the action.
+ * @throws {AppError} 403 if the user fails the authorization check.
  */
 export function requireRole(userRoles, ...allowedRoles) {
   if (!userRoles || userRoles.length === 0) {
-    throw new AppError("No tienes un rol asignado", 403);
+    throw new AppError("Authorization Failure: No roles assigned to your identity context", 403);
   }
 
   const hasRole = userRoles.some((role) => allowedRoles.includes(role));
 
   if (!hasRole) {
     throw new AppError(
-      `No tienes permiso para realizar esta acción. Roles permitidos: ${allowedRoles.join(
+      `Access Denied: You do not have sufficient privileges. Authorized roles: ${allowedRoles.join(
         ", "
       )}`,
       403
@@ -23,36 +27,43 @@ export function requireRole(userRoles, ...allowedRoles) {
   }
 }
 
-/**
- * Verificar si el usuario es dueño
+/** 
+ * Verification helper: Checks for 'DUENO' (Owner) status.
+ * @param {Array} userRoles - Assigned roles.
  */
 export function isDueno(userRoles) {
   return userRoles?.includes("DUENO");
 }
 
-/**
- * Verificar si el usuario es encargado
+/** 
+ * Verification helper: Checks for 'ENCARGADO' (Manager) status.
  */
 export function isEncargado(userRoles) {
   return userRoles?.includes("ENCARGADO");
 }
 
-/**
- * Verificar si el usuario es empleado
+/** 
+ * Verification helper: Checks for 'EMPLEADO' (Staff/Employee) status.
  */
 export function isEmpleado(userRoles) {
   return userRoles?.includes("EMPLEADO");
 }
 
-/**
- * Verificar si es dueño o encargado
+/** 
+ * Composite helper: Checks for administrative authority (Owner or Manager).
  */
 export function isDuenoOrEncargado(userRoles) {
   return isDueno(userRoles) || isEncargado(userRoles);
 }
 
 /**
- * Permisos por módulo y acción
+ * Global Permission Registry
+ * Defines the authoritative mapping between system modules/actions and required roles.
+ * 
+ * Roles:
+ * - DUENO (Owner): Full platform authority, financial control, and branch creation.
+ * - ENCARGADO (Manager): High-level operational management.
+ * - EMPLEADO (Staff): Primary interaction layer (check-ins, sales).
  */
 export const permissions = {
   CLASES: {
@@ -70,8 +81,8 @@ export const permissions = {
     CREAR: ["DUENO"],
     EDITAR: ["DUENO"],
     ELIMINAR: ["DUENO"],
-    COMPRAR: ["DUENO"], // Reponer stock
-    VENDER: ["DUENO", "EMPLEADO", "ENCARGADO"], // Vender productos
+    COMPRAR: ["DUENO"], // Replenish inventory stock
+    VENDER: ["DUENO", "EMPLEADO", "ENCARGADO"], // Point of sale transactions
   },
   MAQUINAS: {
     CREAR: ["DUENO"],
@@ -94,13 +105,18 @@ export const permissions = {
 };
 
 /**
- * Validar permiso para una acción específica
+ * Validates granular permission for a specific module and action.
+ * Maps the request to the central permission registry and enforces a role check.
+ * 
+ * @param {Array} userRoles - The actor's roles.
+ * @param {string} module - The target system module (e.g., 'ECONOMIA').
+ * @param {string} action - The intended action (e.g., 'VER').
  */
 export function validatePermission(userRoles, module, action) {
   const allowedRoles = permissions[module]?.[action];
 
   if (!allowedRoles) {
-    console.warn(`Permiso no definido para ${module}.${action}`);
+    console.warn(`System Warning: Undefined permission mapping for ${module}.${action}`);
     return;
   }
 

@@ -3,25 +3,31 @@ import * as authRepository from "../auth/auth.repository.js";
 import { registrarOperacion } from "../audit/audit.service.js";
 import { AppError } from "../../utils/AppError.js";
 
+/**
+ * Lists all staff members associated with the gyms managed by a specific owner.
+ * 
+ * @param {number} ownerId - The ID of the administrator requesting the list.
+ * @returns {Promise<Array>} A list of administrators with their roles and assigned gyms.
+ */
 export async function listAdminsForMyGyms(ownerId) {
-  if (!ownerId) throw new AppError("ID de dueño no proporcionado", 400);
+  if (!ownerId) throw new AppError("Owner ID not provided", 400);
 
-  // Obtener gyms del usuario actual
+  // Retrieve gyms associated with the requesting administrator
   const userGyms = await authRepository.getGymsByAdminId(ownerId);
   if (!userGyms || userGyms.length === 0) {
-    throw new AppError("Usuario no tiene gyms asignados", 403);
+    throw new AppError("User does not have any assigned gym branches", 403);
   }
 
-  // Obtener administradores de los gyms del usuario
+  // Retrieve administrators belonging to those gyms
   const admins = await adminsRepository.findAdminsByOwner(ownerId);
 
-  // Añadir roles y gyms a cada admin
+  // Hydrate each administrator record with their specific roles and gym associations
   for (const admin of admins) {
     admin.roles = await authRepository.getRolesByAdminId(admin.id);
     admin.gyms = await authRepository.getGymsByAdminId(admin.id);
   }
 
-  // Auditoría
+  // Auditing: Log the query operation
   await registrarOperacion({
     adminId: ownerId,
     gymId: userGyms[0]?.id || null,
@@ -34,65 +40,78 @@ export async function listAdminsForMyGyms(ownerId) {
   return admins;
 }
 
+/**
+ * Updates a staff member's profile.
+ * 
+ * @param {number} ownerId - The ID of the administrator performing the update.
+ * @param {number} adminId - The ID of the staff member being updated.
+ * @param {Object} updateData - The new data to be applied.
+ */
 export async function updateAdmin(ownerId, adminId, updateData) {
-  if (!ownerId) throw new AppError("ID de dueño no proporcionado", 400);
-  if (!adminId) throw new AppError("ID de admin no proporcionado", 400);
+  if (!ownerId) throw new AppError("Owner ID not provided", 400);
+  if (!adminId) throw new AppError("Staff ID not provided", 400);
 
-  // Validar que el owner es dueño
+  // Verification: Ensure the requester manages at least one gym branch
   const ownerGyms = await authRepository.getGymsByAdminId(ownerId);
   if (!ownerGyms || ownerGyms.length === 0) {
-    throw new AppError("Usuario no tiene gyms asignados", 403);
+    throw new AppError("Requester does not have any assigned gym branches", 403);
   }
 
-  // Validar que el admin a actualizar pertenece a uno de los gyms del owner
+  // Verification: Ensure the target administrator exists
   const targetAdmin = await adminsRepository.findAdminById(adminId);
   if (!targetAdmin) {
-    throw new AppError("Administrador no encontrado", 404);
+    throw new AppError("Staff member not found", 404);
   }
 
-  // Actualizar admin
+  // Persist the updates
   const updated = await adminsRepository.updateAdmin(adminId, updateData);
 
-  // Auditoría
+  // Auditing: Log the update with details on modified fields
   await registrarOperacion({
     adminId: ownerId,
     gymId: ownerGyms[0]?.id || null,
     entidad: "ADMIN",
     entidadId: adminId,
     accion: "ACTUALIZAR",
-    detalles: `Actualizó datos de admin: ${Object.keys(updateData).join(", ")}`,
+    detalles: `Updated staff profile fields: ${Object.keys(updateData).join(", ")}`,
   });
 
   return updated;
 }
 
+/**
+ * Permanently removes a staff member from the system.
+ * 
+ * @param {number} ownerId - The ID of the administrator performing the deletion.
+ * @param {number} adminId - The ID of the staff member to be removed.
+ */
 export async function deleteAdmin(ownerId, adminId) {
-  if (!ownerId) throw new AppError("ID de dueño no proporcionado", 400);
-  if (!adminId) throw new AppError("ID de admin no proporcionado", 400);
+  if (!ownerId) throw new AppError("Owner ID not provided", 400);
+  if (!adminId) throw new AppError("Staff ID not provided", 400);
 
-  // Validar que el owner es dueño
+  // Verification: Ensure the requester has administrative authority
   const ownerGyms = await authRepository.getGymsByAdminId(ownerId);
   if (!ownerGyms || ownerGyms.length === 0) {
-    throw new AppError("Usuario no tiene gyms asignados", 403);
+    throw new AppError("Requester does not have any assigned gym branches", 403);
   }
 
-  // Validar que el admin a eliminar existe
+  // Verification: Ensure the target exists before attempting deletion
   const targetAdmin = await adminsRepository.findAdminById(adminId);
   if (!targetAdmin) {
-    throw new AppError("Administrador no encontrado", 404);
+    throw new AppError("Staff member not found", 404);
   }
 
-  // Eliminar admin
+  // Execute deletion
   await adminsRepository.deleteAdmin(adminId);
 
-  // Auditoría
+  // Auditing: Log the deletion with the name of the removed staff member
   await registrarOperacion({
     adminId: ownerId,
     gymId: ownerGyms[0]?.id || null,
     entidad: "ADMIN",
     entidadId: adminId,
     accion: "ELIMINAR",
-    detalles: `Eliminó admin: ${targetAdmin.nombre} ${targetAdmin.apellido}`,
+    detalles: `Removed staff member: ${targetAdmin.nombre} ${targetAdmin.apellido}`,
   });
 
   return true;

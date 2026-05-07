@@ -2,6 +2,10 @@ import * as clasesService from "./clases.service.js";
 import { AppError } from "../../utils/AppError.js";
 import { validatePermission } from "../../utils/rolePermissions.js";
 
+/**
+ * Class Listing Handler
+ * Retrieves all defined classes for the current gym branch.
+ */
 export async function listarClases(req, res, next) {
   try {
     const gymId = req.gym.id;
@@ -12,10 +16,16 @@ export async function listarClases(req, res, next) {
   }
 }
 
+/**
+ * Class Creation Handler
+ * Creates a new base class definition. Requires explicit permission.
+ */
 export async function crearClase(req, res, next) {
   try {
-    if (!req.admin) throw new AppError("No autenticado", 401);
+    if (!req.admin) throw new AppError("Not authenticated", 401);
+    // RBAC: Verify if the user has creation rights for the 'CLASES' module
     validatePermission(req.admin.roles, "CLASES", "CREAR");
+    
     const gymId = req.gym.id;
     const clase = await clasesService.crearClase(gymId, req.body, req.admin);
     res.status(201).json({ ok: true, data: clase });
@@ -24,10 +34,15 @@ export async function crearClase(req, res, next) {
   }
 }
 
+/**
+ * Class Update Handler
+ * Modifies an existing class definition. Requires update permissions.
+ */
 export async function actualizarClase(req, res, next) {
   try {
-    if (!req.admin) throw new AppError("No autenticado", 401);
+    if (!req.admin) throw new AppError("Not authenticated", 401);
     validatePermission(req.admin.roles, "CLASES", "EDITAR");
+    
     const gymId = req.gym.id;
     const claseId = Number(req.params.id);
     const clase = await clasesService.actualizarClase(gymId, claseId, req.body, req.admin);
@@ -37,19 +52,28 @@ export async function actualizarClase(req, res, next) {
   }
 }
 
+/**
+ * Class Deletion Handler
+ * Permanently removes a class and its dependencies.
+ */
 export async function eliminarClase(req, res, next) {
   try {
-    if (!req.admin) throw new AppError("No autenticado", 401);
+    if (!req.admin) throw new AppError("Not authenticated", 401);
     validatePermission(req.admin.roles, "CLASES", "ELIMINAR");
+    
     const gymId = req.gym.id;
     const claseId = Number(req.params.id);
     await clasesService.eliminarClase(gymId, claseId, req.admin);
-    res.status(200).json({ ok: true, message: "Clase eliminada" });
+    res.status(200).json({ ok: true, message: "Class deleted successfully" });
   } catch (err) {
     next(err);
   }
 }
 
+/**
+ * Schedule Listing Handler
+ * Retrieves all scheduled sessions for a specific class.
+ */
 export async function listarHorarios(req, res, next) {
   try {
     const gymId = req.gym.id;
@@ -61,10 +85,15 @@ export async function listarHorarios(req, res, next) {
   }
 }
 
+/**
+ * Schedule Creation Handler
+ * Adds a new recurring or one-time session to a class.
+ */
 export async function crearHorario(req, res, next) {
   try {
-    if (!req.admin) throw new AppError("No autenticado", 401);
+    if (!req.admin) throw new AppError("Not authenticated", 401);
     validatePermission(req.admin.roles, "CLASES", "CREAR_HORARIO");
+    
     const gymId = req.gym.id;
     const claseId = Number(req.params.id);
     const horario = await clasesService.crearHorario(gymId, claseId, req.body, req.admin);
@@ -74,19 +103,28 @@ export async function crearHorario(req, res, next) {
   }
 }
 
+/**
+ * Schedule Deletion Handler
+ * Removes a session from the weekly schedule.
+ */
 export async function eliminarHorario(req, res, next) {
   try {
-    if (!req.admin) throw new AppError("No autenticado", 401);
+    if (!req.admin) throw new AppError("Not authenticated", 401);
     validatePermission(req.admin.roles, "CLASES", "ELIMINAR_HORARIO");
+    
     const gymId = req.gym.id;
     const horarioId = Number(req.params.horarioId);
     await clasesService.eliminarHorario(gymId, horarioId, req.admin);
-    res.status(200).json({ ok: true, message: "Horario eliminado" });
+    res.status(200).json({ ok: true, message: "Session deleted from schedule" });
   } catch (err) {
     next(err);
   }
 }
 
+/**
+ * Enrollment List Handler
+ * Retrieves all clients currently enrolled in a specific class session.
+ */
 export async function listarClientesDeHorario(req, res, next) {
   try {
     const gymId = req.gym.id;
@@ -98,10 +136,15 @@ export async function listarClientesDeHorario(req, res, next) {
   }
 }
 
+/**
+ * Enrollment Handler
+ * Registers a client for a specific class session.
+ */
 export async function inscribirCliente(req, res, next) {
   try {
-    if (!req.admin) throw new AppError("No autenticado", 401);
+    if (!req.admin) throw new AppError("Not authenticated", 401);
     validatePermission(req.admin.roles, "CLASES", "INSCRIBIR_CLIENTE");
+    
     const gymId = req.gym.id;
     const horarioId = Number(req.params.horarioId);
     const clienteId = Number(req.params.clienteId);
@@ -117,10 +160,15 @@ export async function inscribirCliente(req, res, next) {
   }
 }
 
+/**
+ * Unenrollment Handler
+ * Removes a client from a specific class session.
+ */
 export async function desinscribirCliente(req, res, next) {
   try {
-    if (!req.admin) throw new AppError("No autenticado", 401);
+    if (!req.admin) throw new AppError("Not authenticated", 401);
     validatePermission(req.admin.roles, "CLASES", "DESINSCRIBIR_CLIENTE");
+    
     const gymId = req.gym.id;
     const horarioId = Number(req.params.horarioId);
     const clienteId = Number(req.params.clienteId);
@@ -130,12 +178,16 @@ export async function desinscribirCliente(req, res, next) {
       clienteId,
       req.admin
     );
-    res.status(200).json({ ok: true, message: "Cliente desinscrito" });
+    res.status(200).json({ ok: true, message: "Client unenrolled successfully" });
   } catch (err) {
     next(err);
   }
 }
 
+/**
+ * Class Statistics Handler
+ * Provides attendance and performance metrics for a specific class type.
+ */
 export async function estadisticasClase(req, res, next) {
   try {
     const gymId = req.gym.id;
@@ -147,6 +199,10 @@ export async function estadisticasClase(req, res, next) {
   }
 }
 
+/**
+ * Global Concurrency Handler
+ * Lists all classes with their respective popularity and occupancy levels.
+ */
 export async function clasesConCurrencia(req, res, next) {
   try {
     const gymId = req.gym.id;
@@ -157,11 +213,15 @@ export async function clasesConCurrencia(req, res, next) {
   }
 }
 
+/**
+ * Schedule Update Handler
+ * Modifies parameters (time, day, limit) of a scheduled session.
+ */
 export async function actualizarHorario(req, res, next) {
   try {
     const { horarioId } = req.params;
     const data = req.body;
-    const admin = req.user;
+    const admin = req.admin; // Corrected from req.user
     const gymId = req.gym.id;
 
     const horario = await clasesService.actualizarHorario(
@@ -171,16 +231,17 @@ export async function actualizarHorario(req, res, next) {
       admin
     );
 
-    res.json({ data: horario });
+    res.json({ ok: true, data: horario });
   } catch (err) {
     next(err);
   }
 }
 
 /* ============================================================
-   MONITORES
-============================================================ */
+   INSTRUCTOR (MONITOR) MANAGEMENT
+   ============================================================ */
 
+/** Lists instructors assigned to a class */
 export async function listarMonitores(req, res, next) {
   try {
     const gymId = req.gym.id;
@@ -192,38 +253,41 @@ export async function listarMonitores(req, res, next) {
   }
 }
 
+/** Assigns a new instructor to a class */
 export async function agregarMonitor(req, res, next) {
   try {
-    if (!req.admin) throw new AppError("No autenticado", 401);
+    if (!req.admin) throw new AppError("Not authenticated", 401);
     const gymId = req.gym.id;
     const claseId = Number(req.params.id);
     const { admin_id } = req.body;
     
     await clasesService.agregarMonitor(gymId, claseId, admin_id, req.admin);
-    res.status(201).json({ ok: true, message: "Monitor agregado" });
+    res.status(201).json({ ok: true, message: "Instructor assigned" });
   } catch (err) {
     next(err);
   }
 }
 
+/** Removes an instructor assignment from a class */
 export async function removerMonitor(req, res, next) {
   try {
-    if (!req.admin) throw new AppError("No autenticado", 401);
+    if (!req.admin) throw new AppError("Not authenticated", 401);
     const gymId = req.gym.id;
     const claseId = Number(req.params.id);
     const monitorId = Number(req.params.monitorId);
     
     await clasesService.removerMonitor(gymId, claseId, monitorId, req.admin);
-    res.status(200).json({ ok: true, message: "Monitor removido" });
+    res.status(200).json({ ok: true, message: "Instructor removed" });
   } catch (err) {
     next(err);
   }
 }
 
 /* ============================================================
-   PRECIOS
-============================================================ */
+   PRICING TIER MANAGEMENT
+   ============================================================ */
 
+/** Lists pricing options for a class */
 export async function listarPrecios(req, res, next) {
   try {
     const gymId = req.gym.id;
@@ -235,9 +299,10 @@ export async function listarPrecios(req, res, next) {
   }
 }
 
+/** Creates a new pricing tier for a class */
 export async function crearPrecio(req, res, next) {
   try {
-    if (!req.admin) throw new AppError("No autenticado", 401);
+    if (!req.admin) throw new AppError("Not authenticated", 401);
     const gymId = req.gym.id;
     const claseId = Number(req.params.id);
     const precio = await clasesService.crearPrecio(gymId, claseId, req.body, req.admin);
@@ -247,9 +312,10 @@ export async function crearPrecio(req, res, next) {
   }
 }
 
+/** Updates an existing pricing tier */
 export async function actualizarPrecio(req, res, next) {
   try {
-    if (!req.admin) throw new AppError("No autenticado", 401);
+    if (!req.admin) throw new AppError("Not authenticated", 401);
     const precioId = Number(req.params.precioId);
     const precio = await clasesService.actualizarPrecio(precioId, req.body, req.admin);
     res.status(200).json({ ok: true, data: precio });
@@ -258,12 +324,13 @@ export async function actualizarPrecio(req, res, next) {
   }
 }
 
+/** Deletes a pricing tier */
 export async function eliminarPrecio(req, res, next) {
   try {
-    if (!req.admin) throw new AppError("No autenticado", 401);
+    if (!req.admin) throw new AppError("Not authenticated", 401);
     const precioId = Number(req.params.precioId);
     await clasesService.eliminarPrecio(precioId, req.admin);
-    res.status(200).json({ ok: true, message: "Precio eliminado" });
+    res.status(200).json({ ok: true, message: "Pricing tier removed" });
   } catch (err) {
     next(err);
   }

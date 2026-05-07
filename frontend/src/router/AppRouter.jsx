@@ -1,12 +1,14 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "../components/layout/ProtectedRoute";
 
+// Auth and Registration Pages
 import LoginPage from "../pages/Login/LoginPage";
-import RegisterPage from "../pages/Register/RegisterPage";
+import RegisterPage from "../pages/Register/RegisterPageNew";
 import StripeCheckoutPage from "../pages/Stripe/StripeCheckoutPage";
 import SelectGymPage from "../pages/SelectGym/SelectGymPage";
-import DashboardPage from "../pages/Dashboard/DashboardPage";
 
+// Dashboard and Management Pages
+import DashboardPage from "../pages/Dashboard/DashboardPage";
 import ClientesPage from "../pages/Clientes/ClientesPage";
 import ClasesPage from "../pages/Clases/ClasesPage";
 import ProductosPage from "../pages/Productos/ProductosPage";
@@ -15,14 +17,27 @@ import EconomiaPage from "../pages/Economia/EconomiaPage";
 import MaquinasPage from "../pages/Maquinas/MaquinasPage";
 import AdminsPage from "../pages/Admins/AdminsPage";
 
-
+/**
+ * AppRouter Component
+ * 
+ * Defines the application's routing structure using React Router.
+ * Distinguishes between public routes (login, register) and protected routes
+ * that require authentication through the ProtectedRoute wrapper.
+ */
 export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* --- Public Routes --- */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        
+        {/* Stripe Checkout flow for initial registration */}
         <Route path="/stripe-checkout" element={<StripeCheckoutPage />} />
+
+        {/* --- Protected Routes (Require Authentication) --- */}
+        
+        {/* Route for existing owners to add and pay for new branches */}
         <Route
           path="/branch-payment"
           element={
@@ -32,6 +47,7 @@ export default function AppRouter() {
           }
         />
 
+        {/* Multi-gym selection screen for authorized users */}
         <Route
           path="/select-gym"
           element={
@@ -41,6 +57,7 @@ export default function AppRouter() {
           }
         />
 
+        {/* Main Dashboard / Landing after login */}
         <Route
           path="/"
           element={
@@ -50,6 +67,7 @@ export default function AppRouter() {
           }
         />
 
+        {/* Client management section */}
         <Route
           path="/clientes"
           element={
@@ -59,6 +77,7 @@ export default function AppRouter() {
           }
         />
 
+        {/* Class scheduling and management */}
         <Route
           path="/clases"
           element={
@@ -68,6 +87,7 @@ export default function AppRouter() {
           }
         />
 
+        {/* Inventory and product management */}
         <Route
           path="/productos"
           element={
@@ -77,6 +97,7 @@ export default function AppRouter() {
           }
         />
 
+        {/* Payment history and transaction tracking */}
         <Route
           path="/pagos"
           element={
@@ -86,6 +107,7 @@ export default function AppRouter() {
           }
         />
 
+        {/* Financial reports and economic overview */}
         <Route
           path="/economia"
           element={
@@ -95,6 +117,7 @@ export default function AppRouter() {
           }
         />
 
+        {/* Equipment/Machine maintenance and tracking */}
         <Route
           path="/maquinas"
           element={
@@ -104,6 +127,7 @@ export default function AppRouter() {
           }
         />
 
+        {/* Administrative user management */}
         <Route
           path="/admins"
           element={

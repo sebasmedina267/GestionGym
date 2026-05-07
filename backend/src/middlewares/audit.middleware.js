@@ -1,23 +1,28 @@
 import { registrarOperacion } from '../modules/audit/audit.service.js';
 
 /**
- * Middleware de auditoría automática avanzada.
- * Detecta:
- *  - admin
- *  - gym
- *  - método HTTP
- *  - entidad (por ruta)
- *  - entidadId (por params)
- *  - detalles (body + query + path)
+ * Advanced Automated Audit Middleware
+ * 
+ * Intercepts active request cycles to transparently capture operational telemetry.
+ * Automatically identifies:
+ * - The Actor: Authenticated administrator ID.
+ * - The Context: Selected gym branch ID.
+ * - The Action: Derived from HTTP methods (POST -> CREATE, etc.).
+ * - The Resource: Extracted via path-to-entity mapping (REGEX).
+ * - The Specific Record: Extracted from common path parameters (IDs).
+ * - The Metadata: Comprehensive snapshot of request body and query parameters.
+ * 
+ * Safety Policy: Audit failures are captured and logged to console but NEVER 
+ * disrupt the primary request flow.
  */
 export async function auditMiddleware(req, res, next) {
   const admin = req.admin;
   const gym = req.gym;
 
-  // Si no hay admin o gym, no auditamos
+  // Termination: Do not audit if identity or branch context is missing
   if (!admin || !gym) return next();
 
-  // Detectar acción por método HTTP
+  // Action Mapping: Translate HTTP semantics into domain-specific actions
   const method = req.method;
   let accion = null;
 
@@ -30,14 +35,13 @@ export async function auditMiddleware(req, res, next) {
     default: accion = `REQUEST_${method}`;
   }
 
-  // Detectar entidad por la ruta
-  // Ej: /api/gym/1/productos/5 → entidad = PRODUCTOS
+  // Resource Discovery: Map URL path patterns to system entities (e.g., /api/clientes -> CLIENTES)
   const path = req.originalUrl;
   const match = path.match(/\/(clientes|productos|clases|maquinas|pagos|gastos|ingresos|economia|admins|gyms)(\/|$)/);
 
   const entidad = match ? match[1].toUpperCase() : null;
 
-  // Detectar ID si existe
+  // Record Identification: Scan path parameters for unique identifiers
   const entidadId =
     req.params.id ||
     req.params.clienteId ||
@@ -47,7 +51,7 @@ export async function auditMiddleware(req, res, next) {
     req.params.maquinaId ||
     null;
 
-  // Guardar auditoría sin bloquear la request
+  // Persistence: Trigger the non-blocking audit logging service
   try {
     await registrarOperacion({
       adminId: admin.id,
@@ -62,8 +66,8 @@ export async function auditMiddleware(req, res, next) {
       }
     });
   } catch (err) {
-    // Nunca romper la request por un fallo de auditoría
-    console.error("Error en auditoría automática:", err);
+    // Fail-Safe: Log error to console but permit request to continue
+    console.error("Non-Critical Failure: Automated audit telemetry failed:", err);
   }
 
   next();

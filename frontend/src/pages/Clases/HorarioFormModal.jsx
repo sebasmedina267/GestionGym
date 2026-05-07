@@ -1,7 +1,22 @@
 import React from "react";
 import "./Styles/HorarioFormModal.css";
-const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
+// Localized days array for internal selection logic
+const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+/**
+ * HorarioFormModal Component
+ * 
+ * A specialized modal for creating or editing a class schedule entry.
+ * Provides granular control over the day of the week and start/end times.
+ * 
+ * Props:
+ * @param {boolean} open - Visibility state
+ * @param {Function} onClose - Dismiss handler
+ * @param {Object} horarioForm - Current form data state
+ * @param {Function} setHorarioForm - State updater for form data
+ * @param {Function} handleCreateOrUpdateHorario - Submission handler
+ */
 export default function HorarioFormModal({
   open, onClose, horarioForm, setHorarioForm, handleCreateOrUpdateHorario
 }) {
@@ -13,11 +28,12 @@ export default function HorarioFormModal({
     <div className="horario-modal-overlay">
       <div className="horario-modal-container">
         
+        {/* Modal Header: Displays action title and schedule icon */}
         <header className="horario-modal-header">
           <div className="horario-header-title">
             <span className="material-symbols-outlined" style={{color: "var(--primary)"}}>schedule</span>
             <h2>
-              {isEdit ? "Editar Horario" : "Nuevo Turno"}
+              {isEdit ? "Edit Session Slot" : "New Schedule Entry"}
             </h2>
           </div>
           <button className="horario-modal-close" onClick={onClose}>
@@ -27,22 +43,26 @@ export default function HorarioFormModal({
 
         <form onSubmit={handleCreateOrUpdateHorario}>
           <div className="horario-modal-body">
+            
+            {/* Day Selection Field */}
             <div className="horario-field-group">
-              <label className="horario-field-label">Día de la semana</label>
+              <label className="horario-field-label">Target Day</label>
               <select
                 className="horario-input horario-select"
                 value={horarioForm.dia}
                 onChange={(e) => setHorarioForm({ ...horarioForm, dia: parseInt(e.target.value) })}
               >
-                {DIAS.map((dia, idx) => (
+                {DAYS.map((dia, idx) => (
                   <option key={idx} value={idx}>{dia}</option>
                 ))}
               </select>
             </div>
 
+            {/* Time Configuration Grid */}
             <div className="horario-time-row">
+              {/* Start Time Picker */}
               <div className="horario-field-group">
-                <label className="horario-field-label" style={{color: "var(--primary)"}}>Inicio</label>
+                <label className="horario-field-label" style={{color: "var(--primary)"}}>Session Start</label>
                 <div className="time-inputs-group">
                   <input
                     className="horario-input"
@@ -50,6 +70,7 @@ export default function HorarioFormModal({
                     type="number" min="0" max="23"
                     value={horarioForm.hora_inicio}
                     onChange={(e) => setHorarioForm({ ...horarioForm, hora_inicio: parseInt(e.target.value) })}
+                    title="Hour"
                   />
                   <span className="time-sep">:</span>
                   <input
@@ -58,12 +79,14 @@ export default function HorarioFormModal({
                     type="number" min="0" max="59"
                     value={horarioForm.minuto_inicio}
                     onChange={(e) => setHorarioForm({ ...horarioForm, minuto_inicio: parseInt(e.target.value) })}
+                    title="Minute"
                   />
                 </div>
               </div>
 
+              {/* End Time Picker */}
               <div className="horario-field-group">
-                <label className="horario-field-label" style={{color: "var(--secondary)"}}>Fin</label>
+                <label className="horario-field-label" style={{color: "var(--secondary)"}}>Session End</label>
                 <div className="time-inputs-group">
                   <input
                     className="horario-input"
@@ -71,6 +94,7 @@ export default function HorarioFormModal({
                     type="number" min="0" max="23"
                     value={horarioForm.hora_fin}
                     onChange={(e) => setHorarioForm({ ...horarioForm, hora_fin: parseInt(e.target.value) })}
+                    title="Hour"
                   />
                   <span className="time-sep">:</span>
                   <input
@@ -79,17 +103,20 @@ export default function HorarioFormModal({
                     type="number" min="0" max="59"
                     value={horarioForm.minuto_fin}
                     onChange={(e) => setHorarioForm({ ...horarioForm, minuto_fin: parseInt(e.target.value) })}
+                    title="Minute"
                   />
                 </div>
               </div>
             </div>
             
+            {/* Contextual User Guidance */}
             <p className="horario-info-note">
               <span className="material-symbols-outlined" style={{fontSize: "0.875rem", color: "var(--primary)"}}>info</span>
-              Asegúrese de que el horario no colisione con otros turnos de la misma clase.
+              Ensure the session timing does not overlap with existing entries for the same class definition.
             </p>
           </div>
 
+          {/* Action Footer */}
           <footer className="horario-modal-footer">
             <button 
               className="btn-secondary"
@@ -97,7 +124,7 @@ export default function HorarioFormModal({
               type="button" 
               onClick={onClose}
             >
-              Cancelar
+              Cancel
             </button>
             <button 
               className="btn-primary"
@@ -105,7 +132,7 @@ export default function HorarioFormModal({
               type="submit"
             >
               <span className="material-symbols-outlined" style={{fontSize: "1.125rem"}}>check_circle</span>
-              {isEdit ? "Guardar Cambios" : "Añadir Horario"}
+              {isEdit ? "Update Schedule" : "Confirm Entry"}
             </button>
           </footer>
         </form>

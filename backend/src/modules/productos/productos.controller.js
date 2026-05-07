@@ -6,27 +6,41 @@ import { validatePermission } from '../../utils/rolePermissions.js';
    HELPERS
 ============================================================ */
 
+/**
+ * Ensures the request is authenticated via an administrator context.
+ * @param {Object} req - Express request object.
+ * @throws {AppError} 401 if unauthorized.
+ */
 function validarAdmin(req) {
-  if (!req.admin) throw new AppError("No autenticado", 401);
+  if (!req.admin) throw new AppError("Authentication required: Identity context is missing", 401);
 }
 
+/**
+ * Validates a numeric identifier.
+ */
 function validarId(id, nombre = "ID") {
   const num = Number(id);
-  if (isNaN(num)) throw new AppError(`${nombre} inválido`, 400);
+  if (isNaN(num)) throw new AppError(`Invalid format for field: ${nombre}`, 400);
   return num;
 }
 
+/**
+ * Validates a date string and returns the original if correct.
+ */
 function validarFecha(fecha, nombre) {
   if (!fecha) return null;
   const d = new Date(fecha);
-  if (isNaN(d.getTime())) throw new AppError(`Fecha inválida: ${nombre}`, 400);
+  if (isNaN(d.getTime())) throw new AppError(`Invalid date provided: ${nombre}`, 400);
   return fecha;
 }
 
 /* ============================================================
-   LISTAR PRODUCTOS
+   PRODUCT CATALOG HANDLERS
 ============================================================ */
 
+/**
+ * Retrieves the full product catalog for the current branch.
+ */
 export async function listarProductos(req, res, next) {
   try {
     validarAdmin(req);
@@ -39,10 +53,10 @@ export async function listarProductos(req, res, next) {
   }
 }
 
-/* ============================================================
-   LISTAR MOVIMIENTOS
-============================================================ */
-
+/**
+ * Retrieves historical inventory movements (Purchases/Sales).
+ * Supports temporal filtering and movement type classification.
+ */
 export async function listarMovimientos(req, res, next) {
   try {
     validarAdmin(req);
@@ -64,10 +78,9 @@ export async function listarMovimientos(req, res, next) {
   }
 }
 
-/* ============================================================
-   ESTADÍSTICAS
-============================================================ */
-
+/**
+ * Provides analytics for product performance and inventory health.
+ */
 export async function estadisticasProductos(req, res, next) {
   try {
     validarAdmin(req);
@@ -81,14 +94,19 @@ export async function estadisticasProductos(req, res, next) {
 }
 
 /* ============================================================
-   CREAR PRODUCTO BASE
+   PRODUCT MANAGEMENT HANDLERS
 ============================================================ */
 
+/**
+ * Orchestrates the creation of a new product definition.
+ * Handles binary asset (image) processing if provided.
+ */
 export async function crearProductoBase(req, res, next) {
   try {
     validarAdmin(req);
     validatePermission(req.admin.roles, "PRODUCTOS", "CREAR");
 
+    // Asset Hydration: Construct full URL for the uploaded image
     if (req.file) {
       req.body.foto = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
     }
@@ -105,10 +123,9 @@ export async function crearProductoBase(req, res, next) {
   }
 }
 
-/* ============================================================
-   ACTUALIZAR PRODUCTO
-============================================================ */
-
+/**
+ * Persists modifications to an existing product entry.
+ */
 export async function actualizarProducto(req, res, next) {
   try {
     validarAdmin(req);
@@ -134,9 +151,13 @@ export async function actualizarProducto(req, res, next) {
 }
 
 /* ============================================================
-   REGISTRAR COMPRA
+   LOGISTICS HANDLERS
 ============================================================ */
 
+/**
+ * Registers an inventory purchase (Stock-in).
+ * Triggers automated operational expense logging.
+ */
 export async function registrarCompra(req, res, next) {
   try {
     validarAdmin(req);
@@ -157,10 +178,10 @@ export async function registrarCompra(req, res, next) {
   }
 }
 
-/* ============================================================
-   REGISTRAR VENTA
-============================================================ */
-
+/**
+ * Registers an inventory sale (Stock-out).
+ * Triggers automated revenue logging.
+ */
 export async function registrarVenta(req, res, next) {
   try {
     validarAdmin(req);

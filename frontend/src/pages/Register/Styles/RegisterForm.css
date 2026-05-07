@@ -149,28 +149,29 @@
 
 .register-submit-btn {
   width: 100%;
-  background: var(--secondary);
-  color: #003924;
-  padding: 12px;
+  background: linear-gradient(135deg, #4edea3 0%, #3bc98e 100%);
+  color: #ffffff;
+  padding: 14px 16px;
   border-radius: 12px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.2em;
   font-size: 0.75rem;
-  border: none;
+  border: 2px solid #4edea3;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
   transition: all 0.3s ease;
-  box-shadow: 0 5px 15px rgba(78, 222, 163, 0.2);
+  box-shadow: 0 5px 15px rgba(78, 222, 163, 0.3);
   margin-top: 8px;
 }
 
 .register-submit-btn:hover {
-  background: #3bc98e;
-  box-shadow: 0 8px 20px rgba(78, 222, 163, 0.4);
+  background: linear-gradient(135deg, #5aefb0 0%, #46d799 100%);
+  box-shadow: 0 8px 25px rgba(78, 222, 163, 0.5);
+  border-color: #5aefb0;
 }
 
 .register-submit-btn:active {

@@ -10,9 +10,21 @@ import DeleteAdminModal from "./DeleteAdminModal";
 import CreateGymModal from "./CreateGymModal";
 import "./Styles/AdminsPage.css";
 
+/**
+ * AdminsPage Component (Staff Management)
+ * 
+ * The authoritative interface for managing gym human resources.
+ * Features:
+ * - Role-based access control (RBAC) visualization.
+ * - Multi-branch staff coordination.
+ * - Dynamic metrics for staff distribution.
+ * - Comprehensive CRUD for administrators and employees.
+ * - New branch (Gym) creation for Owners.
+ */
 export default function AdminsPage() {
   const logic = useAdminsLogic();
 
+  /** Access Control Guard: Ensure only authorized roles can view this module */
   if (!logic.canManageStaff) {
     return (
       <AppLayout>
@@ -20,7 +32,9 @@ export default function AdminsPage() {
           <div className="admins-page-restricted-card">
             <span className="material-symbols-outlined restricted-icon">lock</span>
             <h1 className="admins-page-restricted-title">Acceso Restringido</h1>
-            <p className="admins-page-restricted-desc">No tienes permisos para gestionar el Staff del sistema.</p>
+            <p className="admins-page-restricted-desc">
+              No tienes suficientes privilegios administrativos para gestionar el personal del sistema.
+            </p>
           </div>
         </div>
       </AppLayout>
@@ -30,42 +44,46 @@ export default function AdminsPage() {
   return (
     <AppLayout>
       <div className="admins-view-container">
-        {/* Header Section */}
+        {/* --- Page Header: Strategic Context and Global Actions --- */}
         <div className="admins-view-header">
           <div className="header-text-group">
-            <h2 className="header-display-title">Gestión de Staff</h2>
+            <h2 className="header-display-title">Ecosistema de Personal</h2>
             <p className="header-subtitle-desc">
-              Administre el acceso, roles y permisos de los empleados en todas sus sucursales. 
-              Optimización de personal y control administrativo centralizado.
+              Organiza niveles de acceso, roles y permisos operativos en todas las sucursales del gimnasio. 
+              Optimización centralizada de recursos humanos y auditoría administrativa.
             </p>
           </div>
           <div className="header-actions-group">
+            {/* Toggle between specific branch view and global organization view */}
             <Button 
               className="btn-filter-gym"
               variant={logic.viewAll ? "danger" : "secondary"} 
               onClick={() => logic.setViewAll(!logic.viewAll)}
             >
               <span className="material-symbols-outlined">{logic.viewAll ? "group" : "location_on"}</span>
-              {logic.viewAll ? "Ver Todos" : (logic.gym?.nombre || "Sucursal Actual")}
+              {logic.viewAll ? "Vista de Organización" : (logic.gym?.nombre || "Sucursal Actual")}
             </Button>
+            
+            {/* Restricted Action: Only owners can expand the gym network */}
             {logic.isDueno && (
               <Button className="btn-add-branch" onClick={() => logic.setShowCreateGym(true)}>
                 <span className="material-symbols-outlined">add_business</span>
-                Crear Sucursal
+                Añadir Sucursal
               </Button>
             )}
+            
             <Button className="btn-hire-staff" onClick={() => logic.setOpen(true)}>
               <span className="material-symbols-outlined">person_add</span>
-              Contratar Empleado
+              Contratar Personal
             </Button>
           </div>
         </div>
 
-        {/* Metrics Row */}
+        {/* --- Operational Metrics: Real-time Staff Distribution --- */}
         <div className="metrics-grid">
           <div className="metric-card">
             <div className="metric-content">
-              <p className="metric-label">STAFF TOTAL</p>
+              <p className="metric-label">TOTAL PERSONAL</p>
               <p className="metric-value">{logic.tableData.length}</p>
             </div>
             <div className="metric-icon-box primary-tint">
@@ -74,7 +92,7 @@ export default function AdminsPage() {
           </div>
           <div className="metric-card">
             <div className="metric-content">
-              <p className="metric-label">SUCURSALES</p>
+              <p className="metric-label">SUCURSALES ACTIVAS</p>
               <p className="metric-value">{logic.gyms?.length || 1}</p>
             </div>
             <div className="metric-icon-box secondary-tint">
@@ -83,7 +101,7 @@ export default function AdminsPage() {
           </div>
           <div className="metric-card">
             <div className="metric-content">
-              <p className="metric-label">ADMINS ACTIVOS</p>
+              <p className="metric-label">ADMINS PRIVILEGIADOS</p>
               <p className="metric-value">{logic.tableData.filter(a => a.rol !== 'Empleado').length}</p>
             </div>
             <div className="metric-icon-box tertiary-tint">
@@ -92,8 +110,8 @@ export default function AdminsPage() {
           </div>
           <div className="metric-card">
             <div className="metric-content">
-              <p className="metric-label">NIVEL DE ACCESO</p>
-              <p className="metric-value text-secondary">{logic.isDueno ? "Root" : "Admin"}</p>
+              <p className="metric-label">TU NIVEL DE PRIVILEGIO</p>
+              <p className="metric-value text-secondary">{logic.isDueno ? "Root / Dueño" : "Administrativo"}</p>
             </div>
             <div className="metric-icon-box success-tint">
               <span className="material-symbols-outlined">verified</span>
@@ -101,12 +119,12 @@ export default function AdminsPage() {
           </div>
         </div>
 
-        {/* Data Table */}
+        {/* --- Data Visualization: Staff Registry Table --- */}
         <div className="table-wrapper-card">
           {logic.loading ? (
             <div className="loading-state">
               <div className="spinner-engine"></div>
-              <span>Sincronizando Engine de Staff...</span>
+              <span>Sincronizando el Motor de Personal...</span>
             </div>
           ) : (
             <AdminsTable
@@ -118,31 +136,31 @@ export default function AdminsPage() {
           )}
         </div>
 
-        {/* Footer Info Sections */}
+        {/* --- Instructional Content: Governance Policies --- */}
         <div className="footer-info-grid">
           <div className="policies-card">
             <div className="policy-glow"></div>
-            <h3 className="policy-title">Políticas de Roles</h3>
+            <h3 className="policy-title">Política de Gobernanza de Roles</h3>
             <div className="policy-items">
               <div className="policy-item">
                 <span className="material-symbols-outlined text-primary">verified_user</span>
                 <div>
-                  <p className="policy-role">Dueños (Root)</p>
-                  <p className="policy-desc">Acceso total a finanzas, configuración de sucursales y borrado de registros.</p>
+                  <p className="policy-role">Dueños (Acceso Root)</p>
+                  <p className="policy-desc">Autoridad fiscal total, control de infraestructura de sucursales y eliminación destructiva de registros.</p>
                 </div>
               </div>
               <div className="policy-item">
                 <span className="material-symbols-outlined text-secondary">verified_user</span>
                 <div>
-                  <p className="policy-role">Managers</p>
-                  <p className="policy-desc">Gestión de staff de su sucursal, reportes de asistencia y ventas locales.</p>
+                  <p className="policy-role">Gerentes de Sucursal</p>
+                  <p className="policy-desc">Supervisión de personal local, analítica de asistencia e informes de ingresos regionales.</p>
                 </div>
               </div>
               <div className="policy-item">
                 <span className="material-symbols-outlined text-tertiary">verified_user</span>
                 <div>
-                  <p className="policy-role">Empleados</p>
-                  <p className="policy-desc">Registro de clientes, cobros en punto de venta y control de acceso.</p>
+                  <p className="policy-role">Personal Operativo (Empleados)</p>
+                  <p className="policy-desc">Check-in de miembros, operaciones en punto de venta y control activo de las instalaciones.</p>
                 </div>
               </div>
             </div>
@@ -150,19 +168,21 @@ export default function AdminsPage() {
 
           <div className="security-card">
             <div>
-              <h3 className="security-title">Seguridad Staff</h3>
+              <h3 className="security-title">Auditoría y Cumplimiento</h3>
               <p className="security-desc">
-                Todas las acciones administrativas son registradas con IP y marca de tiempo en el sistema de auditoría central.
+                Todas las acciones administrativas se registran criptográficamente con origen IP y marcas de tiempo de alta precisión en el motor de auditoría central.
               </p>
             </div>
             <button className="btn-audit-logs">
               <span className="material-symbols-outlined">history_edu</span>
-              Ver Logs de Auditoría
+              Revisar Historial de Auditoría
             </button>
           </div>
         </div>
 
-        {/* Modals */}
+        {/* --- Component Modals: Staff Lifecycle Operations --- */}
+        
+        {/* Onboarding Flow */}
         <CreateAdminModal
           open={logic.open}
           setOpen={logic.setOpen}
@@ -181,6 +201,7 @@ export default function AdminsPage() {
           isDueno={logic.isDueno}
         />
 
+        {/* Profile Modification Flow */}
         <EditAdminModal
           showEdit={logic.showEdit}
           setShowEdit={logic.setShowEdit}
@@ -195,6 +216,7 @@ export default function AdminsPage() {
           isDueno={logic.isDueno}
         />
 
+        {/* Offboarding / Deletion Guard */}
         <DeleteAdminModal
           showDelete={logic.showDelete}
           setShowDelete={logic.setShowDelete}
@@ -203,6 +225,7 @@ export default function AdminsPage() {
           saving={logic.saving}
         />
 
+        {/* Strategic Expansion: Only for Owners */}
         {logic.isDueno && (
           <CreateGymModal
             showCreateGym={logic.showCreateGym}

@@ -2,12 +2,26 @@ import { Link } from "react-router-dom";
 import "./Styles/LoginForm.css";
 import React from "react";
 
+/**
+ * LoginForm Component
+ * 
+ * Handles the user input for authentication. 
+ * Provides visual feedback for errors, loading states, and password visibility toggles.
+ * 
+ * Props:
+ * @param {Object} form - State containing 'email' and 'password'
+ * @param {boolean} loading - Indicates if an auth request is in progress
+ * @param {string} error - Error message to display if login fails
+ * @param {Function} handleInputChange - Callback to update form state
+ * @param {Function} handleSubmit - Callback to execute the login process
+ */
 const LoginForm = ({ form, loading, error, handleInputChange, handleSubmit }) => {
   const [showPassword, setShowPassword] = React.useState(false);
 
   return (
     <form className="login-form-wrapper" onSubmit={handleSubmit}>
-      {/* Error Message */}
+      
+      {/* Global Error Messaging Area */}
       {error && (
         <div className="login-error-container">
           <span className="material-symbols-outlined" style={{fontSize: "1rem"}}>error</span>
@@ -15,14 +29,14 @@ const LoginForm = ({ form, loading, error, handleInputChange, handleSubmit }) =>
         </div>
       )}
 
-      {/* Field: Email */}
+      {/* Field Group: Email Address */}
       <div className="login-field-group">
         <label className="login-field-label">Correo Electrónico</label>
         <div className="login-input-wrapper">
           <span className="material-symbols-outlined login-input-icon">mail</span>
           <input
             className="login-input"
-            placeholder="tu@correo.com"
+            placeholder="you@example.com"
             type="email"
             value={form.email}
             onChange={(e) => handleInputChange("email", e.target.value)}
@@ -31,11 +45,12 @@ const LoginForm = ({ form, loading, error, handleInputChange, handleSubmit }) =>
         </div>
       </div>
 
-      {/* Field: Contraseña */}
+      {/* Field Group: Secure Password */}
       <div className="login-field-group">
         <div className="login-label-row">
           <label className="login-field-label">Contraseña</label>
-          <a className="login-forgot-link" href="#">¿Olvidaste la clave?</a>
+          {/* External link for password recovery flow */}
+          <a className="login-forgot-link" href="#">¿Olvidaste tu contraseña?</a>
         </div>
 
         <div className="login-input-wrapper">
@@ -48,6 +63,7 @@ const LoginForm = ({ form, loading, error, handleInputChange, handleSubmit }) =>
             onChange={(e) => handleInputChange("password", e.target.value)}
             required
           />
+          {/* Interactive toggle to peek at the password */}
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
@@ -60,14 +76,14 @@ const LoginForm = ({ form, loading, error, handleInputChange, handleSubmit }) =>
         </div>
       </div>
 
-      {/* Primary Action */}
+      {/* Primary Execution Action */}
       <button
         className="login-submit-btn"
         type="submit"
         disabled={loading}
       >
         <span>
-          {loading ? "Iniciando..." : "Entrar"}
+          {loading ? "Autenticando..." : "Iniciar Sesión"}
         </span>
 
         {!loading && (
@@ -77,12 +93,12 @@ const LoginForm = ({ form, loading, error, handleInputChange, handleSubmit }) =>
         )}
       </button>
 
-      {/* Secondary Link */}
+      {/* Navigation Footer for New Users */}
       <footer className="login-footer-nav">
         <p className="login-footer-text">
-          ¿No tienes cuenta?
+          ¿Aún no tienes una cuenta? 
           <Link to="/register" className="login-signup-link">
-            Crear una cuenta
+             Únete a la plataforma
           </Link>
         </p>
       </footer>

@@ -11,24 +11,34 @@ import { AlertModal, ConfirmModal } from "./AlertConfirmModals";
 import { useClasesLogic } from "./useClasesLogic";
 import "./Styles/ClasesPage.css";
 
+/**
+ * ClasesPage Component
+ * 
+ * The comprehensive hub for managing gym classes, schedules, and enrollments.
+ * Features a 'Kinetic' UI design with atmospheric effects, detailed metrics, 
+ * a weekly calendar, and modular management modals.
+ */
 export default function ClasesPage() {
   const { gym } = useGym();
   const gymReady = Boolean(gym);
 
+  // Orchestrate state and side-effects via a specialized logic hook
   const { data, state, actions } = useClasesLogic(gym);
 
+  /** Guard: Render a loading state until the gym branch context is resolved */
   if (!gymReady) {
     return (
       <AppLayout>
         <div className="flex h-screen items-center justify-center bg-[#0b1326]">
           <div className="text-[#bdc2ff] animate-pulse font-bold tracking-widest uppercase text-xs">
-            Cargando Gimnasio...
+            Cargando Contexto del Gimnasio...
           </div>
         </div>
       </AppLayout>
     );
   }
 
+  // Destructuring complex data structures from the logic hook for readability
   const {
     clases,
     loading,
@@ -100,7 +110,7 @@ export default function ClasesPage() {
   return (
     <AppLayout>
       <div className="clases-kinetic min-h-screen">
-        {/* Header Section */}
+        {/* --- Page Header: Branding and Primary Actions --- */}
         <header
           className="kinetic-header animate-fade-in"
           style={{ animationDelay: "0.1s" }}
@@ -110,16 +120,13 @@ export default function ClasesPage() {
               Gestión de Clases
             </h1>
             <p className="kinetic-header__subtitle">
-              Programación y control de sesiones de entrenamiento elite
+              Programa y monitorea sesiones de alto rendimiento
               {gym?.nombre ? ` — ${gym.nombre}` : ""}
             </p>
           </div>
           <div className="flex gap-4">
             <button className="kinetic-btn kinetic-btn--ghost" type="button">
-              <span
-                className="material-symbols-outlined text-lg notranslate"
-                translate="no"
-              >
+              <span className="material-symbols-outlined text-lg notranslate" translate="no">
                 filter_list
               </span>
               Filtros
@@ -136,84 +143,69 @@ export default function ClasesPage() {
               <span className="material-symbols-outlined text-lg">
                 calendar_add_on
               </span>
-              Crear Horario
+              Definir Horario
             </button>
           </div>
         </header>
 
-        {/* Metrics Row */}
+        {/* --- Metrics Grid: Performance Overview --- */}
         <section
           className="kinetic-metrics animate-fade-in"
           style={{ animationDelay: "0.2s" }}
         >
+          {/* Metric: Total Class Definitions */}
           <div className="glass-card kinetic-metric-card group">
-            <p className="kinetic-label mb-4">Clases Totales</p>
+            <p className="kinetic-label mb-4">Total de Clases</p>
             <h3 className="kinetic-display text-on-surface">
               {clases?.length || 0}
             </h3>
             <p className="kinetic-metric-card__trend text-secondary">
-              <span
-                className="material-symbols-outlined text-sm notranslate"
-                translate="no"
-              >
+              <span className="material-symbols-outlined text-sm notranslate" translate="no">
                 trending_up
               </span>
-              +{Math.max(0, (clases?.length || 0) - 10)} este mes
+              +{Math.max(0, (clases?.length || 0) - 10)} crecimiento este mes
             </p>
-            <span
-              className="material-symbols-outlined kinetic-metric-card__icon group-hover:text-primary transition-colors notranslate"
-              translate="no"
-            >
+            <span className="material-symbols-outlined kinetic-metric-card__icon group-hover:text-primary transition-colors notranslate" translate="no">
               exercise
             </span>
           </div>
 
+          {/* Metric: Active Weekly Sessions */}
           <div className="glass-card kinetic-metric-card group">
             <p className="kinetic-label mb-4">Horarios Activos</p>
             <h3 className="kinetic-display text-on-surface">
               {horariosGlobales?.length || 0}
             </h3>
             <p className="kinetic-metric-card__trend text-primary">
-              <span
-                className="material-symbols-outlined text-sm notranslate"
-                translate="no"
-              >
+              <span className="material-symbols-outlined text-sm notranslate" translate="no">
                 schedule
               </span>
-              {horariosGlobales?.length || 0} slots semanales
+              {horariosGlobales?.length || 0} cupos semanales activos
             </p>
-            <span
-              className="material-symbols-outlined kinetic-metric-card__icon group-hover:text-primary transition-colors notranslate"
-              translate="no"
-            >
+            <span className="material-symbols-outlined kinetic-metric-card__icon group-hover:text-primary transition-colors notranslate" translate="no">
               event_available
             </span>
           </div>
 
+          {/* Metric: Total Participation Count */}
           <div className="glass-card kinetic-metric-card group">
-            <p className="kinetic-label mb-4">Alumnos Inscritos</p>
+            <p className="kinetic-label mb-4">Inscripción Total</p>
             <h3 className="kinetic-display text-on-surface">
               {alumnosInscritosTotal}
             </h3>
             <p className="kinetic-metric-card__trend text-secondary">
-              <span
-                className="material-symbols-outlined text-sm notranslate"
-                translate="no"
-              >
+              <span className="material-symbols-outlined text-sm notranslate" translate="no">
                 group_add
               </span>
-              84% capacidad total
+              84% de la capacidad total de la sucursal
             </p>
-            <span
-              className="material-symbols-outlined kinetic-metric-card__icon group-hover:text-primary transition-colors notranslate"
-              translate="no"
-            >
+            <span className="material-symbols-outlined kinetic-metric-card__icon group-hover:text-primary transition-colors notranslate" translate="no">
               groups
             </span>
           </div>
         </section>
 
-        {/* Weekly Schedule Grid */}
+        {/* --- Central Section: Weekly Interactive Calendar --- */}
         <section
           className="kinetic-section animate-fade-in"
           style={{ animationDelay: "0.3s" }}
@@ -221,14 +213,14 @@ export default function ClasesPage() {
           <div className="flex items-center justify-between mb-8">
             <h2 className="kinetic-section__title text-on-surface mb-0">
               <span className="kinetic-section__accent bg-primary" />
-              Calendario Semanal
+              Horario Semanal
             </h2>
             <div className="flex bg-white/5 rounded-xl p-1">
               <button className="px-5 py-2 rounded-lg bg-[#bdc2ff] text-[#131e8c] text-xs font-bold shadow-lg shadow-[#bdc2ff]/10">
-                Vista Rejilla
+                Vista de Cuadrícula
               </button>
               <button className="px-5 py-2 rounded-lg text-xs font-bold text-on-surface-variant hover:text-on-surface transition-colors">
-                Lista
+                Vista de Lista
               </button>
             </div>
           </div>
@@ -242,7 +234,7 @@ export default function ClasesPage() {
           />
         </section>
 
-        {/* Available Classes */}
+        {/* --- Catalog Section: Class Definitions List --- */}
         <section
           className="kinetic-section animate-fade-in"
           style={{ animationDelay: "0.4s" }}
@@ -250,14 +242,11 @@ export default function ClasesPage() {
           <div className="flex items-center justify-between mb-8">
             <h2 className="kinetic-section__title text-on-surface mb-0">
               <span className="kinetic-section__accent bg-secondary" />
-              Clases Disponibles
+              Catálogo de Servicios
             </h2>
             <button className="text-primary text-sm font-bold hover:underline tracking-tight flex items-center gap-1 group">
-              Ver catálogo completo
-              <span
-                className="material-symbols-outlined text-xs group-hover:translate-x-1 transition-transform notranslate"
-                translate="no"
-              >
+              Ver repositorio completo
+              <span className="material-symbols-outlined text-xs group-hover:translate-x-1 transition-transform notranslate" translate="no">
                 arrow_forward
               </span>
             </button>
@@ -265,15 +254,16 @@ export default function ClasesPage() {
 
           {loading && (
             <div className="text-center py-20 text-[#bdc2ff] animate-pulse font-bold">
-              Cargando catálogo...
+              Obteniendo datos del catálogo...
             </div>
           )}
           {error && (
             <div className="text-center py-20 text-error font-bold">
-              Error al cargar clases
+              Error crítico al cargar las clases
             </div>
           )}
 
+          {/* Render list of classes with dynamic icons based on name patterns */}
           <div className="kinetic-list">
             {clases?.map((c, idx) => {
               const concInfo = concurrencia.find((x) => x.id === c.id);
@@ -282,7 +272,6 @@ export default function ClasesPage() {
                 horariosGlobales.filter((h) => h.claseNombre === c.nombre)
                   .length;
               const alumnosCount = concInfo?.participantes ?? 0;
-              const isEven = idx % 2 === 0;
 
               return (
                 <article
@@ -298,10 +287,7 @@ export default function ClasesPage() {
                             : "bg-[#1e293b] text-[#94a3b8]"
                         }`}
                     >
-                      <span
-                        className="material-symbols-outlined notranslate"
-                        translate="no"
-                      >
+                      <span className="material-symbols-outlined notranslate" translate="no">
                         {c.nombre.toLowerCase().includes("pilates")
                           ? "self_improvement"
                           : c.nombre.toLowerCase().includes("boxing")
@@ -313,16 +299,17 @@ export default function ClasesPage() {
                       <h4 className="kinetic-item__title">{c.nombre}</h4>
                       <p className="kinetic-item__desc">
                         {c.descripcion ||
-                          "Sesión de entrenamiento elite enfocada en alto rendimiento."}
+                          "Sesión de entrenamiento de élite enfocada en métricas de alto rendimiento."}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-12">
+                    {/* Inline Participation Metrics */}
                     <div className="kinetic-item__stats-group">
                       <div className="kinetic-item__stat">
                         <span className="kinetic-item__stat-label">
-                          ALUMNOS
+                          MIEMBROS
                         </span>
                         <span className="kinetic-item__stat-val">
                           {alumnosCount}
@@ -361,7 +348,7 @@ export default function ClasesPage() {
           </div>
         </section>
 
-        {/* Floating Action Button */}
+        {/* Floating Action Button: Quick class creation */}
         <button
           className="kinetic-fab group"
           onClick={() => {
@@ -370,16 +357,15 @@ export default function ClasesPage() {
             setShowClaseModal(true);
           }}
         >
-          <span
-            className="material-symbols-outlined text-3xl notranslate"
-            translate="no"
-          >
+          <span className="material-symbols-outlined text-3xl notranslate" translate="no">
             add
           </span>
           <span className="kinetic-fab__label">Nueva Clase</span>
         </button>
 
-        {/* Modals */}
+        {/* --- Modal Stack: Handling sub-flows --- */}
+        
+        {/* Class Details: Sub-tabs for schedules, instructors, prices, and stats */}
         <ClassDetailModal
           open={showDetailModal}
           onClose={() => {
@@ -411,6 +397,7 @@ export default function ClasesPage() {
           edadData={data.edadData}
         />
 
+        {/* Create/Edit Base Class Definition */}
         <CreateClassModal
           open={showClaseModal}
           onClose={() => setShowClaseModal(false)}
@@ -421,6 +408,7 @@ export default function ClasesPage() {
           handleUpdateClase={handleUpdateClase}
         />
 
+        {/* Weekly Schedule Entry Editor */}
         <HorarioFormModal
           open={showHorarioModal}
           onClose={() => setShowHorarioModal(false)}
@@ -429,6 +417,7 @@ export default function ClasesPage() {
           handleCreateOrUpdateHorario={handleCreateOrUpdateHorario}
         />
 
+        {/* Instructor Assignment Flow */}
         <AssignMonitorModal
           open={showMonitorModal}
           onClose={() => setShowMonitorModal(false)}
@@ -438,6 +427,7 @@ export default function ClasesPage() {
           handleAgregarMonitor={handleAgregarMonitor}
         />
 
+        {/* Pricing Strategy Editor */}
         <PriceFormModal
           open={showPrecioModal}
           onClose={() => setShowPrecioModal(false)}
@@ -446,6 +436,7 @@ export default function ClasesPage() {
           handleCreateOrUpdatePrecio={handleCreateOrUpdatePrecio}
         />
 
+        {/* Member Enrollment & Check-in Management */}
         <InscriptionsModal
           open={showAlumnosModal}
           onClose={() => {
@@ -462,6 +453,7 @@ export default function ClasesPage() {
           handleDesinscribir={handleDesinscribir}
         />
 
+        {/* System Feedback Modals */}
         <AlertModal
           open={alertModal.open}
           title={alertModal.title}

@@ -1,6 +1,21 @@
 import Table from "../../components/ui/Table";
 import "./Styles/ClientesTable.css";
 
+/**
+ * ClientesTable Component
+ * 
+ * Renders the member directory in a high-density, interactive data grid.
+ * Features:
+ * - Dynamic column generation with custom renders for status and gender.
+ * - Integrated actions for profile editing, status toggling, and deletion.
+ * - Identity visualization via avatars.
+ * 
+ * Props:
+ * @param {Array} data - Collection of member entities.
+ * @param {Function} onEdit - Callback for profile modification.
+ * @param {Function} onDelete - Callback for member offboarding.
+ * @param {Function} onToggle - Callback for membership status switching.
+ */
 export default function ClientesTable({ data, onEdit, onDelete, onToggle }) {
   const columns = [
     {
@@ -19,7 +34,7 @@ export default function ClientesTable({ data, onEdit, onDelete, onToggle }) {
     { key: "edad", label: "Edad" },
     {
       key: "sexo",
-      label: "Sexo",
+      label: "Género",
       render: (v) =>
         v === "M" ? "Masculino" : v === "F" ? "Femenino" : "Otro",
     },
@@ -46,6 +61,7 @@ export default function ClientesTable({ data, onEdit, onDelete, onToggle }) {
           <button
             className="clientes-v2__iconBtn clientes-v2__iconBtn--primary"
             onClick={() => onEdit(row)}
+            title="Editar Perfil"
           >
             ✎
           </button>
@@ -57,6 +73,7 @@ export default function ClientesTable({ data, onEdit, onDelete, onToggle }) {
                 : "clientes-v2__iconBtn--good"
             }`}
             onClick={() => onToggle(row)}
+            title={row.activo ? "Desactivar Miembro" : "Activar Miembro"}
           >
             {row.activo ? "⦸" : "✓"}
           </button>
@@ -64,6 +81,7 @@ export default function ClientesTable({ data, onEdit, onDelete, onToggle }) {
           <button
             className="clientes-v2__iconBtn clientes-v2__iconBtn--danger"
             onClick={() => onDelete(row)}
+            title="Eliminar Registro"
           >
             🗑
           </button>

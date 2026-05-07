@@ -2,7 +2,10 @@ import { pool } from '../../config/db.js';
 import { AppError } from '../../utils/AppError.js';
 
 /**
- * Obtiene todos los gyms asociados a un admin
+ * Retrieves all gym branches associated with a specific administrator via the junction table.
+ * 
+ * @param {number} adminId - The unique identifier of the administrator.
+ * @returns {Promise<Array>} A collection of gym entities with full metadata.
  */
 export async function getGymsByAdminId(adminId) {
   const [rows] = await pool.query(
@@ -16,7 +19,9 @@ export async function getGymsByAdminId(adminId) {
 }
 
 /**
- * Obtiene TODOS los gyms
+ * Retrieves the global directory of all registered gym branches, ordered alphabetically.
+ * 
+ * @returns {Promise<Array>} The complete list of all gym branch records.
  */
 export async function getAllGyms() {
   const [rows] = await pool.query(`SELECT * FROM gyms ORDER BY nombre ASC`);
@@ -24,7 +29,10 @@ export async function getAllGyms() {
 }
 
 /**
- * Obtiene un gym por ID
+ * Retrieves identity and configuration data for a single branch by its ID.
+ * 
+ * @param {number} gymId - The target branch identifier.
+ * @returns {Promise<Object|null>} The branch record or null if not found.
  */
 export async function getGymById(gymId) {
   const [rows] = await pool.query(
@@ -35,10 +43,14 @@ export async function getGymById(gymId) {
 }
 
 /**
- * Crea un gym
+ * Persists a new gym branch entity to the system registry.
+ * 
+ * @param {Object} data - Branch profile data (branding, physical address, web assets).
+ * @returns {Promise<Object>} The successfully persisted gym entity with its system ID.
+ * @throws {AppError} If mandatory identity fields are missing.
  */
 export async function createGym({ nombre, direccion, ciudad, foto, urlWeb }) {
-  if (!nombre) throw new AppError('El nombre del gym es obligatorio', 400);
+  if (!nombre) throw new AppError('Policy Violation: Branch identity (Name) is mandatory', 400);
 
   const [result] = await pool.query(
     `INSERT INTO gyms (nombre, direccion, ciudad, foto, url_web) VALUES (?, ?, ?, ?, ?)`,
@@ -54,14 +66,20 @@ export async function createGym({ nombre, direccion, ciudad, foto, urlWeb }) {
 }
 
 /**
- * Actualiza un gym
+ * Dynamically updates branch configuration parameters.
+ * Only modifies fields explicitly provided in the payload.
+ * 
+ * @param {number} gymId - Target branch ID.
+ * @param {Object} updateData - Partial dataset for modification.
+ * @returns {Promise<Object|null>} The post-update branch record.
  */
 export async function updateGym(gymId, { nombre, direccion, ciudad, foto, urlWeb }) {
-  if (!gymId) throw new AppError('ID del gym es obligatorio', 400);
+  if (!gymId) throw new AppError('Integrity Error: Target branch ID is mandatory for updates', 400);
 
   const fields = [];
   const values = [];
 
+  // Dynamic field mapping for optimized SQL generation
   if (nombre !== undefined) {
     fields.push('nombre = ?');
     values.push(nombre);
@@ -84,7 +102,7 @@ export async function updateGym(gymId, { nombre, direccion, ciudad, foto, urlWeb
   }
 
   if (fields.length === 0) {
-    throw new AppError('No hay campos para actualizar', 400);
+    throw new AppError('Payload Error: No updateable fields provided', 400);
   }
 
   values.push(gymId);
@@ -103,11 +121,15 @@ export async function updateGym(gymId, { nombre, direccion, ciudad, foto, urlWeb
 }
 
 /**
- * Vincula un admin a un gym con un rol
+ * Establishes an administrative link between a user and a gym branch.
+ * Enforces role-based hierarchy ('DUENO' or 'EMPLEADO').
+ * 
+ * @param {Object} linkData - Junction mapping (adminId, gymId, rol).
+ * @throws {AppError} If the relationship already exists or references are invalid.
  */
 export async function linkAdminToGym({ adminId, gymId, rol }) {
   if (!adminId || !gymId || !rol) {
-    throw new AppError('Datos incompletos para vincular admin a gym', 400);
+    throw new AppError('Integrity Error: Incomplete junction data for organizational mapping', 400);
   }
 
   try {
@@ -116,12 +138,13 @@ export async function linkAdminToGym({ adminId, gymId, rol }) {
       [adminId, gymId, rol]
     );
   } catch (err) {
+    // Conflict resolution: Identify specific database constraint violations
     if (err.code === 'ER_DUP_ENTRY') {
-      throw new AppError('El administrador ya está vinculado a este gym', 400);
+      throw new AppError('Conflict: This administrator is already associated with the specified branch', 400);
     }
 
     if (err.code === 'ER_NO_REFERENCED_ROW_2') {
-      throw new AppError('Admin o Gym no existen', 400);
+      throw new AppError('Reference Error: Attempting to link non-existent identity entities', 400);
     }
 
     throw err;

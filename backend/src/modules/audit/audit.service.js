@@ -3,8 +3,8 @@ import * as authRepository from "../auth/auth.repository.js";
 import { AppError } from "../../utils/AppError.js";
 
 /* ============================================================
-   ACCIONES PERMITIDAS
-============================================================ */
+   PERMITTED ACTIONS (VALIDATION WHITELIST)
+   ============================================================ */
 
 const ACCIONES_VALIDAS = [
   "CREAR",
@@ -26,20 +26,33 @@ const ACCIONES_VALIDAS = [
 ];
 
 /* ============================================================
-   VALIDAR PERMISOS
-============================================================ */
+   PERMISSION VALIDATION
+   ============================================================ */
 
+/**
+ * Validates that an administrator has authority to operate within a specific gym branch.
+ * @param {number} adminId - The administrator's unique identifier.
+ * @param {number} gymId - The target gym branch identifier.
+ * @throws {AppError} 403 if the administrator is not linked to the branch.
+ */
 async function validarPermisos(adminId, gymId) {
   const gyms = await authRepository.getGymsByAdminId(adminId);
   if (!gyms.some((g) => g.id === gymId)) {
-    throw new AppError("El admin no pertenece a este gym", 403);
+    throw new AppError("Administrator does not belong to this gym branch", 403);
   }
 }
 
 /* ============================================================
-   REGISTRAR OPERACION
-============================================================ */
+   OPERATION LOGGING (AUDIT TRAIL)
+   ============================================================ */
 
+/**
+ * Persists a detailed operational log for accountability and security tracking.
+ * This service is designed to be non-blocking for critical business flows.
+ * 
+ * @param {Object} data - Log attributes including actor, context, and specifics.
+ * @returns {Promise<Object|null>} The persisted log record or null on failure.
+ */
 export async function registrarOperacion({
   adminId,
   gymId,
@@ -51,22 +64,22 @@ export async function registrarOperacion({
   try {
     console.log('--- DEBUG: registrarOperacion v4 ---');
     if (!adminId)
-      throw new AppError("adminId es obligatorio para auditoría", 400);
-    if (!gymId) throw new AppError("gymId es obligatorio para auditoría", 400);
-    if (!accion) throw new AppError("La acción es obligatoria en auditoría", 400);
+      throw new AppError("adminId is mandatory for auditing", 400);
+    if (!gymId) throw new AppError("gymId is mandatory for auditing", 400);
+    if (!accion) throw new AppError("Action is mandatory for auditing", 400);
 
-    // Validar acción
     const accionLimpia = accion?.trim();
+    // Optional: Re-enable whitelist validation if stricter auditing is required
     /*
     if (!ACCIONES_VALIDAS.includes(accionLimpia)) {
-      throw new AppError(`Acción de auditoría inválida: ${accionLimpia}`, 400);
+      throw new AppError(`Invalid audit action: ${accionLimpia}`, 400);
     }
     */
 
-    // Validar permisos
+    // Security Guard: Ensure the actor has jurisdiction over the branch
     await validarPermisos(adminId, gymId);
 
-    // Registrar auditoría
+    // Persist the audit entry
     const log = await auditRepository.insertLog({
       adminId,
       gymId,
@@ -78,13 +91,18 @@ export async function registrarOperacion({
 
     return log;
   } catch (error) {
-    console.error("ERROR NO CRÍTICO EN AUDITORÍA:", error.message);
-    // No relanzamos el error para no interrumpir el flujo principal (ej. registro)
+    // Non-Critical Failure: Log error to console but do not disrupt primary user workflows
+    console.error("NON-CRITICAL AUDIT ERROR:", error.message);
     return null;
   }
 }
 
+/**
+ * Retrieves the operational history for a specific administrator.
+ * @param {number} adminId - Target administrator ID.
+ * @returns {Promise<Array>} List of chronological audit logs.
+ */
 export async function listMyLogs(adminId) {
-  if (!adminId) throw new AppError("adminId requerido", 400);
+  if (!adminId) throw new AppError("adminId is required", 400);
   return auditRepository.getLogsByAdminId(adminId);
 }

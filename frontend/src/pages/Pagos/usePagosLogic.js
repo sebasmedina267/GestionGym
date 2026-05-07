@@ -3,30 +3,53 @@ import { useFetch } from "../../hooks/useFetch";
 import { useGym } from "../../hooks/useGym";
 import api from "../../api/axios";
 
+/**
+ * usePagosLogic Hook
+ * 
+ * Centralizes the complex state management and business logic for client payment oversight.
+ * Responsibilities:
+ * - Synchronizing class-specific enrollment and payment data for a given month.
+ * - Hydrating class pricing configurations to enable quick collections.
+ * - Orchestrating the "Quick Pay" workflow for rapid desk transactions.
+ * - Aggregating real-time financial metrics and chart data for the dashboard.
+ * - Managing UI feedback and instructional alerts for operational guards.
+ * 
+ * @returns {Object} State and operations for the payments dashboard.
+ */
 export function usePagosLogic() {
   const { gym } = useGym();
   const gymReady = Boolean(gym);
 
+  // Temporal Scoping: Defaults to current month for relevant financial oversight
   const currentMonthStr = new Date().toISOString().substring(0, 7);
   const [mes, setMes] = useState(currentMonthStr);
   
+  // Data Queries: Classes available at the current branch
   const { data: clases } = useFetch(
     gymReady ? `/clases?gymId=${gym.id}` : null
   );
   
+  // Selection State: Active discipline and its primary pricing plan
   const [claseId, setClaseId] = useState("");
   const [clasePrecio, setClasePrecio] = useState(null);
   
+  // Detailed Ledger State: Enrollment status and individual payment records
   const [estadoClase, setEstadoClase] = useState([]);
   const [loadingEstado, setLoadingEstado] = useState(false);
   
+  // Interaction State: Quick collection workflow management
   const [showMetodoModal, setShowMetodoModal] = useState(false);
   const [clientePendiente, setClientePendiente] = useState(null);
   const [metodoPago, setMetodoPago] = useState('EFECTIVO');
   const [pagando, setPagando] = useState(false);
   
+  // Feedback Layer: Instructional and operational alerts
   const [alertModal, setAlertModal] = useState({ open: false, title: '', message: '', type: 'info' });
   
+  /**
+   * Synchronizes the detailed enrollment and payment ledger for the selected class.
+   * Also attempts to retrieve the primary price definition for subsequent transactions.
+   */
   const handleFetchEstado = async () => {
     if (!claseId) {
       setEstadoClase([]);
@@ -38,6 +61,7 @@ export function usePagosLogic() {
       const res = await api.get(`/pagos/estado/${claseId}?mes=${mes}`);
       setEstadoClase(res.data.data);
       
+      // Auto-hydration of pricing context to facilitate rapid collections
       try {
         const preciosRes = await api.get(`/clases/${claseId}/precios`);
         if (Array.isArray(preciosRes.data.data) && preciosRes.data.data.length > 0) {
@@ -54,10 +78,15 @@ export function usePagosLogic() {
     }
   };
 
+  /** Reactive effect to synchronize data when discipline or month filters change */
   useEffect(() => {
     handleFetchEstado();
   }, [claseId, mes]);
 
+  /** 
+   * Triggers the "Quick Pay" confirmation workflow.
+   * Enforces business rules: prevent duplicate monthly payments and require pricing config.
+   */
   const handleQuickPayClick = (cliente) => {
     if (cliente.pagado) {
       setAlertModal({
@@ -84,6 +113,7 @@ export function usePagosLogic() {
     setShowMetodoModal(true);
   };
 
+  /** Executes the financial transaction and synchronizes the local ledger on success */
   const handleConfirmarPago = async () => {
     if (!clientePendiente) return;
 
@@ -122,6 +152,7 @@ export function usePagosLogic() {
     }
   };
 
+  /** Aggregates numeric statistics for the active discipline view */
   const classStats = useMemo(() => {
     let totalPagado = 0;
     let pagadosCount = 0;
@@ -144,6 +175,7 @@ export function usePagosLogic() {
     };
   }, [estadoClase]);
 
+  /** Aggregates method-specific collection data for diversity analysis */
   const metodoPagoStats = useMemo(() => {
     const conteo = {};
     
@@ -161,6 +193,7 @@ export function usePagosLogic() {
       .sort((a, b) => b.cantidad - a.cantidad);
   }, [estadoClase]);
 
+  /** Formats aggregation data for high-level health visualization */
   const chartData = [
     { name: "Al corriente", value: classStats.pagadosCount },
     { name: "Pendientes", value: classStats.pendientesCount }

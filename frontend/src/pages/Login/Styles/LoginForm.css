@@ -110,28 +110,30 @@
 
 .login-submit-btn {
   width: 100%;
-  background: var(--secondary);
-  color: #003924;
-  padding: 12px;
+  background: linear-gradient(135deg, #4edea3 0%, #3bc98e 100%);
+  color: #ffffff;
+  padding: 14px 16px;
   border-radius: 16px;
   font-weight: 950;
   text-transform: uppercase;
   letter-spacing: 0.2em;
   font-size: 0.875rem;
-  border: none;
+  border: 2px solid #4edea3;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 20px rgba(78, 222, 163, 0.3);
+  box-shadow: 0 10px 20px rgba(78, 222, 163, 0.4);
   margin-top: 8px;
 }
 
 .login-submit-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 15px 30px rgba(78, 222, 163, 0.5);
+  transform: translateY(-3px);
+  background: linear-gradient(135deg, #5aefb0 0%, #46d799 100%);
+  box-shadow: 0 15px 35px rgba(78, 222, 163, 0.6);
+  border-color: #5aefb0;
 }
 
 .login-submit-btn:active {

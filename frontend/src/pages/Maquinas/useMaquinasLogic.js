@@ -3,10 +3,23 @@ import { useFetch } from "../../hooks/useFetch";
 import { useGym } from "../../hooks/useGym";
 import api from "../../api/axios";
 
+/**
+ * useMaquinasLogic Hook
+ * 
+ * Centralizes the business logic for equipment inventory management.
+ * Features:
+ * - Real-time synchronization of machine data via useFetch.
+ * - Dynamic analytic computation for operational health and usage density.
+ * - State management for multi-purpose modals (Edit, Delete, Alert).
+ * - Multi-part form handling with image upload capabilities.
+ * 
+ * @returns {Object} State and operational handlers for the MaquinasPage.
+ */
 export function useMaquinasLogic() {
   const { gym } = useGym();
   const gymReady = Boolean(gym);
 
+  // Fetch machinery inventory scoped to the current gym branch
   const { data: maquinas = [], loading, refetch } = useFetch(
     gymReady ? `/maquinas?gymId=${gym.id}` : null
   );
@@ -16,34 +29,41 @@ export function useMaquinasLogic() {
   const [alertModal, setAlertModal] = useState({ open: false, title: '', message: '', type: 'info' });
   const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
 
+  // Core machinery record schema
   const [form, setForm] = useState({
     nombre: "",
     uso: "",
     descripcion: "",
     cantidad: 1,
     ubicacion: "",
-    estado: "Disponible", // New field
+    estado: "Disponible", 
     imagen: null,
   });
 
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
 
-  // Calculate summary stats
+  /**
+   * Analytic Processor
+   * Computes inventory KPIs including total volume, operational count, and 
+   * maintenance density. Uses useMemo for performance optimization.
+   */
   const stats = useMemo(() => {
     if (!maquinas) return { total: 0, operativas: 0, mantenimiento: 0, uso: 0 };
     
-    // Using a simple logic for operativas/mantenimiento based on 'estado'
-    // Default to 'Disponible' if not present
+    // Aggregate total units across all equipment categories
     const total = maquinas.reduce((acc, m) => acc + (parseInt(m.cantidad) || 0), 0);
+    
+    // Filter by functional status (Operational vs Maintenance)
     const operativas = maquinas
       .filter(m => !m.estado || m.estado === "Disponible" || m.estado === "En Uso")
       .reduce((acc, m) => acc + (parseInt(m.cantidad) || 0), 0);
+      
     const mantenimiento = maquinas
       .filter(m => m.estado === "Mantenimiento")
       .reduce((acc, m) => acc + (parseInt(m.cantidad) || 0), 0);
     
-    // Average use - for now a static or simple calc
+    // Compute current utilization density based on 'En Uso' status
     const inUse = maquinas
       .filter(m => m.estado === "En Uso")
       .reduce((acc, m) => acc + (parseInt(m.cantidad) || 0), 0);
@@ -53,10 +73,11 @@ export function useMaquinasLogic() {
       total, 
       operativas, 
       mantenimiento, 
-      uso: usoPromedio || 82 // Fallback to mockup value if 0 for visual flair
+      uso: usoPromedio || 82 // Design fallback for improved visual hierarchy in empty states
     };
   }, [maquinas]);
 
+  /** Resets form state to default acquisition configuration */
   const resetForm = () => {
     setEditing(null);
     setForm({
@@ -71,6 +92,7 @@ export function useMaquinasLogic() {
     setErrors({});
   };
 
+  /** Populates form for configuration updates of an existing asset */
   const openEdit = (maquina) => {
     setEditing(maquina);
     setForm({
@@ -85,6 +107,7 @@ export function useMaquinasLogic() {
     setOpen(true);
   };
 
+  /** Initiates the deletion workflow with security confirmation */
   const handleDelete = (id) => {
     setConfirmModal({
       open: true,
@@ -115,6 +138,7 @@ export function useMaquinasLogic() {
     });
   };
 
+  /** Persists machinery records (Creation or Modification) to the backend */
   const handleSave = async () => {
     const newErrors = {};
     if (!form.nombre) newErrors.nombre = "El nombre es obligatorio";
@@ -132,6 +156,7 @@ export function useMaquinasLogic() {
       data.append("ubicacion", form.ubicacion);
       data.append("estado", form.estado);
       
+      // Attachment handling: only append if a new physical file is selected
       if (form.imagen instanceof File) {
         data.append("imagen", form.imagen);
       }

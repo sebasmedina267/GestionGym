@@ -11,7 +11,16 @@ import MovimientoModal from "./MovimientoModal";
 
 import "./Styles/ProductosPage.css";
 
-
+/**
+ * ProductosPage Component
+ * 
+ * Orchestrates the retail and inventory management system of the gym.
+ * Features:
+ * - Tabbed interface for switching between real-time inventory and financial analytics.
+ * - Global product acquisition (Creation of new items).
+ * - Stock movement management (Inbound/Outbound logistics).
+ * - Reactive search and filtering of the product catalog.
+ */
 export default function ProductosPage() {
   const {
     gymReady,
@@ -35,6 +44,7 @@ export default function ProductosPage() {
     handleUpdateImagen
   } = useProductosLogic();
 
+  // Guard: Context synchronization check
   if (!gymReady) {
     return (
       <AppLayout>
@@ -46,6 +56,7 @@ export default function ProductosPage() {
   return (
     <AppLayout>
       <div className="productosPage">
+        {/* Module Header: Contextual identity and primary acquisition action */}
         <div className="headerSection">
           <div>
             <h2 className="headerTitle">Gestión de Tienda e Inventario</h2>
@@ -57,7 +68,7 @@ export default function ProductosPage() {
           </Button>
         </div>
 
-        {/* TABS NAVBAR */}
+        {/* Global Navigation: Tabbed subsystem selection */}
         <div className="tabsNav">
           <button 
             className={`tabBtn ${activeTab === "inventario" ? "tabBtnActive" : ""}`}
@@ -75,6 +86,7 @@ export default function ProductosPage() {
           </button>
         </div>
 
+        {/* Subsystem: Inventory Control & Catalog */}
         {activeTab === "inventario" && (
           <InventarioTab 
             inventoryStats={inventoryStats}
@@ -87,6 +99,7 @@ export default function ProductosPage() {
           />
         )}
 
+        {/* Subsystem: Financial Performance & Sales Metrics */}
         {activeTab === "finanzas" && (
           <FinanzasTab 
             chartData={chartData}
@@ -94,6 +107,7 @@ export default function ProductosPage() {
           />
         )}
 
+        {/* Action Modal: New Item Acquisition */}
         <CrearProductoModal 
           open={openCrear}
           onClose={() => setOpenCrear(false)}
@@ -103,6 +117,7 @@ export default function ProductosPage() {
           saving={saving}
         />
 
+        {/* Action Modal: Logistics Movement (Stock entry/removal) */}
         <MovimientoModal 
           open={openMovimiento}
           onClose={() => setOpenMovimiento(false)}
@@ -118,4 +133,3 @@ export default function ProductosPage() {
     </AppLayout>
   );
 }
-

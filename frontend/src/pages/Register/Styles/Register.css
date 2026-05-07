@@ -5,11 +5,12 @@
   background-color: #0b1326;
   color: #dae2fd;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 16px;
+  padding: 24px 16px;
   position: relative;
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .register-ambient-glow-1 {
@@ -62,11 +63,12 @@
   backdrop-filter: blur(24px);
   border: 1px solid rgba(189, 194, 255, 0.1);
   border-radius: 1.5rem;
-  padding: 24px 32px;
+  padding: 20px 24px;
   box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
 }
 
-.register-back-link {
+.register-back-link,
+.register-back-link-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -75,15 +77,21 @@
   font-size: 0.813rem;
   font-weight: 600;
   transition: all 0.3s ease;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
 }
 
-.register-back-link:hover {
-  color: var(--secondary);
+.register-back-link:hover,
+.register-back-link-btn:hover {
+  color: #4edea3;
   transform: translateX(-4px);
 }
 
-.register-back-link span:first-child {
+.register-back-link span:first-child,
+.register-back-link-btn span:first-child {
   font-size: 1.25rem;
 }
 
@@ -96,7 +104,7 @@
 
 .register-brand-header {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .register-brand-title {

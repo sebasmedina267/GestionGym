@@ -8,6 +8,16 @@ import GymsNotifyModal from "./GymsNotifyModal";
 import { useGymsLogic, EMPTY_GYM_FORM } from "./useGymsLogic";
 import "./Styles/GymsPage.css";
 
+/**
+ * GymsPage Component (Branch Portfolio Management)
+ * 
+ * The strategic cockpit for Owners to manage their gym branch network.
+ * Responsibilities:
+ * - Visualizing the managed branch portfolio.
+ * - System-wide discovery of unmanaged branches for acquisition/assignment.
+ * - Orchestrating branch expansion (Creation) and profile refinement (Editing).
+ * - Enforcing organizational security policies for structural changes.
+ */
 export default function GymsPage() {
   const {
     isDueno,
@@ -44,16 +54,16 @@ export default function GymsPage() {
     handleEditGym,
   } = useGymsLogic();
 
-  // ============================================================
-  // Acceso restringido
-  // ============================================================
+  /** 
+   * Security Guard: Structural organizational changes are restricted to primary Owners.
+   */
   if (!isDueno) {
     return (
       <AppLayout>
         <div className="gyms-redesign-container">
           <div className="gyms-restricted">
-            <h1>Acceso Restringido</h1>
-            <p>Solo los Dueños pueden gestionar gimnasios.</p>
+            <h1>Acceso Administrativo Restringido</h1>
+            <p>Solo los Dueños de la Organización verificados están autorizados para gestionar la infraestructura de las sucursales.</p>
           </div>
         </div>
       </AppLayout>
@@ -63,24 +73,25 @@ export default function GymsPage() {
   return (
     <AppLayout>
       <div className="gyms-redesign-container">
-        <Header title="Mis Gimnasios">
+        {/* --- Strategic Header: Branch Discovery & Expansion --- */}
+        <Header title="Portafolio de Sucursales">
           <div className="gyms-header-actions">
             <Button variant="primary" onClick={() => { setErrors({}); setOpenAssignGym(true); }}>
-              + Asignar Gimnasio
+              Vincular Sucursal Existente
             </Button>
             <Button variant="primary" onClick={() => { setCreateForm(EMPTY_GYM_FORM); setErrors({}); setOpenCreateGym(true); }}>
-              + Crear Gimnasio
+              Inicializar Nueva Sucursal
             </Button>
           </div>
         </Header>
 
         {loading ? (
-          <div className="gyms-loading">Cargando gimnasios...</div>
+          <div className="gyms-loading">Sincronizando Datos de Sucursales...</div>
         ) : (
           <>
-            {/* MIS GIMNASIOS */}
+            {/* --- PRIMARY PORTFOLIO: Branches under active management --- */}
             <div className="gyms-section">
-              <h3 className="gyms-section-title">Mis Gimnasios</h3>
+              <h3 className="gyms-section-title">Portafolio de Gestión Activa</h3>
               {myGyms && myGyms.length > 0 ? (
                 <div className="gyms-grid">
                   {myGyms.map((gym) => (
@@ -88,16 +99,16 @@ export default function GymsPage() {
                   ))}
                 </div>
               ) : (
-                <p className="gyms-section-desc">No tienes gimnasios asignados aún.</p>
+                <p className="gyms-section-desc">Aún no has integrado ninguna sucursal a tu portafolio.</p>
               )}
             </div>
 
-            {/* GIMNASIOS DISPONIBLES */}
+            {/* --- DISCOVERY: Branches available in the global system --- */}
             {availableGyms.length > 0 && (
               <div className="gyms-section--available">
-                <h3 className="gyms-section-title">Gimnasios Disponibles</h3>
+                <h3 className="gyms-section-title">Directorio Global del Sistema</h3>
                 <p className="gyms-section-desc">
-                  Puedes asignar {availableGyms.length} gimnasio{availableGyms.length !== 1 ? "s" : ""}
+                  {availableGyms.length} sucursal{availableGyms.length !== 1 ? "es" : ""} encontradas en el registro disponibles para asignación.
                 </p>
                 <div className="gyms-grid">
                   {availableGyms.map((gym) => (
@@ -109,7 +120,9 @@ export default function GymsPage() {
           </>
         )}
 
-        {/* MODALES */}
+        {/* --- MODAL ORCHESTRATION --- */}
+        
+        {/* Assignment Flow: Link unmanaged branches */}
         <GymsAssignModal
           open={openAssignGym}
           onClose={() => setOpenAssignGym(false)}
@@ -122,32 +135,35 @@ export default function GymsPage() {
           availableGyms={availableGyms}
         />
 
+        {/* Expansion Flow: Initialize brand new branches */}
         <GymsFormModal
           open={openCreateGym}
           onClose={() => setOpenCreateGym(false)}
-          title="Crear Nuevo Gimnasio"
+          title="Expansión de Sucursal: Nueva Infraestructura"
           form={createForm}
           setForm={setCreateForm}
           errors={errors}
           setErrors={setErrors}
           onSubmit={handleCreateGym}
           saving={saving}
-          submitText="Crear Gimnasio"
+          submitText="Desplegar Sucursal"
         />
 
+        {/* Configuration Flow: Refine branch profiles */}
         <GymsFormModal
           open={openEditGym}
           onClose={() => setOpenEditGym(false)}
-          title={`Editar: ${editingGym?.nombre || ""}`}
+          title={`Configurar: ${editingGym?.nombre || ""}`}
           form={editForm}
           setForm={setEditForm}
           errors={errors}
           setErrors={setErrors}
           onSubmit={handleEditGym}
           saving={saving}
-          submitText="Guardar Cambios"
+          submitText="Actualizar Configuración"
         />
 
+        {/* Feedback Channel: Success/Error notifications */}
         <GymsNotifyModal notif={notif} closeNotif={closeNotif} />
       </div>
     </AppLayout>

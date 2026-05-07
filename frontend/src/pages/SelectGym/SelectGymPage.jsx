@@ -5,13 +5,25 @@ import { useAuth } from "../../hooks/useAuth";
 import { useGym } from "../../hooks/useGym";
 import { useFetch } from "../../hooks/useFetch";
 
+/**
+ * SelectGymPage Component
+ * 
+ * Serves as the organizational entry point for multi-branch administrators.
+ * Features:
+ * - Real-time synchronization of managed branches for the authenticated user.
+ * - Persistent context selection via the useGym hook.
+ * - High-fidelity Kinetic UI cards with atmospheric background effects.
+ * - Guarded navigation ensuring a branch is selected before dashboard access.
+ */
 export default function SelectGymPage() {
   const { admin } = useAuth();
   const { setGym } = useGym();
   const navigate = useNavigate();
 
+  // Retrieves the portfolio of branches managed by the authenticated administrator
   const { data: gyms, loading } = useFetch(admin ? `/gyms` : null);
 
+  /** Auth Guard: Ensures user context exists before rendering the selector */
   if (!admin) return (
     <div className="select-gym-container">
       <div className="loading-gyms-container">
@@ -21,11 +33,16 @@ export default function SelectGymPage() {
     </div>
   );
 
+  /**
+   * Persists the selected branch context and navigates to the primary dashboard.
+   * @param {Object} gym - The selected branch entity.
+   */
   const handleSelect = (gym) => {
     setGym(gym);  
     navigate("/");
   };
 
+  /** Loading Guard: Visual feedback during branch portfolio retrieval */
   if (loading) return (
     <div className="select-gym-container">
       <div className="loading-gyms-container">
@@ -37,7 +54,7 @@ export default function SelectGymPage() {
 
   return (
     <div className="select-gym-container">
-      {/* Ambient Effects */}
+      {/* Ambient Effects: Enhance the visual depth and premium feel of the selection screen */}
       <div className="select-gym-ambient-1"></div>
       <div className="select-gym-ambient-2"></div>
 
@@ -46,6 +63,7 @@ export default function SelectGymPage() {
         <p className="select-gym-subtitle">Elige la unidad operativa para gestionar tu ecosistema.</p>
       </header>
 
+      {/* Grid: Responsive layout for branch selection cards */}
       <div className="select-gym-grid">
         {gyms?.map((gym) => (
           <div 

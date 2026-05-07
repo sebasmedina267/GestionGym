@@ -3,16 +3,33 @@ import api from "../../api/axios";
 import { useAuth } from "../../hooks/useAuth";
 import { useGym } from "../../hooks/useGym";
 
+/**
+ * useProfileLogic Hook
+ * 
+ * Manages the data and operational state for the profile and team management module.
+ * Responsibilities:
+ * - Asynchronous retrieval of personal audit logs.
+ * - Staff synchronization for the active branch (Owners only).
+ * - Lifecycle management for branch expansion (Gym creation).
+ * - Employee profile modification and offboarding workflows.
+ * - Dynamic privilege badge calculation.
+ * 
+ * @returns {Object} State and operations for the profile dashboard.
+ */
 export const useProfileLogic = () => {
   const { admin, logout } = useAuth();
   const { gym } = useGym();
+  
+  // Audit and Loading State
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
+  
+  // Organizational Expansion State
   const [showCreateGym, setShowCreateGym] = useState(false);
   const [newGymForm, setNewGymForm] = useState({ nombre: "", direccion: "" });
   const [savingGym, setSavingGym] = useState(false);
   
-  // Empleados
+  // Team Management (Staff) State
   const [empleados, setEmpleados] = useState([]);
   const [loadingEmpleados, setLoadingEmpleados] = useState(false);
   const [showEditEmpleado, setShowEditEmpleado] = useState(false);
@@ -24,6 +41,7 @@ export const useProfileLogic = () => {
 
   const isDueno = admin?.roles?.includes('DUENO');
 
+  /** Synchronizes personal activity audit trail upon component mount */
   useEffect(() => {
     const fetchLogs = async () => {
       try {
@@ -39,7 +57,7 @@ export const useProfileLogic = () => {
     if (admin) fetchLogs();
   }, [admin]);
 
-  // Cargar empleados del gym
+  /** Retrieves the branch staff list if the administrator has appropriate privileges (Owner) */
   useEffect(() => {
     const fetchEmpleados = async () => {
       if (!gym?.id || !isDueno) return;
@@ -56,6 +74,10 @@ export const useProfileLogic = () => {
     fetchEmpleados();
   }, [gym, isDueno]);
 
+  /** 
+   * Orchestrates the creation of a new gym branch infrastructure.
+   * Note: This is a legacy implementation. Modern branch expansion uses Stripe redirection.
+   */
   const handleCreateGym = async () => {
     if (!newGymForm.nombre.trim()) {
       alert("Por favor ingresa el nombre del gimnasio");
@@ -83,6 +105,7 @@ export const useProfileLogic = () => {
     }
   };
 
+  /** Initializes the employee profile update flow */
   const handleEditEmpleado = (empleado) => {
     setSelectedEmpleado(empleado);
     setEditForm({
@@ -94,6 +117,7 @@ export const useProfileLogic = () => {
     setShowEditEmpleado(true);
   };
 
+  /** Persists staff profile updates and synchronizes the local staff list */
   const handleSaveEmpleado = async () => {
     if (!editForm.nombre.trim() || !editForm.apellido.trim()) {
       alert("Por favor completa nombre y apellido");
@@ -110,7 +134,8 @@ export const useProfileLogic = () => {
       });
       alert("Empleado actualizado correctamente");
       setShowEditEmpleado(false);
-      // Recargar empleados
+      
+      // Real-time synchronization of the team roster
       if (gym?.id) {
         const res = await api.get(`/admins?gymId=${gym.id}`);
         setEmpleados(res.data.data || []);
@@ -122,11 +147,13 @@ export const useProfileLogic = () => {
     }
   };
 
+  /** Initiates the destructive offboarding process for a staff member */
   const handleDeleteEmpleado = async (empleado) => {
     setEmployeeToDelete(empleado);
     setShowConfirmDelete(true);
   };
 
+  /** Confirms and executes staff record deletion */
   const confirmDelete = async () => {
     try {
       setSavingEmpleado(true);
@@ -134,7 +161,7 @@ export const useProfileLogic = () => {
       alert("Empleado eliminado correctamente");
       setShowConfirmDelete(false);
       setEmployeeToDelete(null);
-      // Recargar empleados
+      
       if (gym?.id) {
         const res = await api.get(`/admins?gymId=${gym.id}`);
         setEmpleados(res.data.data || []);
@@ -146,6 +173,7 @@ export const useProfileLogic = () => {
     }
   };
 
+  /** Semantic badge mapping based on administrative privileges */
   const rolBadge = admin?.roles?.includes('DUENO') ? 'Socio Fundador (Dueño)' : 'Staff Operativo';
 
   return {

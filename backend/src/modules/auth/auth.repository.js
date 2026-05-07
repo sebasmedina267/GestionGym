@@ -2,9 +2,14 @@ import { pool } from "../../config/db.js";
 import { AppError } from "../../utils/AppError.js";
 
 /* ============================================================
-   DUEÑOS
-============================================================ */
+   OWNER MANAGEMENT
+   ============================================================ */
 
+/**
+ * Retrieves the first gym owner found in the database.
+ * Useful for checking system state or for simple single-tenant scenarios.
+ * @returns {Promise<Object|undefined>} The owner record if found
+ */
 export async function findAnyOwner() {
   const [rows] = await pool.query(
     `SELECT a.* 
@@ -17,9 +22,14 @@ export async function findAnyOwner() {
 }
 
 /* ============================================================
-   ADMIN
-============================================================ */
+   ADMINISTRATOR ACCOUNT MANAGEMENT
+   ============================================================ */
 
+/**
+ * Creates a new administrator account (Owner or Employee).
+ * @param {Object} data - Name, last name, and hashed password
+ * @returns {Promise<Object>} The newly created admin record
+ */
 export async function createAdmin({ nombre, apellido, passwordHash }) {
   const [result] = await pool.query(
     `INSERT INTO admins (nombre, apellido, password) VALUES (?, ?, ?)`,
@@ -34,6 +44,11 @@ export async function createAdmin({ nombre, apellido, passwordHash }) {
   return rows[0];
 }
 
+/**
+ * Finds an administrator by their unique ID.
+ * @param {number} id - Target admin ID
+ * @returns {Promise<Object|undefined>} The admin record
+ */
 export async function findAdminById(id) {
   const [rows] = await pool.query(
     `SELECT * FROM admins WHERE id = ?`,
@@ -42,6 +57,11 @@ export async function findAdminById(id) {
   return rows[0];
 }
 
+/**
+ * Updates an administrator's password.
+ * @param {number} adminId - Target admin ID
+ * @param {string} passwordHash - The new hashed password
+ */
 export async function updatePassword(adminId, passwordHash) {
   await pool.query(
     `UPDATE admins SET password = ? WHERE id = ?`,
@@ -49,6 +69,10 @@ export async function updatePassword(adminId, passwordHash) {
   );
 }
 
+/**
+ * Updates the last login timestamp for an administrator.
+ * @param {number} adminId - Target admin ID
+ */
 export async function updateLastLogin(adminId) {
   await pool.query(
     `UPDATE admins SET ultimo_login = NOW() WHERE id = ?`,
@@ -57,9 +81,14 @@ export async function updateLastLogin(adminId) {
 }
 
 /* ============================================================
-   GYMS
-============================================================ */
+   GYM BRANCH MANAGEMENT
+   ============================================================ */
 
+/**
+ * Creates a new gym branch record.
+ * @param {Object} data - Branch details (name, address, city, etc.)
+ * @returns {Promise<Object>} The newly created gym branch
+ */
 export async function createGym({ nombre, direccion, ciudad, urlWeb, foto }) {
   const [result] = await pool.query(
     `INSERT INTO gyms (nombre, direccion, ciudad, foto, url_web) VALUES (?, ?, ?, ?, ?)`,
@@ -74,6 +103,11 @@ export async function createGym({ nombre, direccion, ciudad, urlWeb, foto }) {
   return rows[0];
 }
 
+/**
+ * Verifies if a gym branch exists by ID.
+ * @param {number} gymId - Target gym ID
+ * @returns {Promise<boolean>} True if it exists
+ */
 export async function gymExists(gymId) {
   const [rows] = await pool.query(
     `SELECT id FROM gyms WHERE id = ?`,
@@ -83,17 +117,20 @@ export async function gymExists(gymId) {
 }
 
 /* ============================================================
-   RELACIÓN ADMIN–GYM
-============================================================ */
+   ADMIN-GYM RELATIONSHIP (RBAC)
+   ============================================================ */
 
+/**
+ * Links an administrator to a specific gym branch with a defined role.
+ * Roles: 'DUENO' (Owner), 'EMPLEADO' (Employee).
+ * @param {Object} data - Admin ID, Gym ID, and Role
+ */
 export async function linkAdminToGym({ adminId, gymId, rol }) {
-  // Validar admin
   const admin = await findAdminById(adminId);
-  if (!admin) throw new AppError("Administrador no existe", 404);
+  if (!admin) throw new AppError("Administrator does not exist", 404);
 
-  // Validar gym
   const gym = await gymExists(gymId);
-  if (!gym) throw new AppError("Gym no existe", 404);
+  if (!gym) throw new AppError("Gym branch does not exist", 404);
 
   try {
     await pool.query(
@@ -102,12 +139,17 @@ export async function linkAdminToGym({ adminId, gymId, rol }) {
     );
   } catch (err) {
     if (err.code === "ER_DUP_ENTRY") {
-      throw new AppError("El administrador ya está vinculado a este gym", 400);
+      throw new AppError("Administrator is already linked to this gym branch", 400);
     }
     throw err;
   }
 }
 
+/**
+ * Retrieves all gym branches associated with an administrator.
+ * @param {number} adminId - Target admin ID
+ * @returns {Promise<Array>} List of gym branches
+ */
 export async function getGymsByAdminId(adminId) {
   const [rows] = await pool.query(
     `SELECT g.* 
@@ -119,6 +161,11 @@ export async function getGymsByAdminId(adminId) {
   return rows;
 }
 
+/**
+ * Counts how many gym branches an administrator manages.
+ * @param {number} adminId - Target admin ID
+ * @returns {Promise<number>} Total branches
+ */
 export async function countGymsForAdmin(adminId) {
   const [rows] = await pool.query(
     `SELECT COUNT(*) AS total
@@ -129,6 +176,11 @@ export async function countGymsForAdmin(adminId) {
   return rows[0].total;
 }
 
+/**
+ * Retrieves all unique roles an administrator holds across branches.
+ * @param {number} adminId - Target admin ID
+ * @returns {Promise<Array>} List of role strings
+ */
 export async function getRolesByAdminId(adminId) {
   const [rows] = await pool.query(
     `SELECT DISTINCT rol FROM admins_gyms WHERE admin_id = ?`,
@@ -137,10 +189,16 @@ export async function getRolesByAdminId(adminId) {
   return rows.map((r) => r.rol);
 }
 
+/** Alias for getRolesByAdminId */
 export async function getAdminRole(adminId) {
   return await getRolesByAdminId(adminId);
 }
 
+/**
+ * Finds the official owner associated with a specific gym branch.
+ * @param {number} gymId - Target gym ID
+ * @returns {Promise<Object|undefined>} Owner admin record
+ */
 export async function findOwnerByGymId(gymId) {
   const [rows] = await pool.query(
     `SELECT a.* 
@@ -154,9 +212,12 @@ export async function findOwnerByGymId(gymId) {
 }
 
 /* ============================================================
-   LOGIN
-============================================================ */
+   LEGACY AUTHENTICATION
+   ============================================================ */
 
+/**
+ * Finds an active administrator by their full name. Deprecated.
+ */
 export async function findAdminByNombreApellido(nombre, apellido) {
   const [rows] = await pool.query(
     `SELECT * FROM admins WHERE nombre = ? AND apellido = ? AND activo = 1`,
@@ -166,26 +227,22 @@ export async function findAdminByNombreApellido(nombre, apellido) {
 }
 
 /* ============================================================
-   RESET DE CONTRASEÑA
-============================================================ */
+   PASSWORD RECOVERY LOGIC
+   ============================================================ */
 
+/**
+ * Legacy password reset creation. Deprecated.
+ */
 export async function createPasswordReset({ adminId, token, passwordHash }) {
   const conn = await pool.getConnection();
-
   try {
     await conn.beginTransaction();
-
-    const expiracion = new Date(Date.now() + 1000 * 60 * 30);
-
-    // Guardar token y contraseña temporal
+    const expiracion = new Date(Date.now() + 1000 * 60 * 30); // 30 mins
     await conn.query(
       `INSERT INTO password_reset (admin_id, token, expiracion)
        VALUES (?, ?, ?)`,
       [adminId, token, expiracion]
     );
-
-    // NO actualizar contraseña aquí (bug corregido)
-
     await conn.commit();
   } catch (err) {
     await conn.rollback();
@@ -195,6 +252,7 @@ export async function createPasswordReset({ adminId, token, passwordHash }) {
   }
 }
 
+/** Retrieves legacy reset token. Deprecated. */
 export async function findPasswordResetByToken(token) {
   const [rows] = await pool.query(
     `SELECT * FROM password_reset WHERE token = ? AND expiracion > NOW()`,
@@ -203,6 +261,7 @@ export async function findPasswordResetByToken(token) {
   return rows[0];
 }
 
+/** Deletes legacy reset token. Deprecated. */
 export async function deletePasswordReset(token) {
   await pool.query(
     `DELETE FROM password_reset WHERE token = ?`,
@@ -211,10 +270,10 @@ export async function deletePasswordReset(token) {
 }
 
 /* ============================================================
-   NUEVAS FUNCIONES CON EMAIL (PUNTO 2)
-============================================================ */
+   MODERN EMAIL-BASED AUTHENTICATION
+   ============================================================ */
 
-// Crear admin con email
+/** Creates admin using email as primary identifier. */
 export async function createAdminWithEmail({ nombre, apellido, email, passwordHash, activo = true }) {
   const [result] = await pool.query(
     `INSERT INTO admins (nombre, apellido, email, password, activo) VALUES (?, ?, ?, ?, ?)`,
@@ -225,11 +284,10 @@ export async function createAdminWithEmail({ nombre, apellido, email, passwordHa
     `SELECT id, nombre, apellido, email, activo, creado_en FROM admins WHERE id = ?`,
     [result.insertId]
   );
-
   return rows[0];
 }
 
-// Login con email (solo activos)
+/** Finds active admin by email. */
 export async function findAdminByEmail(email) {
   const [rows] = await pool.query(
     `SELECT * FROM admins WHERE email = ? AND activo = 1`,
@@ -238,7 +296,7 @@ export async function findAdminByEmail(email) {
   return rows[0];
 }
 
-// Buscar admin por email (incluyendo inactivos)
+/** Finds admin by email regardless of activation status. */
 export async function findAdminByEmailRaw(email) {
   const [rows] = await pool.query(
     `SELECT * FROM admins WHERE email = ?`,
@@ -247,12 +305,12 @@ export async function findAdminByEmailRaw(email) {
   return rows[0];
 }
 
-// Eliminar admin por email
+/** Permanently deletes an admin account by email. */
 export async function deleteAdminByEmail(email) {
   await pool.query(`DELETE FROM admins WHERE email = ?`, [email]);
 }
 
-// Validar si email ya existe
+/** Checks if an email is already associated with any admin account. */
 export async function emailExists(email) {
   const [rows] = await pool.query(
     `SELECT id FROM admins WHERE email = ?`,
@@ -261,7 +319,11 @@ export async function emailExists(email) {
   return !!rows[0];
 }
 
-// Crear usuario final (usuario de app)
+/* ============================================================
+   END-USER (CLIENT) REPOSITORY
+   ============================================================ */
+
+/** Registers a new gym client. */
 export async function createUserFinal({ email, nombre, apellido, passwordHash }) {
   const [result] = await pool.query(
     `INSERT INTO usuarios_finales (email, nombre, apellido, password) VALUES (?, ?, ?, ?)`,
@@ -272,11 +334,10 @@ export async function createUserFinal({ email, nombre, apellido, passwordHash })
     `SELECT id, email, nombre, apellido, activo, tipo_suscripcion FROM usuarios_finales WHERE id = ?`,
     [result.insertId]
   );
-
   return rows[0];
 }
 
-// Buscar usuario final por email
+/** Finds active client by email. */
 export async function findUserFinalByEmail(email) {
   const [rows] = await pool.query(
     `SELECT * FROM usuarios_finales WHERE email = ? AND activo = 1`,
@@ -285,7 +346,7 @@ export async function findUserFinalByEmail(email) {
   return rows[0];
 }
 
-// Validar si email de usuario final existe
+/** Checks if email is associated with a client account. */
 export async function userFinalEmailExists(email) {
   const [rows] = await pool.query(
     `SELECT id FROM usuarios_finales WHERE email = ?`,
@@ -294,7 +355,7 @@ export async function userFinalEmailExists(email) {
   return !!rows[0];
 }
 
-// Inscribir usuario en gimnasio
+/** Links a client to a specific gym branch. */
 export async function enrollUserInGym({ userId, gymId, metodo_pago = 'APP' }) {
   const [result] = await pool.query(
     `INSERT INTO usuarios_finales_gimnasios (usuario_id, gym_id, metodo_pago)
@@ -305,7 +366,7 @@ export async function enrollUserInGym({ userId, gymId, metodo_pago = 'APP' }) {
   return result;
 }
 
-// Obtener gimnasios donde usuario está inscrito
+/** Retrieves all gym branches where a client is actively enrolled. */
 export async function getGymsForUser(userId) {
   const [rows] = await pool.query(
     `SELECT g.* 
@@ -317,20 +378,22 @@ export async function getGymsForUser(userId) {
   return rows;
 }
 
-// Crear token de reset con nueva tabla
+/* ============================================================
+   MODERN RECOVERY REPOSITORY
+   ============================================================ */
+
+/** Creates a security token for password recovery (Modern). */
 export async function createPasswordResetToken({ email, token, tipo_usuario = 'ADMIN' }) {
-  const expiracion = new Date(Date.now() + 1000 * 60 * 30); // 30 minutos
-  
+  const expiracion = new Date(Date.now() + 1000 * 60 * 30); // 30 minutes
   const [result] = await pool.query(
     `INSERT INTO password_reset_tokens (email, token, tipo_usuario, fecha_expiracion)
      VALUES (?, ?, ?, ?)`,
     [email, token, tipo_usuario, expiracion]
   );
-
   return result.insertId;
 }
 
-// Validar token de reset
+/** Finds a valid, unused recovery token. */
 export async function findPasswordResetToken(token) {
   const [rows] = await pool.query(
     `SELECT * FROM password_reset_tokens 
@@ -340,7 +403,7 @@ export async function findPasswordResetToken(token) {
   return rows[0];
 }
 
-// Usar token de reset (marcar como usado)
+/** Invalidates a recovery token after use. */
 export async function usePasswordResetToken(tokenId) {
   await pool.query(
     `UPDATE password_reset_tokens 
@@ -350,7 +413,7 @@ export async function usePasswordResetToken(tokenId) {
   );
 }
 
-// Actualizar contraseña de usuario final
+/** Updates client password. */
 export async function updateUserFinalPassword(userId, passwordHash) {
   await pool.query(
     `UPDATE usuarios_finales SET password = ? WHERE id = ?`,
@@ -358,7 +421,7 @@ export async function updateUserFinalPassword(userId, passwordHash) {
   );
 }
 
-// Obtener usuario final por ID
+/** Finds client profile by ID. */
 export async function findUserFinalById(id) {
   const [rows] = await pool.query(
     `SELECT id, email, nombre, apellido, foto, activo, tipo_suscripcion FROM usuarios_finales WHERE id = ?`,

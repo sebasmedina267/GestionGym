@@ -13,7 +13,7 @@ export const useRegisterLogic = () => {
         email: "",
         password: "",
         confirmPassword: "",
-        rol: "DUENO", // Ahora será DUENO o USUARIO
+        rol: "DUENO",
         gymNombre: "",
         gymDireccion: "",
         gymUrlWeb: "",
@@ -103,8 +103,15 @@ export const useRegisterLogic = () => {
                     }
                 });
 
-                // Redirigir al pago Stripe con el email para activarlo luego
-                navigate("/stripe-checkout", { state: { email: form.email } }); 
+                // Redirigir al pago Stripe con los datos necesarios para crear el intent
+                navigate("/stripe-checkout", {
+                    state: {
+                        email: form.email,
+                        nombre: form.nombre,
+                        apellido: form.apellido,
+                        gymNombre: form.gymNombre
+                    }
+                });
             } else {
                 await api.post("/auth/user/register", {
                     nombre: form.nombre,

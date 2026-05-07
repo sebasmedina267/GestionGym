@@ -7,6 +7,16 @@ import Button from "../../components/ui/Button";
 import "./Styles/MaquinasPage.css";
 import "./Styles/MaquinasModals.css";
 
+/**
+ * MaquinasPage Component
+ * 
+ * Orchestrates the equipment inventory management system.
+ * Key responsibilities:
+ * - Displaying high-level equipment analytics (Total, Operational, Maintenance).
+ * - Providing a unified interface for asset discovery and filtering.
+ * - Managing the lifecycle of machinery via creation, update, and deletion modals.
+ * - Implementing a responsive 'Kinetic' design for high-density inventory data.
+ */
 export default function MaquinasPage() {
   const {
     gymReady,
@@ -30,6 +40,7 @@ export default function MaquinasPage() {
     handleSave,
   } = useMaquinasLogic();
 
+  // Guard: Ensure gym branch context is synchronized before rendering
   if (!gymReady) {
     return (
       <AppLayout>
@@ -46,11 +57,11 @@ export default function MaquinasPage() {
   return (
     <AppLayout>
       <div className="maquinas-page">
-        {/* Ambient Glows */}
+        {/* Aesthetic Background Accents */}
         <div className="maquinas-ambient-glow-1"></div>
         <div className="maquinas-ambient-glow-2"></div>
 
-        {/* Page Header Area */}
+        {/* Page Header Area: Identity and Primary Actions */}
         <div className="maquinas-header-area">
           <div className="maquinas-title-group">
             <div className="maquinas-title-wrapper">
@@ -73,9 +84,9 @@ export default function MaquinasPage() {
           </button>
         </div>
 
-        {/* Dashboard Quick Stats */}
+        {/* Analytic Pulse: Quick-view statistics of branch assets */}
         <div className="maquinas-stats-grid">
-          {/* Total Items */}
+          {/* Total Assets Count */}
           <div className="stat-card-kinetic">
             <div className="stat-card-content">
               <div className="stat-icon-wrapper icon-total">
@@ -89,7 +100,7 @@ export default function MaquinasPage() {
             <span className="material-symbols-outlined stat-arrow">chevron_right</span>
           </div>
 
-          {/* Operativas */}
+          {/* Operational Assets (Active state) */}
           <div className="stat-card-kinetic">
             <div className="stat-card-content">
               <div className="stat-icon-wrapper icon-operativas">
@@ -103,7 +114,7 @@ export default function MaquinasPage() {
             <span className="material-symbols-outlined stat-arrow">chevron_right</span>
           </div>
 
-          {/* Mantenimiento */}
+          {/* Assets flagged for Maintenance */}
           <div className="stat-card-kinetic">
             <div className="stat-card-content">
               <div className="stat-icon-wrapper icon-mantenimiento">
@@ -117,7 +128,7 @@ export default function MaquinasPage() {
             <span className="material-symbols-outlined stat-arrow">chevron_right</span>
           </div>
 
-          {/* Uso */}
+          {/* Aggregate Usage Density (%) */}
           <div className="stat-card-kinetic">
             <div className="stat-card-content">
               <div className="stat-icon-wrapper icon-uso">
@@ -135,7 +146,7 @@ export default function MaquinasPage() {
           </div>
         </div>
 
-        {/* Filter & Search Bar */}
+        {/* Global Controls: Search and Advanced Filtering */}
         <div className="maquinas-controls">
           <div className="maquinas-search-wrapper">
             <span className="material-symbols-outlined search-icon">search</span>
@@ -151,7 +162,7 @@ export default function MaquinasPage() {
           </button>
         </div>
 
-        {/* Inventory Section */}
+        {/* Primary Data Display: The machinery catalog */}
         <div className="maquinas-grid-container">
           {loading ? (
             <div className="loading-maquinas-state">
@@ -169,6 +180,7 @@ export default function MaquinasPage() {
           )}
         </div>
 
+        {/* Management Modal: Handles both Acquisition and Configuration Updates */}
         <MaquinasFormModal 
           open={open}
           setOpen={setOpen}
@@ -181,7 +193,7 @@ export default function MaquinasPage() {
           resetForm={resetForm}
         />
 
-        {/* MODAL DE CONFIRMACIÓN - Kinetic Style */}
+        {/* GOVERNANCE: Confirmation Modal for high-impact actions (e.g. deletion) */}
         <Modal open={confirmModal.open} onClose={() => setConfirmModal({ ...confirmModal, open: false })} title={confirmModal.title}>
           <div className="maquina-confirm-container">
             <div className="maquina-confirm-top">
@@ -208,7 +220,7 @@ export default function MaquinasPage() {
           </div>
         </Modal>
 
-        {/* MODAL DE ALERTA - Kinetic Style */}
+        {/* NOTIFICATION: System alerts and operational feedback */}
         <Modal open={alertModal.open} onClose={() => setAlertModal({ ...alertModal, open: false })} title={alertModal.title}>
           <div className="maquina-alert-container">
             <div className="maquina-confirm-top">

@@ -1,5 +1,19 @@
 import "./Styles/DashboardHeader.css";
 
+/**
+ * DashboardHeader Component
+ * 
+ * Provides the visual entry point and global control actions for the dashboard.
+ * Displays:
+ * - Dynamic title reflecting the active gym context.
+ * - Explanatory subtitle for operational clarity.
+ * - Global actions for data export (PDF) and real-time synchronization.
+ * 
+ * Props:
+ * @param {Object} gym - Current branch context.
+ * @param {Function} onExport - Handler for generating financial/operational reports.
+ * @param {Function} onSync - Handler for manual data refresh.
+ */
 export default function DashboardHeader({ gym, onExport, onSync }) {
   return (
     <header className="dashboard-hero-header">
@@ -13,6 +27,7 @@ export default function DashboardHeader({ gym, onExport, onSync }) {
         </p>
       </div>
       <div className="dashboard-hero-actions">
+        {/* Export Action: Triggers PDF generation */}
         <button
           className="dashboard-hero-btn dashboard-hero-btn--ghost"
           type="button"
@@ -20,6 +35,7 @@ export default function DashboardHeader({ gym, onExport, onSync }) {
         >
           Exportar
         </button>
+        {/* Sync Action: Triggers multi-stream data refetch */}
         <button
           className="dashboard-hero-btn dashboard-hero-btn--primary"
           type="button"

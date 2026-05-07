@@ -9,10 +9,24 @@ import PagosModals from "./PagosModals";
 import { exportEconomiaPDF } from "../Economia/pdfUtils";
 import "./Styles/PagosPage.css";
 
+/**
+ * PagosPage Component
+ * 
+ * Orchestrates the client-side financial lifecycle, specifically focusing on class enrollments 
+ * and monthly membership collections.
+ * 
+ * Features:
+ * - Discipline-specific filtering for targeted financial oversight.
+ * - Real-time payment status tracking (Paid vs. Overdue).
+ * - Accelerated "Quick Pay" workflow for manual desk collections.
+ * - Integrated financial reporting with PDF export capabilities.
+ * - Dynamic data visualization of revenue streams and payment methods.
+ */
 export default function PagosPage() {
   const logic = usePagosLogic();
   const pdfRef = useRef();
 
+  /** Guard: Ensures the branch context is fully hydrated before rendering interactive elements */
   if (!logic.gymReady) {
     return (
       <AppLayout>
@@ -26,6 +40,7 @@ export default function PagosPage() {
       <div className="pagos-page">
         <Header title="Control de Pagos de Clientes" />
 
+        {/* Global Control Bar: Discipline selection and temporal scoping (Month) */}
         <PagosFiltros
           claseId={logic.claseId}
           setClaseId={logic.setClaseId}
@@ -37,6 +52,7 @@ export default function PagosPage() {
 
         {logic.claseId ? (
           <div className="pagos-grid" ref={pdfRef}>
+            {/* Primary Ledger: Detailed member enrollment and payment status grid */}
             <PagosTabla
               clases={logic.clases}
               claseId={logic.claseId}
@@ -46,6 +62,7 @@ export default function PagosPage() {
               handleQuickPayClick={logic.handleQuickPayClick}
             />
 
+            {/* Strategic Summary: High-level analytics and export triggers */}
             <PagosResumen
               classStats={logic.classStats}
               metodoPagoStats={logic.metodoPagoStats}
@@ -54,6 +71,7 @@ export default function PagosPage() {
             />
           </div>
         ) : (
+          /* Empty State: Guidance for the user to initiate the management flow */
           <div className="glass-card neon-glow-primary pagos-empty-state">
             <span className="pagos-empty-icon-wrapper">
               <span className="material-symbols-outlined pagos-empty-icon">payments</span>
@@ -65,6 +83,7 @@ export default function PagosPage() {
           </div>
         )}
 
+        {/* Subsystem Modals: Managed workflows for payment confirmation and feedback */}
         <PagosModals
           alertModal={logic.alertModal}
           setAlertModal={logic.setAlertModal}
@@ -82,4 +101,3 @@ export default function PagosPage() {
     </AppLayout>
   );
 }
-

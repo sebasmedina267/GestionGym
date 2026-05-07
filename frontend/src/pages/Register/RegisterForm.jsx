@@ -2,6 +2,29 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Styles/RegisterForm.css";
 
+/**
+ * RegisterForm Component
+ * 
+ * A high-density, authoritative registration form tailored for both Organization Owners 
+ * and standard App Users.
+ * 
+ * Features:
+ * - Role-conditional field rendering (Gym details for Owners vs. simple profile for Users).
+ * - Real-time password visibility toggles.
+ * - Multi-part form support for asset uploads (Gym photos).
+ * - Integrated validation feedback and server-side error banners.
+ * - Kinetic UI aesthetic with glassmorphism and animated transitions.
+ * 
+ * Props:
+ * @param {Object} form - Reactive state containing all registration attributes.
+ * @param {Object} errors - Mapping of field identifiers to validation messages.
+ * @param {boolean} loading - Submission state guard to prevent duplicate requests.
+ * @param {string} success - Success message for post-registration feedback.
+ * @param {boolean} isOwner - Boolean flag derived from role selection to toggle UI paths.
+ * @param {Function} handleInputChange - Handler for string/numeric inputs.
+ * @param {Function} handleFileChange - Handler for file/binary inputs.
+ * @param {Function} handleSubmit - Orchestrator for the registration API lifecycle.
+ */
 const RegisterForm = ({
     form,
     errors,
@@ -18,7 +41,7 @@ const RegisterForm = ({
 
     return (
         <form className="register-form-wrapper" onSubmit={handleSubmit}>
-            {/* Mensajes de Éxito/Error Generales */}
+            {/* Global Communication Layer: Displaying high-level feedback */}
             {errors.general && (
                 <div className="register-alert register-alert-error">
                     <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>error</span>
@@ -32,7 +55,7 @@ const RegisterForm = ({
                 </div>
             )}
 
-            {/* Fila de Nombres */}
+            {/* Identity Layer: Core personal identification attributes */}
             <div className="register-form-row">
                 <div className="register-field-group">
                     <label className="register-field-label">Nombre</label>
@@ -66,7 +89,7 @@ const RegisterForm = ({
                 </div>
             </div>
 
-            {/* Fila de Email y Rol */}
+            {/* Connectivity & Role Layer: Routing the user through the appropriate platform tier */}
             <div className="register-form-row">
                 <div className="register-field-group">
                     <label className="register-field-label">Correo Electrónico</label>
@@ -101,7 +124,7 @@ const RegisterForm = ({
                 </div>
             </div>
 
-            {/* Datos específicos de Dueño */}
+            {/* Professional Tier (Owner): Infrastructure and Branding configuration */}
             {isOwner && (
                 <>
                     <div className="register-form-row">
@@ -165,7 +188,7 @@ const RegisterForm = ({
                 </>
             )}
 
-            {/* Fila de Contraseña */}
+            {/* Security Layer: Credential definition and verification */}
             <div className="register-form-row">
                 <div className="register-field-group">
                     <label className="register-field-label">Contraseña</label>
@@ -212,7 +235,7 @@ const RegisterForm = ({
                 </div>
             </div>
 
-            {/* CTA */}
+            {/* Execution Layer: Primary call to action with dynamic role-based messaging */}
             <button
                 className="register-submit-btn"
                 type="submit"
@@ -224,7 +247,7 @@ const RegisterForm = ({
                 {!loading && <span className="material-symbols-outlined btn-icon-animate" style={{ fontSize: "1.25rem" }}>arrow_forward</span>}
             </button>
 
-            {/* Link to Login */}
+            {/* Navigation: Contextual link for existing platform members */}
             <div className="register-login-link-container">
                 <p className="register-login-link-text">
                     ¿Ya tienes una cuenta? <Link to="/login" className="register-login-link">Inicia sesión</Link>

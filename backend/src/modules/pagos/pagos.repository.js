@@ -2,7 +2,12 @@ import { pool } from "../../config/db.js";
 import { AppError } from "../../utils/AppError.js";
 
 /**
- * LISTAR PAGOS DEL GYM
+ * Retrieves a comprehensive list of payments for a gym branch.
+ * Supports granular filtering by class, client, and chronological range.
+ * 
+ * @param {number} gymId - The target gym branch identifier.
+ * @param {Object} filters - Search criteria (claseId, clienteId, desde, hasta).
+ * @returns {Promise<Array>} List of payment records with joined client and class details.
  */
 export async function findByGym(
   gymId,
@@ -40,7 +45,8 @@ export async function findByGym(
 }
 
 /**
- * LISTAR PAGOS PENDIENTES DEL GYM
+ * Retrieves outstanding (unpaid) payment records for a gym branch.
+ * Useful for desk debt collection and financial health monitoring.
  */
 export async function findPagnosPendientes(gymId, { claseId, clienteId, desde, hasta } = {}) {
   let query = `
@@ -75,10 +81,15 @@ export async function findPagnosPendientes(gymId, { claseId, clienteId, desde, h
 }
 
 /**
- * ESTADO DE PAGOS POR CLASE (CHECKLIST)
+ * Generates a real-time payment checklist for all active students in a specific class.
+ * Cross-references enrollments with payment records for the specified month.
+ * 
+ * @param {number} gymId - The target branch.
+ * @param {number} claseId - The target discipline.
+ * @param {string} mes - Filter month (format 'YYYY-MM').
+ * @returns {Promise<Array>} List of students with their respective payment status for the period.
  */
 export async function getEstadoPagosClase(gymId, claseId, mes) {
-  // mes format: 'YYYY-MM'
   const query = `
     SELECT DISTINCT 
       c.id AS cliente_id,
@@ -104,7 +115,13 @@ export async function getEstadoPagosClase(gymId, claseId, mes) {
 }
 
 /**
- * CREA PAGO + INGRESO ECONÓMICO EN UNA SOLA TRANSACCIÓN
+ * Persists a new payment and atomically records a corresponding revenue entry if paid.
+ * Orchestrated within a database transaction to ensure financial data integrity.
+ * 
+ * @param {number} gymId - Gym branch identifier.
+ * @param {Object} data - Payment attributes (client, amount, dates, method).
+ * @param {number} adminId - The performing administrator's ID.
+ * @returns {Promise<Object>} The persisted payment record.
  */
 export async function createPago(gymId, data, adminId) {
   const conn = await pool.getConnection();
@@ -124,15 +141,15 @@ export async function createPago(gymId, data, adminId) {
       metodo_pago = 'EFECTIVO',
     } = data;
 
-    // Validar cliente pertenece al gym
+    // Security Check: Verify client exists within the specified branch scope
     const [clienteRows] = await conn.query(
       "SELECT id FROM clientes WHERE id = ? AND gym_id = ?",
       [cliente_id, gymId],
     );
     if (!clienteRows[0])
-      throw new AppError("Cliente no pertenece a este gym", 400);
+      throw new AppError("Integrity Error: Client does not belong to this gym branch", 400);
 
-    // Crear pago (ahora incluye gym_id y metodo_pago)
+    // Persist Payment Entry
     const [pagoResult] = await conn.query(
       `INSERT INTO pagos (gym_id, cliente_id, precio_id, clase_id, pagado, importe, fecha_pago, periodo_inicio, periodo_fin, metodo_pago)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -152,7 +169,7 @@ export async function createPago(gymId, data, adminId) {
 
     const pagoId = pagoResult.insertId;
 
-    // Si está pagado → registrar ingreso económico
+    // Financial Synchronization: Automatically record revenue if the transaction is settled
     if (pagado) {
       await conn.query(
         `INSERT INTO ingresos (gym_id, fuente_tipo, fuente_id, descripcion, importe, fecha, admin_id)
@@ -160,7 +177,7 @@ export async function createPago(gymId, data, adminId) {
         [
           gymId,
           pagoId,
-          `Pago cliente ${cliente_id}`,
+          `Payment from client ID ${cliente_id}`,
           importe,
           fecha_pago,
           adminId,
@@ -182,9 +199,7 @@ export async function createPago(gymId, data, adminId) {
   }
 }
 
-/**
- * OBTENER PAGO POR ID (VALIDANDO GYM)
- */
+/** Retrieves a specific payment record by ID, scoped to a gym branch. */
 export async function getById(gymId, id) {
   const [rows] = await pool.query(
     `SELECT *
@@ -196,7 +211,13 @@ export async function getById(gymId, id) {
 }
 
 /**
- * ACTUALIZACIÓN DE PAGO + INGRESO (si cambia pagado)
+ * Updates a payment record and handles conditional revenue synchronization.
+ * If the status transitions to 'paid', an associated income record is created.
+ * 
+ * @param {number} gymId - Gym branch scope.
+ * @param {number} id - Target payment record.
+ * @param {Object} data - Updated fields.
+ * @param {number} adminId - Performing admin.
  */
 export async function updatePago(gymId, id, data, adminId) {
   const conn = await pool.getConnection();
@@ -205,11 +226,12 @@ export async function updatePago(gymId, id, data, adminId) {
     await conn.beginTransaction();
 
     const pagoActual = await getById(gymId, id);
-    if (!pagoActual) throw new AppError("Pago no encontrado", 404);
+    if (!pagoActual) throw new AppError("Resource Error: Payment record not found", 404);
 
     const fields = [];
     const values = [];
 
+    // Dynamic field mapping for partial updates
     [
       "precio_id",
       "clase_id",
@@ -237,7 +259,7 @@ export async function updatePago(gymId, id, data, adminId) {
       );
     }
 
-    // Si antes no estaba pagado y ahora sí → crear ingreso
+    // Revenue Trigger: Transition from 'unpaid' to 'paid' triggers an automatic economic income entry
     if (!pagoActual.pagado && data.pagado === true) {
       await conn.query(
         `INSERT INTO ingresos (gym_id, fuente_tipo, fuente_id, descripcion, importe, fecha, admin_id)
@@ -245,7 +267,7 @@ export async function updatePago(gymId, id, data, adminId) {
         [
           gymId,
           id,
-          `Pago cliente ${pagoActual.cliente_id}`,
+          `Payment settlement for client ID ${pagoActual.cliente_id}`,
           data.importe ?? pagoActual.importe,
           data.fecha_pago ?? pagoActual.fecha_pago,
           adminId,

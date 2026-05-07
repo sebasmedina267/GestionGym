@@ -6,31 +6,41 @@ import { requireFields } from '../../utils/validators.js';
 import { AppError } from '../../utils/AppError.js';
 
 /**
- * VALIDAR PERMISOS DEL ADMIN
+ * Validates that an administrator has authority to manage inventory within a specific gym branch.
+ * @param {number} adminId - The administrator's unique identifier.
+ * @param {number} gymId - The target gym branch identifier.
+ * @throws {AppError} 403 if permission is denied.
  */
 async function validarPermisos(adminId, gymId) {
   const gyms = await authRepository.getGymsByAdminId(adminId);
   if (!gyms.some(g => g.id === gymId)) {
-    throw new AppError('No tienes permiso para operar en este gym', 403);
+    throw new AppError('Access Denied: You do not have permission to manage inventory in this branch', 403);
   }
 }
 
 /**
- * LISTAR PRODUCTOS DEL GYM
+ * Retrieves the full product catalog for a specific gym branch.
+ * @param {number} gymId - The target branch identifier.
+ * @returns {Promise<Array>} Collection of product entities.
  */
 export async function listarProductos(gymId) {
   return productosRepository.findByGym(gymId);
 }
 
 /**
- * LISTAR MOVIMIENTOS
+ * Retrieves historical inventory movements (Purchases and Sales) for a branch.
+ * Supports granular filtering via query parameters.
+ * @param {number} gymId - The branch identifier.
+ * @param {Object} filtros - Criteria for filtering movements.
  */
 export async function listarMovimientos(gymId, filtros) {
   return productosRepository.findMovimientosByGym(gymId, filtros);
 }
 
 /**
- * ESTADÍSTICAS
+ * Aggregates financial performance statistics for the product catalog.
+ * Breaks down revenue and costs on a per-product basis.
+ * @param {number} gymId - The branch identifier.
  */
 export async function estadisticasProductos(gymId) {
   const [ingresos, gastos] = await Promise.all([
@@ -42,18 +52,21 @@ export async function estadisticasProductos(gymId) {
 }
 
 /**
- * CREAR PRODUCTO BASE
+ * Creates a new base product definition in the catalog.
+ * @param {number} gymId - Target branch for the product.
+ * @param {Object} data - Product properties (branding, default pricing).
+ * @param {Object} admin - Identity of the performing administrator.
  */
 export async function crearProductoBase(gymId, data, admin) {
   requireFields(data, ['nombre', 'precio_unitario']);
 
-  if (!admin?.id) throw new AppError('Admin inválido', 400);
+  if (!admin?.id) throw new AppError('Invalid administrator context', 400);
 
   await validarPermisos(admin.id, gymId);
 
   const producto = await productosRepository.createProducto(gymId, data);
 
-  // Auditoría
+  // Audit: Track catalog expansion
   await registrarOperacion({
     adminId: admin.id,
     gymId,
@@ -67,19 +80,22 @@ export async function crearProductoBase(gymId, data, admin) {
 }
 
 /**
- * ACTUALIZAR PRODUCTO
+ * Updates an existing product definition.
+ * @param {number} gymId - Branch context.
+ * @param {number} id - Target product ID.
+ * @param {Object} data - Attributes to modify.
  */
 export async function actualizarProducto(gymId, id, data, admin) {
-  if (!admin?.id) throw new AppError('Admin inválido', 400);
+  if (!admin?.id) throw new AppError('Invalid administrator context', 400);
 
   await validarPermisos(admin.id, gymId);
 
   const producto = await productosRepository.getProductoById(gymId, id);
-  if (!producto) throw new AppError('Producto no encontrado', 404);
+  if (!producto) throw new AppError('Resource Error: Product not found', 404);
 
   const actualizado = await productosRepository.updateProducto(gymId, id, data);
 
-  // Auditoría
+  // Audit: Track catalog modification
   await registrarOperacion({
     adminId: admin.id,
     gymId,
@@ -93,19 +109,24 @@ export async function actualizarProducto(gymId, id, data, admin) {
 }
 
 /**
- * REGISTRAR COMPRA
+ * Orchestrates an inventory replenishment (Purchase) transaction.
+ * Synchronizes stock levels and automatically records an operational expense.
+ * 
+ * @param {number} gymId - Branch context.
+ * @param {number} productoId - Target product for replenishment.
+ * @param {Object} data - Transaction details (quantity, cost).
  */
 export async function registrarCompra(gymId, productoId, data, admin) {
   requireFields(data, ['cantidad', 'precio_unitario']);
 
-  if (!admin?.id) throw new AppError('Admin inválido', 400);
+  if (!admin?.id) throw new AppError('Invalid administrator context', 400);
 
   await validarPermisos(admin.id, gymId);
 
   const producto = await productosRepository.getProductoById(gymId, productoId);
-  if (!producto) throw new AppError('Producto no encontrado', 404);
+  if (!producto) throw new AppError('Resource Error: Product not found', 404);
 
-  // Movimiento + producto actualizado
+  // Transaction Layer: Update physical stock and log inventory movement
   const { movimiento, producto: productoActualizado } =
     await productosRepository.registrarMovimiento(gymId, productoId, {
       tipo_movimiento: 'COMPRA',
@@ -114,17 +135,17 @@ export async function registrarCompra(gymId, productoId, data, admin) {
       adminId: admin.id,
     });
 
-  // Registrar gasto económico
+  // Financial Integration: Record the capital outflow in the 'Economy' ledger
   await economiaRepository.insertGasto({
     gymId,
     fuente_tipo: 'PRODUCTO_COMPRA',
     fuente_id: movimiento.id,
-    descripcion: `Compra producto ${producto.nombre}`,
+    descripcion: `Inventory Replenishment: ${producto.nombre}`,
     importe: data.cantidad * data.precio_unitario,
     adminId: admin.id,
   });
 
-  // Auditoría
+  // Audit: Track inventory acquisition
   await registrarOperacion({
     adminId: admin.id,
     gymId,
@@ -138,18 +159,24 @@ export async function registrarCompra(gymId, productoId, data, admin) {
 }
 
 /**
- * REGISTRAR VENTA
+ * Orchestrates an inventory depletion (Sale) transaction.
+ * Synchronizes stock levels and automatically records operational revenue.
+ * 
+ * @param {number} gymId - Branch context.
+ * @param {number} productoId - Product sold.
+ * @param {Object} data - Transaction details (quantity, selling price).
  */
 export async function registrarVenta(gymId, productoId, data, admin) {
   requireFields(data, ['cantidad', 'precio_unitario']);
 
-  if (!admin?.id) throw new AppError('Admin inválido', 400);
+  if (!admin?.id) throw new AppError('Invalid administrator context', 400);
 
   await validarPermisos(admin.id, gymId);
 
   const producto = await productosRepository.getProductoById(gymId, productoId);
-  if (!producto) throw new AppError('Producto no encontrado', 404);
+  if (!producto) throw new AppError('Resource Error: Product not found', 404);
 
+  // Transaction Layer: Deduct physical stock and log inventory movement
   const { movimiento, producto: productoActualizado } =
     await productosRepository.registrarMovimiento(gymId, productoId, {
       tipo_movimiento: 'VENTA',
@@ -158,17 +185,17 @@ export async function registrarVenta(gymId, productoId, data, admin) {
       adminId: admin.id,
     });
 
-  // Registrar ingreso económico
+  // Financial Integration: Record the capital inflow in the 'Economy' ledger
   await economiaRepository.insertIngreso({
     gymId,
     fuente_tipo: 'PRODUCTO_VENTA',
     fuente_id: movimiento.id,
-    descripcion: `Venta producto ${producto.nombre}`,
+    descripcion: `Inventory Sale: ${producto.nombre}`,
     importe: data.cantidad * data.precio_unitario,
     adminId: admin.id,
   });
 
-  // Auditoría
+  // Audit: Track inventory revenue event
   await registrarOperacion({
     adminId: admin.id,
     gymId,

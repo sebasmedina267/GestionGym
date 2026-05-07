@@ -8,14 +8,28 @@ import ClienteModal from "./ClienteModal";
 import ClientesTable from "./ClientesTable";
 import "./Styles/ClientesPage.css";
 
+/**
+ * ClientesPage Component
+ * 
+ * Orchestrates the management of gym members. 
+ * Supports creating, updating, toggling status, and deleting client records.
+ * Distinguishes between local clients and external App Users (who have limited editability).
+ */
 export default function ClientesPage() {
   const { gym } = useGym();
+  
+  // Custom hook to fetch and synchronize the list of clients for the current gym
   const { clientes, loading, refetch } = useClientes(gym?.id);
 
+  // --- UI States ---
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
 
+  /**
+   * Filtered client list based on search input. 
+   * Searches across full names.
+   */
   const filtered = useMemo(() => {
     return clientes.filter((c) =>
       `${c.nombre} ${c.apellido}`
@@ -24,47 +38,76 @@ export default function ClientesPage() {
     );
   }, [clientes, search]);
 
+  /**
+   * Persists client data to the backend.
+   * Handles both creation and updates.
+   * @param {Object} form - Data from the ClienteModal
+   */
   const handleSave = async (form) => {
     const payload = { ...form, edad: Number(form.edad) };
 
-    if (editing) {
-      if (editing.tipo_origen === 'APP') {
-         payload.tipo_origen = 'APP';
+    try {
+      if (editing) {
+        // Carry over origin metadata for correct backend routing
+        if (editing.tipo_origen === 'APP') {
+           payload.tipo_origen = 'APP';
+        }
+        await api.patch(`/clientes/${editing.id}`, payload);
+      } else {
+        await api.post(`/clientes`, payload);
       }
-      await api.patch(`/clientes/${editing.id}`, payload);
-    } else {
-      await api.post(`/clientes`, payload);
-    }
 
-    setModalOpen(false);
-    setEditing(null);
-    refetch();
+      setModalOpen(false);
+      setEditing(null);
+      refetch(); // Synchronize UI with updated database state
+    } catch (error) {
+      console.error("Save client error:", error);
+      alert("Error al guardar los datos del cliente. Inténtalo de nuevo.");
+    }
   };
 
+  /**
+   * Handles client record removal.
+   * Note: App Users cannot be deleted from this interface as they own their accounts.
+   */
   const handleDelete = async (cliente) => {
     if (cliente.tipo_origen === 'APP') {
-      alert("No puedes eliminar un usuario de la App desde aquí. Debes cancelar su suscripción.");
+      alert("Los usuarios de la App móvil no pueden eliminarse aquí. Solo se puede gestionar su estado de membresía.");
       return;
     }
-    if (!confirm(`Eliminar a ${cliente.nombre}?`)) return;
-    await api.delete(`/clientes/${cliente.id}`);
-    refetch();
+    
+    if (!confirm(`¿Estás seguro de que deseas eliminar a ${cliente.nombre}?`)) return;
+    
+    try {
+      await api.delete(`/clientes/${cliente.id}`);
+      refetch();
+    } catch (error) {
+      console.error("Delete client error:", error);
+    }
   };
 
+  /**
+   * Toggles the active/inactive status of a member.
+   */
   const handleToggle = async (cliente) => {
-    await api.patch(`/clientes/${cliente.id}`, {
-      activo: !cliente.activo,
-      tipo_origen: cliente.tipo_origen
-    });
-    refetch();
+    try {
+      await api.patch(`/clientes/${cliente.id}`, {
+        activo: !cliente.activo,
+        tipo_origen: cliente.tipo_origen
+      });
+      refetch();
+    } catch (error) {
+      console.error("Toggle client status error:", error);
+    }
   };
 
   return (
     <AppLayout>
       <div className="clientes-v2">
+        {/* Page Header: Title and primary creation action */}
         <header className="clientes-v2__hero">
           <div>
-            <p className="clientes-v2__kicker">Miembros</p>
+            <p className="clientes-v2__kicker">Miembros Activos</p>
             <h1 className="clientes-v2__title">Gestión de Clientes</h1>
           </div>
 
@@ -72,17 +115,19 @@ export default function ClientesPage() {
             className="clientes-v2__cta"
             onClick={() => setModalOpen(true)}
           >
-            + Nuevo cliente
+            + Nuevo Cliente
           </button>
         </header>
 
+        {/* Data Table Container */}
         <section className="clientes-v2__tableShell">
           <div className="clientes-v2__tableToolbar">
+            {/* Real-time Filter Bar */}
             <div className="clientes-v2__filter">
               <span className="clientes-v2__filterIcon">⎚</span>
               <input
                 className="clientes-v2__filterInput"
-                placeholder="Buscar cliente..."
+                placeholder="Buscar por nombre..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -90,13 +135,14 @@ export default function ClientesPage() {
           </div>
 
           {loading ? (
-            <p>Cargando...</p>
+            <div className="clientes-v2__loading">Procesando datos...</div>
           ) : (
             <ClientesTable
               data={filtered}
               onEdit={(c) => {
+                // Constraint: App Users are managed within the app; dashboard only toggles status
                 if (c.tipo_origen === 'APP') {
-                   alert("Los datos de usuarios de la App son de solo lectura aquí. Solo puedes cambiar su estado.");
+                   alert("Los perfiles de usuarios móviles son de solo lectura. Solo puedes gestionar su estado activo/inactivo.");
                    return;
                 }
                 setEditing(c);
@@ -108,6 +154,7 @@ export default function ClientesPage() {
           )}
         </section>
 
+        {/* Create/Edit Modal Component */}
         <ClienteModal
           key={editing?.id || "new"} 
           open={modalOpen}
