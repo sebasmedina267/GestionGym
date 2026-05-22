@@ -108,7 +108,7 @@ export function useClasesLogic(gym) {
       }
     };
     load();
-    cargarConcurrencia();
+    Promise.resolve().then(cargarConcurrencia);
   }, [clases]);
 
   // --- Action Handlers ---

@@ -5,13 +5,17 @@ import App from "./App.jsx";
 import { AuthProvider } from "./context/AuthProvider.jsx";
 import { GymProvider } from "./context/GymProvider.jsx";
 import { UIProvider } from "./context/UIProvider.jsx";
+import { NotificationProvider } from "./context/NotificationContext.jsx";
+
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
       <GymProvider>
         <UIProvider>
-          <App />
+          <NotificationProvider>
+            <App />
+          </NotificationProvider>
         </UIProvider>
       </GymProvider>
     </AuthProvider>

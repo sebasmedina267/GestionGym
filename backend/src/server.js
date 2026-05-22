@@ -9,6 +9,7 @@ console.log(">>> [FitFlow] Initializing Backend Infrastructure <<<");
 
 import app from './app.js';
 import { config } from './config/env.js';
+import { startCleanupJob } from './jobs/cleanup.inactive.users.js';
 
 /**
  * Server Lifecycle Initialization
@@ -16,4 +17,5 @@ import { config } from './config/env.js';
  */
 app.listen(config.port, () => {
   console.log(`[FitFlow] Operational: Backend services listening on port ${config.port}`);
+  startCleanupJob();
 });

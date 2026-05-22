@@ -19,7 +19,6 @@ export const Step3DuenoPago = ({
   formData,
   loading,
   processDuenoPayment,
-  goBack,
 }) => {
   // Local state for mandatory legal acceptance before paying
   const [acceptTerms, setAcceptTerms] = useState(false);

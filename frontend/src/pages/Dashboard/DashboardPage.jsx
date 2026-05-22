@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import AppLayout from "../../components/layout/AppLayout";
 import { useDashboardLogic } from "./useDashboardLogic";
 import DashboardHeader from "./DashboardHeader";

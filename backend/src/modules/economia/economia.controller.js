@@ -1,6 +1,8 @@
 import * as economiaService from "./economia.service.js";
 import { AppError } from "../../utils/AppError.js";
 import { validatePermission } from "../../utils/rolePermissions.js";
+import * as pdfService from "../../services/pdf.service.js";
+import { pool } from "../../config/db.js";
 
 /* ============================================================
    HELPERS
@@ -160,6 +162,138 @@ export async function listarGastos(req, res, next) {
     });
 
     res.status(200).json({ ok: true, data: gastos });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/* ============================================================
+   PDF REPORT HANDLERS
+   ============================================================ */
+
+/**
+ * Generates and downloads a comprehensive financial resume PDF
+ */
+export async function descargarResumenPDF(req, res, next) {
+  try {
+    validarAdmin(req);
+    validatePermission(req.admin.roles, "ECONOMIA", "VER");
+
+    const desde = validarFecha(req.query.desde, "desde");
+    const hasta = validarFecha(req.query.hasta, "hasta");
+
+    // Fetch gym information
+    const conn = await pool.getConnection();
+    const [[gym]] = await conn.query("SELECT * FROM gyms WHERE id = ?", [req.gym.id]);
+    conn.release();
+
+    if (!gym) {
+      throw new AppError("Gym not found", 404);
+    }
+
+    // Fetch financial data
+    const resumen = await economiaService.resumenEconomico(req.gym.id, { desde, hasta });
+    const ingresos = await economiaService.listarIngresos(req.gym.id, { desde, hasta });
+    const gastos = await economiaService.listarGastos(req.gym.id, { desde, hasta });
+
+    // Generate PDF
+    const doc = pdfService.generarResumenPDF(
+      { resumen, ingresos, gastos },
+      gym
+    );
+
+    // Set response headers
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="Reporte_Financiero_${gym.nombre}_${new Date().toISOString().split('T')[0]}.pdf"`
+    );
+
+    // Stream PDF to response
+    doc.pipe(res);
+    doc.end();
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * Generates and downloads an income transactions PDF report
+ */
+export async function descargarIngresoPDF(req, res, next) {
+  try {
+    validarAdmin(req);
+    validatePermission(req.admin.roles, "ECONOMIA", "VER");
+
+    const desde = validarFecha(req.query.desde, "desde");
+    const hasta = validarFecha(req.query.hasta, "hasta");
+
+    // Fetch gym information
+    const conn = await pool.getConnection();
+    const [[gym]] = await conn.query("SELECT * FROM gyms WHERE id = ?", [req.gym.id]);
+    conn.release();
+
+    if (!gym) {
+      throw new AppError("Gym not found", 404);
+    }
+
+    // Fetch income data
+    const ingresos = await economiaService.listarIngresos(req.gym.id, { desde, hasta });
+
+    // Generate PDF
+    const doc = pdfService.generarIngresoPDF(ingresos, gym);
+
+    // Set response headers
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="Reporte_Ingresos_${gym.nombre}_${new Date().toISOString().split('T')[0]}.pdf"`
+    );
+
+    // Stream PDF to response
+    doc.pipe(res);
+    doc.end();
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * Generates and downloads an expense transactions PDF report
+ */
+export async function descargarGastoPDF(req, res, next) {
+  try {
+    validarAdmin(req);
+    validatePermission(req.admin.roles, "ECONOMIA", "VER");
+
+    const desde = validarFecha(req.query.desde, "desde");
+    const hasta = validarFecha(req.query.hasta, "hasta");
+
+    // Fetch gym information
+    const conn = await pool.getConnection();
+    const [[gym]] = await conn.query("SELECT * FROM gyms WHERE id = ?", [req.gym.id]);
+    conn.release();
+
+    if (!gym) {
+      throw new AppError("Gym not found", 404);
+    }
+
+    // Fetch expense data
+    const gastos = await economiaService.listarGastos(req.gym.id, { desde, hasta });
+
+    // Generate PDF
+    const doc = pdfService.generarGastoPDF(gastos, gym);
+
+    // Set response headers
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="Reporte_Gastos_${gym.nombre}_${new Date().toISOString().split('T')[0]}.pdf"`
+    );
+
+    // Stream PDF to response
+    doc.pipe(res);
+    doc.end();
   } catch (err) {
     next(err);
   }

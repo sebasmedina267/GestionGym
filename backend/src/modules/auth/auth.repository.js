@@ -429,3 +429,30 @@ export async function findUserFinalById(id) {
   );
   return rows[0];
 }
+
+/** Updates last activity timestamp for a user. */
+export async function updateUserLastActivity(userId) {
+  await pool.query(
+    `UPDATE usuarios_finales SET última_actividad = NOW() WHERE id = ?`,
+    [userId]
+  );
+}
+
+/** Finds native client by email (from clientes table). */
+export async function findClienteNativeByEmail(email) {
+  const [rows] = await pool.query(
+    `SELECT * FROM clientes WHERE email = ? AND activo = 1`,
+    [email]
+  );
+  return rows[0];
+}
+
+/** Finds native client by ID (from clientes table). */
+export async function findClienteNativeById(id) {
+  const [rows] = await pool.query(
+    `SELECT id, gym_id, email, nombre, apellido, activo FROM clientes WHERE id = ?`,
+    [id]
+  );
+  return rows[0];
+}
+

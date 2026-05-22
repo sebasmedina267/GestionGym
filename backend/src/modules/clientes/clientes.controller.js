@@ -137,3 +137,29 @@ export async function eliminarCliente(req, res, next) {
     next(err);
   }
 }
+
+/**
+ * Destructive manual action to execute the data retention cleanup policy.
+ * Scoped to DUENO (Owner) authorization check.
+ */
+export async function cleanupClientes(req, res, next) {
+  try {
+    validarAdmin(req);
+
+    // Governance: restricted to DUENO (Owner)
+    if (!req.admin.roles.includes("DUENO")) {
+      throw new AppError("Privilege Violation: Only primary Owners can trigger database cleanup", 403);
+    }
+
+    const purgedCount = await clientesService.cleanupClientesInactivos(req.gym.id, req.admin);
+
+    res.status(200).json({
+      ok: true,
+      message: `Manual data cleanup successful. Stale inactive records purged.`,
+      purgedCount
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+

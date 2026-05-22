@@ -27,6 +27,7 @@ export const registerEmployeeSchema = {
     email: z.string().email(),
     password: passwordSchema,
     gymId: z.union([z.number().int().positive(), z.string().transform(Number).pipe(z.number().int().positive())]),
+    rol: z.enum(["EMPLEADO", "ENCARGADO"]).optional(),
   }),
 };
 

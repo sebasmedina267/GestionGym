@@ -27,8 +27,7 @@ export default function ClassDetailModal({
   setForm, setShowClaseModal,
   horarios, setHorarioForm, setShowHorarioModal,
   openInscripciones, openEditHorario,
-  selectedHorario,
-  monitores, setSelectedMonitor, setShowMonitorModal, handleRemoverMonitor,
+  monitores, setShowMonitorModal, handleRemoverMonitor,
   precios, setPrecioForm, setShowPrecioModal, openEditPrecio, handleEliminarPrecio,
   stats, generoData, edadData
 }) {

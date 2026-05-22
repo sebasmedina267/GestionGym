@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useContext } from "react";
 import { useFetch } from "../../hooks/useFetch";
 import { useGym } from "../../hooks/useGym";
+import { NotificationContext } from "../../context/NotificationContext";
 import api from "../../api/axios";
 
 /**
@@ -17,6 +18,7 @@ import api from "../../api/axios";
  */
 export function useProductosLogic() {
   const { gym } = useGym();
+  const { addNotification } = useContext(NotificationContext);
   const gymReady = Boolean(gym);
 
   const [activeTab, setActiveTab] = useState("inventario");
@@ -60,7 +62,8 @@ export function useProductosLogic() {
    */
   const handleCrearProducto = async () => {
     if (!formCrear.nombre || !formCrear.precio) {
-      return alert("Faltan datos requeridos.");
+      addNotification("Por favor completa el nombre y precio del producto", "error");
+      return;
     }
 
     try {
@@ -81,9 +84,11 @@ export function useProductosLogic() {
       setOpenCrear(false);
       setFormCrear({ nombre: "", precio: "", stock: "", imagen: null });
       await refetchProductos();
+      addNotification(`${formCrear.nombre} ha sido agregado al inventario`, "success");
     } catch (error) {
       console.error(error);
-      alert(error.response?.data?.message || "Error al crear producto");
+      const errorMsg = error.response?.data?.message || "Error al crear producto";
+      addNotification(errorMsg, "error");
     } finally {
       setSaving(false);
     }

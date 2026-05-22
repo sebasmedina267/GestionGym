@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useFetch } from "../../hooks/useFetch";
+import { NotificationContext } from "../../context/NotificationContext";
 import api, { UPLOADS_URL } from "../../api/axios";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -13,7 +14,9 @@ export const EMPTY_GYM_FORM = {
   direccion: "", 
   ciudad: "", 
   foto: "", 
-  urlWeb: "" 
+  urlWeb: "",
+  latitud: "",
+  longitud: ""
 };
 
 /**
@@ -30,6 +33,7 @@ export const EMPTY_GYM_FORM = {
 export function useGymsLogic() {
   const navigate = useNavigate();
   const { admin } = useAuth();
+  const { addNotification } = useContext(NotificationContext);
   const isDueno = admin?.roles?.includes("DUENO");
 
   // --- Primary Data Queries ---
@@ -49,12 +53,6 @@ export function useGymsLogic() {
 
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
-
-  // --- Centralized Notification System ---
-  const [notif, setNotif] = useState({ open: false, title: "", message: "", type: "info" });
-  const showNotif = (title, message, type = "info") =>
-    setNotif({ open: true, title, message, type });
-  const closeNotif = () => setNotif((n) => ({ ...n, open: false }));
 
   /** 
    * Computed: Identifies branches in the system not yet managed by the owner.
@@ -80,11 +78,25 @@ export function useGymsLogic() {
    */
   const handleCreateGym = async () => {
     const newErrors = {};
-    if (!createForm.nombre) newErrors.nombre = "Obligatorio";
-    if (!createForm.direccion) newErrors.direccion = "Obligatorio";
-    if (!createForm.ciudad) newErrors.ciudad = "Obligatorio";
+    if (!createForm.nombre) newErrors.nombre = "El nombre de la sucursal es obligatorio";
+    if (!createForm.direccion) newErrors.direccion = "La dirección es obligatoria";
+    if (!createForm.ciudad) newErrors.ciudad = "La ciudad es obligatoria";
+    if (!createForm.latitud) newErrors.latitud = "La latitud es obligatoria";
+    if (!createForm.longitud) newErrors.longitud = "La longitud es obligatoria";
+    
+    // Validar que latitud y longitud sean números válidos
+    if (createForm.latitud && (isNaN(createForm.latitud) || createForm.latitud < -90 || createForm.latitud > 90)) {
+      newErrors.latitud = "La latitud debe estar entre -90 y 90";
+    }
+    if (createForm.longitud && (isNaN(createForm.longitud) || createForm.longitud < -180 || createForm.longitud > 180)) {
+      newErrors.longitud = "La longitud debe estar entre -180 y 180";
+    }
+    
     setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
+    if (Object.keys(newErrors).length > 0) {
+      addNotification("Por favor completa todos los campos requeridos correctamente", "error");
+      return;
+    }
 
     try {
       setSaving(true);
@@ -104,15 +116,20 @@ export function useGymsLogic() {
           nombre: createForm.nombre,
           direccion: createForm.direccion,
           ciudad: createForm.ciudad,
-          urlWeb: createForm.urlWeb
+          urlWeb: createForm.urlWeb,
+          latitud: parseFloat(createForm.latitud),
+          longitud: parseFloat(createForm.longitud)
         }
       }));
 
+      addNotification("Redirigiendo al portal de pago...", "info");
+      
       // Step 3: Transition to the high-security payment gateway
       navigate("/branch-payment");
       
     } catch (err) {
-      showNotif("❌ Error Crítico", err.response?.data?.message || "Error al inicializar el ciclo de vida de facturación", "error");
+      const errorMsg = err.response?.data?.message || "Error al inicializar la creación de sucursal";
+      addNotification(errorMsg, "error");
     } finally {
       setSaving(false);
     }
@@ -123,7 +140,8 @@ export function useGymsLogic() {
    */
   const handleAssignGym = async () => {
     if (!assignForm.gymId) {
-      setErrors({ gymId: "Selección de sucursal objetivo obligatoria" });
+      setErrors({ gymId: "Seleccione una sucursal" });
+      addNotification("Seleccione una sucursal para vincular", "error");
       return;
     }
     try {
@@ -135,9 +153,10 @@ export function useGymsLogic() {
       
       refetch();
       refetchMy();
-      showNotif("✅ Integración Exitosa", "La sucursal ha sido añadida a tu portafolio de gestión.", "success");
+      addNotification("Sucursal vinculada exitosamente a tu portafolio", "success");
     } catch (err) {
-      showNotif("❌ Error", err.response?.data?.message || "La integración al portafolio falló", "error");
+      const errorMsg = err.response?.data?.message || "Error al vincular la sucursal";
+      addNotification(errorMsg, "error");
     } finally {
       setSaving(false);
     }
@@ -160,11 +179,14 @@ export function useGymsLogic() {
   /** Persists administrative profile changes for a branch */
   const handleEditGym = async () => {
     const newErrors = {};
-    if (!editForm.nombre) newErrors.nombre = "Obligatorio";
-    if (!editForm.direccion) newErrors.direccion = "Obligatorio";
-    if (!editForm.ciudad) newErrors.ciudad = "Obligatorio";
+    if (!editForm.nombre) newErrors.nombre = "El nombre es obligatorio";
+    if (!editForm.direccion) newErrors.direccion = "La dirección es obligatoria";
+    if (!editForm.ciudad) newErrors.ciudad = "La ciudad es obligatoria";
     setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
+    if (Object.keys(newErrors).length > 0) {
+      addNotification("Por favor completa todos los campos requeridos", "error");
+      return;
+    }
 
     try {
       setSaving(true);
@@ -175,9 +197,10 @@ export function useGymsLogic() {
       
       refetch();
       refetchMy();
-      showNotif("✅ Configuración Actualizada", "Los datos administrativos de la sucursal han sido sincronizados.", "success");
+      addNotification(`${editForm.nombre} ha sido actualizada exitosamente`, "success");
     } catch (err) {
-      showNotif("❌ Error de Sincronización", err.response?.data?.message || "Error al sincronizar la configuración de la sucursal", "error");
+      const errorMsg = err.response?.data?.message || "Error al actualizar la sucursal";
+      addNotification(errorMsg, "error");
     } finally {
       setSaving(false);
     }
@@ -208,8 +231,6 @@ export function useGymsLogic() {
     setErrors,
     saving,
 
-    notif,
-    closeNotif,
     resolvePhoto,
 
     handleCreateGym,

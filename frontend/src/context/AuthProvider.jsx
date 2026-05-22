@@ -6,7 +6,9 @@ export function AuthProvider({ children }) {
 
   const [admin, setAdmin] = useState(() => {
     const stored = localStorage.getItem("admin");
-    return stored ? JSON.parse(stored) : null;
+    if (!stored) return null;
+    const parsed = JSON.parse(stored);
+    return parsed.tipo ? parsed : { ...parsed, tipo: "ADMIN" };
   });
 
   const loading = false;
@@ -15,26 +17,44 @@ export function AuthProvider({ children }) {
      LOGIN
   ============================ */
   const login = async (email, password) => {
-    const { data } = await api.post("/auth/login", {
+    // Use unified endpoint that works for both admins and clients
+    const { data } = await api.post("/auth/login-unified", {
       email,
       password,
     });
 
-    const { admin: userAdmin, gyms, roles, token } = data.data;
+    const { tipo, token } = data.data;
 
-    const userData = {
-      id: userAdmin.id,
-      nombre: userAdmin.nombre,
-      apellido: userAdmin.apellido,
-      email: userAdmin.email,
-      gyms,
-      roles,
-    };
-
-    localStorage.setItem("token", token);
-    localStorage.setItem("admin", JSON.stringify(userData));
-
-    setAdmin(userData);
+    // Handle different user types
+    if (tipo === "ADMIN") {
+      const { admin: userAdmin, gyms, roles } = data.data;
+      const userData = {
+        id: userAdmin.id,
+        nombre: userAdmin.nombre,
+        apellido: userAdmin.apellido,
+        email: userAdmin.email,
+        gyms,
+        roles,
+        tipo: "ADMIN",
+      };
+      localStorage.setItem("token", token);
+      localStorage.setItem("admin", JSON.stringify(userData));
+      setAdmin(userData);
+    } else if (tipo === "USUARIO_FINAL") {
+      // Client user - redirect handled in router
+      const { user, gyms } = data.data;
+      const userData = {
+        id: user.id,
+        nombre: user.nombre,
+        apellido: user.apellido,
+        email: user.email,
+        tipo: "USUARIO_FINAL",
+        gyms: gyms || [],
+      };
+      localStorage.setItem("token", token);
+      localStorage.setItem("admin", JSON.stringify(userData));
+      setAdmin(userData);
+    }
   };
 
   /* ============================
@@ -52,6 +72,7 @@ export function AuthProvider({ children }) {
       email: userAdmin.email,
       gyms,
       roles,
+      tipo: "ADMIN",
     };
 
     localStorage.setItem("token", token);

@@ -141,9 +141,9 @@ export default function ClasesPage() {
               }}
             >
               <span className="material-symbols-outlined text-lg">
-                calendar_add_on
+                add_box
               </span>
-              Definir Horario
+              Crear Clase
             </button>
           </div>
         </header>
@@ -265,7 +265,7 @@ export default function ClasesPage() {
 
           {/* Render list of classes with dynamic icons based on name patterns */}
           <div className="kinetic-list">
-            {clases?.map((c, idx) => {
+            {clases?.map((c) => {
               const concInfo = concurrencia.find((x) => x.id === c.id);
               const horariosCount =
                 concInfo?.horarios ??

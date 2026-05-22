@@ -1,0 +1,38 @@
+/* Custom Client Dashboard Styles */
+
+.dashboard-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Hero section gradient overlay */
+.hero-gradient {
+  background: linear-gradient(180deg, rgba(31, 41, 55, 0.5) 0%, rgba(10, 11, 20, 1) 100%);
+}
+
+/* Custom transitions for cards */
+.bg-gym-card {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+
+.bg-gym-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Hide scrollbars but allow scrolling if needed in sub-containers */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Accent glow effect */
+.gym-accent-glow {
+  text-shadow: 0 0 15px rgba(124, 58, 237, 0.4);
+}

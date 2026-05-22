@@ -1,0 +1,238 @@
+.client-profile-container {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  font-family: 'Inter', sans-serif;
+  color: #1e293b;
+}
+
+.client-profile-loading {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  background-color: #f8fafc;
+  color: #64748b;
+  font-size: 1.125rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Header */
+.client-profile-header {
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.client-profile-header__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.client-profile-back-link {
+  color: #64748b;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.client-profile-back-link:hover {
+  color: #0f172a;
+}
+
+.client-profile-logo__text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.client-profile-logout-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.client-profile-logout-btn:hover {
+  color: #dc2626;
+  text-decoration: underline;
+}
+
+/* Main Content */
+.client-profile-main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.client-profile-section {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  margin-bottom: 2rem;
+}
+
+.client-profile-section h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 0.75rem;
+}
+
+.mt-8 {
+  margin-top: 2rem;
+}
+
+/* Form Styles */
+.client-profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.profile-input {
+  padding: 0.75rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #1e293b;
+  transition: all 0.2s ease;
+  background-color: white;
+}
+
+.profile-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.disabled-input {
+  background-color: #f1f5f9;
+  color: #64748b;
+  cursor: not-allowed;
+  border-color: #e2e8f0;
+}
+
+.input-hint {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.form-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-primary-large {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: white;
+  border: none;
+  padding: 0.875rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+.btn-primary-large:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.4);
+}
+
+.btn-primary-large:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Placeholder */
+.placeholder-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  background: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.placeholder-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.placeholder-text {
+  color: #64748b;
+  font-size: 1.05rem;
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .client-profile-header {
+    padding: 1rem;
+  }
+  
+  .client-profile-main {
+    padding: 1rem;
+  }
+  
+  .client-profile-section {
+    padding: 1.5rem;
+  }
+  
+  .form-actions {
+    justify-content: stretch;
+  }
+  
+  .btn-primary-large {
+    width: 100%;
+  }
+}

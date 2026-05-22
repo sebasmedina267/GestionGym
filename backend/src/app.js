@@ -10,6 +10,7 @@ import { auditMiddleware } from './middlewares/audit.middleware.js';
 import authRoutes from './modules/auth/auth.routes.js';
 import adminsRoutes from './modules/admins/admins.routes.js';
 import gymsRoutes from './modules/gyms/gyms.routes.js';
+import gymsClientRoutes from './modules/gyms/gyms.client.routes.js';
 import clientesRoutes from './modules/clientes/clientes.routes.js';
 import clasesRoutes from './modules/clases/clases.routes.js';
 import maquinasRoutes from './modules/maquinas/maquinas.routes.js';
@@ -18,6 +19,7 @@ import pagosRoutes from './modules/pagos/pagos.routes.js';
 import economiaRoutes from './modules/economia/economia.routes.js';
 import auditRoutes from './modules/audit/audit.routes.js';
 import stripeRoutes from './modules/stripe/stripe.routes.js';
+import clienteRoutes from './modules/cliente/cliente.routes.js';
 
 /**
  * FitFlow Management Engine - Application Orchestrator
@@ -65,6 +67,8 @@ app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
  */
 app.use('/api/auth', authRoutes); // Registration & Authentication
 app.use('/api/stripe', stripeRoutes); // Payment Intent Management
+app.use('/api/client/gyms', gymsClientRoutes); // Gym Discovery & Public Info
+app.use('/api/client/dashboard', clienteRoutes); // Enrolled User Dashboard
 
 /**
  * ========================

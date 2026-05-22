@@ -2,6 +2,7 @@ import * as authRepository from "./auth.repository.js";
 import { hashPassword, comparePassword } from "../../utils/password.js";
 import { signToken } from "../../utils/jwt.js";
 import { registrarOperacion } from "../audit/audit.service.js";
+import { isPaymentSuccessful } from "../stripe/stripe.service.js";
 import { AppError } from "../../utils/AppError.js";
 import crypto from "crypto";
 import { pool } from "../../config/db.js";
@@ -439,6 +440,7 @@ export async function registerEmployeeWithEmail({
   email,
   password,
   gymId,
+  rol,
   foto,
 }) {
   if (!nombre || !apellido || !email || !password || !gymId) {
@@ -472,11 +474,11 @@ export async function registerEmployeeWithEmail({
       passwordHash,
     });
 
-    // Link as employee role
+    // Link as employee or manager role
     await authRepository.linkAdminToGym({
       adminId: admin.id,
       gymId,
-      rol: "EMPLEADO",
+      rol: rol || "EMPLEADO",
     });
 
     await conn.commit();
@@ -591,7 +593,7 @@ export async function requestPasswordReset(email) {
   });
 
   // In production, this token would be sent via email service
-  return { mensaje: "Recovery email sent", token }; 
+  return { mensaje: "Recovery email sent", token };
 }
 
 /**
@@ -654,22 +656,48 @@ export async function registerUserFinal({ email, nombre, apellido, password }) {
 
   const passwordHash = await hashPassword(password);
 
-  const user = await authRepository.createUserFinal({
-    email,
-    nombre,
-    apellido,
-    passwordHash,
-  });
+  // TRANSACTION: Begin atomic operation for user creation and audit logging
+  const conn = await pool.getConnection();
 
-  const token = signToken({
-    id: user.id,
-    email: user.email,
-    nombre: user.nombre,
-    apellido: user.apellido,
-    tipo: "USUARIO_FINAL",
-  });
+  try {
+    await conn.beginTransaction();
 
-  return { user, token };
+    const user = await authRepository.createUserFinal({
+      email,
+      nombre,
+      apellido,
+      passwordHash,
+    });
+
+    // Audit user registration
+    await registrarOperacion({
+      adminId: null, // Final users are not linked to admins
+      gymId: null,   // Not yet enrolled in any gym
+      entidad: "USUARIO_FINAL",
+      entidadId: user.id,
+      accion: "REGISTRO",
+      detalles: { email, nombre, apellido },
+    });
+
+    // COMMIT: If we reach here, registration is complete
+    await conn.commit();
+
+    const token = signToken({
+      id: user.id,
+      email: user.email,
+      nombre: user.nombre,
+      apellido: user.apellido,
+      tipo: "USUARIO_FINAL",
+    });
+
+    return { user, token };
+  } catch (err) {
+    // ROLLBACK: If any error occurs, revert user creation
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
+  }
 }
 
 /**
@@ -701,6 +729,32 @@ export async function loginUserFinal({ email, password }) {
 
   return { user, gyms, token };
 }
+
+/** Authenticates a native client from the dashboard. */
+export async function loginClienteNative({ email, password }) {
+  if (!email || !password) {
+    throw new AppError("Email and password required", 400);
+  }
+
+  const user = await authRepository.findClienteNativeByEmail(email);
+  if (!user) throw new AppError("Invalid credentials", 401);
+
+  const ok = await comparePassword(password, user.password);
+  if (!ok) throw new AppError("Invalid credentials", 401);
+
+  // For native clients, we only have one gym associated
+  const token = signToken({
+    id: user.id,
+    email: user.email,
+    nombre: user.nombre,
+    apellido: user.apellido,
+    tipo: "USUARIO_FINAL", // We treat them as the same type for the frontend
+    gymId: user.gym_id
+  });
+
+  return { user, gyms: [{ id: user.gym_id }], token };
+}
+
 
 /**
  * Links an app consumer to a specific gym branch membership.
@@ -734,61 +788,95 @@ export async function enrollUserInGym({ userId, gymId, metodo_pago = "APP" }) {
 /**
  * Finalizes and activates an owner's administrative account after payment confirmation.
  * This is the post-checkout hook for standard platform onboarding.
+ * 
+ * SECURITY: Validates that payment was actually successful via Stripe before activating account.
+ * TRANSACTIONAL: Ensures payment verification and account activation are atomic.
+ * 
  * @param {string} email - The pending owner's email.
  * @param {string} paymentIntentId - Stripe transaction reference.
  * @returns {Promise<Object>} Fully activated session and business data.
+ * @throws {AppError} If payment not found, not successful, or activation fails.
  */
 export async function confirmOwnerRegistrationAfterPayment(email, paymentIntentId) {
   if (!email || !paymentIntentId) {
     throw new AppError("Email and Payment Intent ID required", 400);
   }
 
+  // SECURITY CHECK: Verify payment was actually successful before activating account
+  const paymentSuccessful = await isPaymentSuccessful(paymentIntentId);
+  if (!paymentSuccessful) {
+    throw new AppError("Payment was not completed or failed. Account cannot be activated.", 402);
+  }
+
   const admin = await authRepository.findAdminByEmailRaw(email);
   if (!admin) throw new AppError("Registration record not found", 404);
 
-  // Activate the account
-  await pool.query(
-    "UPDATE admins SET activo = 1 WHERE id = ?",
-    [admin.id]
-  );
+  // TRANSACTION: Begin atomic operation
+  const conn = await pool.getConnection();
 
-  const gyms = await authRepository.getGymsByAdminId(admin.id);
-  const roles = await authRepository.getRolesByAdminId(admin.id);
+  try {
+    await conn.beginTransaction();
 
-  // Audit payment confirmation
-  await registrarOperacion({
-    adminId: admin.id,
-    gymId: gyms[0]?.id,
-    entidad: "ADMIN",
-    entidadId: admin.id,
-    accion: "CONFIRMACION_PAGO_DUENO",
-    detalles: { email, paymentIntentId },
-  });
+    // Activate the account within transaction
+    await conn.query(
+      "UPDATE admins SET activo = 1 WHERE id = ?",
+      [admin.id]
+    );
 
-  // Return full session data for immediate login
-  const token = signToken({
-    id: admin.id,
-    nombre: admin.nombre,
-    apellido: admin.apellido,
-    email: admin.email,
-    roles,
-    gyms: gyms.map((g) => g.id),
-  });
+    // Audit payment confirmation within transaction
+    await registrarOperacion({
+      adminId: admin.id,
+      gymId: (await authRepository.getGymsByAdminId(admin.id))[0]?.id,
+      entidad: "ADMIN",
+      entidadId: admin.id,
+      accion: "CONFIRMACION_PAGO_DUENO",
+      detalles: { email, paymentIntentId },
+    });
 
-  return {
-    mensaje: "Payment confirmed, account activated",
-    admin,
-    gyms,
-    roles,
-    token,
-  };
+    // COMMIT: If we reach here, payment is confirmed and account activated
+    await conn.commit();
+
+    // Fetch updated data after activation
+    const updatedAdmin = await authRepository.findAdminByEmailRaw(email);
+    const gyms = await authRepository.getGymsByAdminId(updatedAdmin.id);
+    const roles = await authRepository.getRolesByAdminId(updatedAdmin.id);
+
+    // Return full session data for immediate login
+    const token = signToken({
+      id: updatedAdmin.id,
+      nombre: updatedAdmin.nombre,
+      apellido: updatedAdmin.apellido,
+      email: updatedAdmin.email,
+      roles,
+      gyms: gyms.map((g) => g.id),
+    });
+
+    return {
+      mensaje: "Payment confirmed, account activated",
+      admin: updatedAdmin,
+      gyms,
+      roles,
+      token,
+    };
+  } catch (err) {
+    // ROLLBACK: If any error occurs, account stays inactive
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
+  }
 }
 
 /**
  * Provisioning: Creates and links a new business branch for an existing owner.
  * Triggered after a successful "Branch Expansion" payment.
+ * 
+ * SECURITY: Validates that payment was actually successful via Stripe before creating branch.
+ * TRANSACTIONAL: Ensures payment verification and branch creation are atomic.
+ * 
  * @param {Object} data - Branch profile and expansion transaction reference.
  * @returns {Promise<Object>} The newly established branch record.
+ * @throws {AppError} If payment not successful or branch creation fails.
  */
 export async function createBranchAfterPayment({
   ownerId,
@@ -801,6 +889,12 @@ export async function createBranchAfterPayment({
 }) {
   if (!ownerId || !nombre || !paymentIntentId) {
     throw new AppError("Incomplete data for branch creation", 400);
+  }
+
+  // SECURITY CHECK: Verify payment was actually successful before creating branch
+  const paymentSuccessful = await isPaymentSuccessful(paymentIntentId);
+  if (!paymentSuccessful) {
+    throw new AppError("Payment was not completed or failed. Branch cannot be created.", 402);
   }
 
   const ownerRole = await authRepository.getAdminRole(ownerId);
@@ -829,8 +923,6 @@ export async function createBranchAfterPayment({
       rol: "DUENO",
     });
 
-    await conn.commit();
-
     // Audit branch creation
     await registrarOperacion({
       adminId: ownerId,
@@ -841,8 +933,12 @@ export async function createBranchAfterPayment({
       detalles: { nombre, paymentIntentId },
     });
 
+    // COMMIT: If we reach here, all operations succeeded
+    await conn.commit();
+
     return gym;
   } catch (err) {
+    // ROLLBACK: If any error occurs, branch creation is reverted
     await conn.rollback();
     throw err;
   } finally {

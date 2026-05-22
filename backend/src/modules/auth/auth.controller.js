@@ -131,7 +131,7 @@ export async function registerEmployee(req, res, next) {
       throw new AppError("Only a gym owner can register employees", 403);
     }
 
-    const { nombre, apellido, email, password, gymId } = req.body;
+    const { nombre, apellido, email, password, gymId, rol } = req.body;
     const foto = req.file?.filename || null;
 
     const result = await authService.registerEmployeeWithEmail({
@@ -140,6 +140,7 @@ export async function registerEmployee(req, res, next) {
       email,
       password,
       gymId: Number(gymId),
+      rol,
       foto,
     });
 
@@ -183,6 +184,66 @@ export async function login(req, res, next) {
     const result = await authService.loginWithEmail({ email, password });
 
     res.status(200).json({ ok: true, data: result });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * Unified login endpoint
+ * 
+ * Attempts to login as either admin or client (usuario final).
+ * Tries admin first, then client if admin login fails.
+ * 
+ * Request body:
+ *   - email: {string} User email address
+ *   - password: {string} User password
+ * 
+ * Response (200 OK):
+ *   - ok: true
+ *   - data: { user/admin, token, gyms, tipo: 'ADMIN' | 'USUARIO_FINAL' }
+ * 
+ * Errors:
+ *   - 401: Invalid credentials (neither admin nor client found)
+ *   - 400: Missing email/password
+ */
+export async function loginUnified(req, res, next) {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      throw new AppError("Email and password are required", 400);
+    }
+
+    // Try admin login first
+    try {
+      const adminResult = await authService.loginWithEmail({ email, password });
+      return res.status(200).json({
+        ok: true,
+        data: { ...adminResult, tipo: "ADMIN" },
+      });
+    } catch (adminErr) {
+      // Admin login failed, try App User login
+      try {
+        const clientResult = await authService.loginUserFinal({ email, password });
+        return res.status(200).json({
+          ok: true,
+          data: { ...clientResult, tipo: "USUARIO_FINAL" },
+        });
+      } catch (clientErr) {
+        // App User login failed, try Native Client login
+        try {
+          const nativeResult = await authService.loginClienteNative({ email, password });
+          return res.status(200).json({
+            ok: true,
+            data: { ...nativeResult, tipo: "USUARIO_FINAL" },
+          });
+        } catch (nativeErr) {
+          throw new AppError("Invalid credentials", 401);
+        }
+      }
+    }
+
   } catch (err) {
     next(err);
   }

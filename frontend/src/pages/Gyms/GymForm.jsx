@@ -36,6 +36,28 @@ export default function GymForm({ form, setForm, errors, setErrors }) {
         placeholder="Ej: Ciudad de México"
       />
       <Input 
+        label="Latitud" 
+        type="number"
+        value={form.latitud} 
+        onChange={update("latitud")} 
+        error={errors.latitud} 
+        variant="kinetic"
+        icon="map"
+        placeholder="Ej: 19.4326"
+        step="0.0001"
+      />
+      <Input 
+        label="Longitud" 
+        type="number"
+        value={form.longitud} 
+        onChange={update("longitud")} 
+        error={errors.longitud} 
+        variant="kinetic"
+        icon="map"
+        placeholder="Ej: -99.1332"
+        step="0.0001"
+      />
+      <Input 
         label="Sitio Web (Opcional)" 
         value={form.urlWeb} 
         onChange={update("urlWeb")} 

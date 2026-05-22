@@ -56,4 +56,12 @@ router.get('/ingresos', economiaController.listarIngresos);
  */
 router.get('/gastos', economiaController.listarGastos);
 
+/**
+ * PDF Reports
+ * Downloads financial reports as PDF documents
+ */
+router.get('/pdf/resumen', economiaController.descargarResumenPDF);
+router.get('/pdf/ingresos', economiaController.descargarIngresoPDF);
+router.get('/pdf/gastos', economiaController.descargarGastoPDF);
+
 export default router;

@@ -66,7 +66,7 @@ export default function Header() {
                   className="material-symbols-outlined"
                   style={{ color: "#bdc2ff", fontSize: "20px" }}
                 >
-                  factory
+                  location_on
                 </span>
                 {gym ? gym.nombre : "Seleccionar gimnasio"}
                 <span className="material-symbols-outlined gym-chevron">
@@ -89,7 +89,7 @@ export default function Header() {
                           className="material-symbols-outlined"
                           style={{ fontSize: "18px", color: gym?.id === g.id ? "#4edea3" : "#454653" }}
                         >
-                          {gym?.id === g.id ? "check_circle" : "factory"}
+                          {gym?.id === g.id ? "check_circle" : "location_on"}
                         </span>
                         {g.nombre}
                       </button>
@@ -108,7 +108,7 @@ export default function Header() {
                 className="material-symbols-outlined"
                 style={{ color: "#bdc2ff", fontSize: "20px" }}
               >
-                factory
+                location_on
               </span>
               {gym ? gym.nombre : "Sin gimnasio seleccionado"}
             </div>

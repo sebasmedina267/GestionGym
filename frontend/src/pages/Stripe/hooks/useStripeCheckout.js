@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js";
 import { confirmOwnerPayment, createBranchAfterPayment, createOwnerSubscriptionPayment, createBranchSubscriptionPayment } from "../../../api/stripe.api";
-import api from "../../../api/axios";
 
 /**
  * useStripeCheckout Hook

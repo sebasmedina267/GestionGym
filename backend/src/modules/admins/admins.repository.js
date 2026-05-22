@@ -56,7 +56,7 @@ export async function findAdminById(adminId) {
  * Handles partial updates via COALESCE.
  */
 export async function updateAdmin(adminId, data) {
-  const { nombre, apellido, edad, sexo, direccion, foto, gymId } = data;
+  const { nombre, apellido, edad, sexo, direccion, foto, gymId, rol } = data;
 
   // Transaction Layer 1: Base identity update
   if (nombre || apellido) {
@@ -90,8 +90,8 @@ export async function updateAdmin(adminId, data) {
     }
   }
 
-  // Transaction Layer 3: Branch assignment management
-  if (gymId) {
+  // Transaction Layer 3: Branch assignment and Role management
+  if (gymId || rol) {
     const [gymAssignments] = await pool.query(
       `SELECT * FROM admins_gyms WHERE admin_id = ?`,
       [adminId]
@@ -100,15 +100,27 @@ export async function updateAdmin(adminId, data) {
     if (gymAssignments.length === 0) {
       // Create new link if none exists
       await pool.query(
-        `INSERT INTO admins_gyms (admin_id, gym_id, rol) VALUES (?, ?, 'EMPLEADO')`,
-        [adminId, gymId]
+        `INSERT INTO admins_gyms (admin_id, gym_id, rol) VALUES (?, ?, ?)`,
+        [adminId, gymId || null, rol || 'EMPLEADO']
       );
     } else {
-      // Re-map the primary branch association
-      await pool.query(
-        `UPDATE admins_gyms SET gym_id = ? WHERE admin_id = ? LIMIT 1`,
-        [gymId, adminId]
-      );
+      // Update gym_id and/or rol
+      if (gymId && rol) {
+        await pool.query(
+          `UPDATE admins_gyms SET gym_id = ?, rol = ? WHERE admin_id = ? LIMIT 1`,
+          [gymId, rol, adminId]
+        );
+      } else if (gymId) {
+        await pool.query(
+          `UPDATE admins_gyms SET gym_id = ? WHERE admin_id = ? LIMIT 1`,
+          [gymId, adminId]
+        );
+      } else if (rol) {
+        await pool.query(
+          `UPDATE admins_gyms SET rol = ? WHERE admin_id = ? LIMIT 1`,
+          [rol, adminId]
+        );
+      }
     }
   }
 

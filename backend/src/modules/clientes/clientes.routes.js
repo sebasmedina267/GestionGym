@@ -61,4 +61,10 @@ router.patch('/:id', validate(actualizarClienteSchema), clientesController.actua
  */
 router.delete('/:id', validate(eliminarClienteSchema), clientesController.eliminarCliente);
 
+/**
+ * POST /cleanup
+ * Executes the data retention cleanup policy for the branch (Owner restricted).
+ */
+router.post('/cleanup', clientesController.cleanupClientes);
+
 export default router;

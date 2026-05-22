@@ -6,6 +6,9 @@ export const crearGymSchema = {
     direccion: z.string().optional(),
     ciudad: z.string().optional(),
     foto: z.string().optional(),
+    urlWeb: z.string().url("URL inválida").optional().or(z.literal("")),
+    latitud: z.number().min(-90).max(90, "Latitud debe estar entre -90 y 90"),
+    longitud: z.number().min(-180).max(180, "Longitud debe estar entre -180 y 180"),
   }),
 };
 
@@ -15,6 +18,9 @@ export const actualizarGymSchema = {
     direccion: z.string().optional(),
     ciudad: z.string().optional(),
     foto: z.string().optional(),
+    urlWeb: z.string().url("URL inválida").optional().or(z.literal("")),
+    latitud: z.number().min(-90).max(90).optional(),
+    longitud: z.number().min(-180).max(180).optional(),
   }),
   params: z.object({
     id: z.string().regex(/^\d+$/),

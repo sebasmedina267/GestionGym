@@ -1,7 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useContext } from "react";
 import AppLayout from "../../components/layout/AppLayout";
 import Button from "../../components/ui/Button";
 import { useGym } from "../../hooks/useGym";
+import { NotificationContext } from "../../context/NotificationContext";
 import api from "../../api/axios";
 import { useClientes } from "./useClientes";
 import ClienteModal from "./ClienteModal";
@@ -17,7 +18,8 @@ import "./Styles/ClientesPage.css";
  */
 export default function ClientesPage() {
   const { gym } = useGym();
-  
+  const { addNotification } = useContext(NotificationContext);
+
   // Custom hook to fetch and synchronize the list of clients for the current gym
   const { clientes, loading, refetch } = useClientes(gym?.id);
 
@@ -50,11 +52,13 @@ export default function ClientesPage() {
       if (editing) {
         // Carry over origin metadata for correct backend routing
         if (editing.tipo_origen === 'APP') {
-           payload.tipo_origen = 'APP';
+          payload.tipo_origen = 'APP';
         }
         await api.patch(`/clientes/${editing.id}`, payload);
+        addNotification(`${form.nombre} ha sido actualizado exitosamente`, "success");
       } else {
         await api.post(`/clientes`, payload);
+        addNotification(`${form.nombre} ha sido registrado como nuevo cliente`, "success");
       }
 
       setModalOpen(false);
@@ -62,7 +66,8 @@ export default function ClientesPage() {
       refetch(); // Synchronize UI with updated database state
     } catch (error) {
       console.error("Save client error:", error);
-      alert("Error al guardar los datos del cliente. Inténtalo de nuevo.");
+      const errorMsg = error.response?.data?.message || "Error al guardar los datos del cliente";
+      addNotification(errorMsg, "error");
     }
   };
 
@@ -72,17 +77,20 @@ export default function ClientesPage() {
    */
   const handleDelete = async (cliente) => {
     if (cliente.tipo_origen === 'APP') {
-      alert("Los usuarios de la App móvil no pueden eliminarse aquí. Solo se puede gestionar su estado de membresía.");
+      addNotification("Los usuarios de la App no pueden eliminarse desde aquí", "warning");
       return;
     }
-    
+
     if (!confirm(`¿Estás seguro de que deseas eliminar a ${cliente.nombre}?`)) return;
-    
+
     try {
       await api.delete(`/clientes/${cliente.id}`);
       refetch();
+      addNotification(`${cliente.nombre} ha sido eliminado`, "success");
     } catch (error) {
       console.error("Delete client error:", error);
+      const errorMsg = error.response?.data?.message || "Error al eliminar el cliente";
+      addNotification(errorMsg, "error");
     }
   };
 
@@ -95,9 +103,13 @@ export default function ClientesPage() {
         activo: !cliente.activo,
         tipo_origen: cliente.tipo_origen
       });
+      const newStatus = !cliente.activo ? "activado" : "desactivado";
+      addNotification(`${cliente.nombre} ha sido ${newStatus}`, "success");
       refetch();
     } catch (error) {
       console.error("Toggle client status error:", error);
+      const errorMsg = error.response?.data?.message || "Error al cambiar el estado del cliente";
+      addNotification(errorMsg, "error");
     }
   };
 
@@ -142,8 +154,8 @@ export default function ClientesPage() {
               onEdit={(c) => {
                 // Constraint: App Users are managed within the app; dashboard only toggles status
                 if (c.tipo_origen === 'APP') {
-                   alert("Los perfiles de usuarios móviles son de solo lectura. Solo puedes gestionar su estado activo/inactivo.");
-                   return;
+                  addNotification("Los perfiles de usuarios móviles son de solo lectura", "info");
+                  return;
                 }
                 setEditing(c);
                 setModalOpen(true);
@@ -156,7 +168,7 @@ export default function ClientesPage() {
 
         {/* Create/Edit Modal Component */}
         <ClienteModal
-          key={editing?.id || "new"} 
+          key={editing?.id || "new"}
           open={modalOpen}
           onClose={() => {
             setModalOpen(false);

@@ -4,6 +4,7 @@ import { registrarOperacion } from "../audit/audit.service.js";
 import { requireFields } from "../../utils/validators.js";
 import { AppError } from "../../utils/AppError.js";
 import { hashPassword } from "../../utils/password.js";
+import { pool } from "../../config/db.js";
 import crypto from "crypto";
 
 /* ============================================================
@@ -37,18 +38,18 @@ function generarContraseñaAutomatica() {
   const lowercase = 'abcdefghijklmnopqrstuvwxyz';
   const numbers = '0123456789';
   const symbols = '!@#$%^&*';
-  
+
   let password = '';
   // Ensure at least one char of each mandatory type
   password += letters.charAt(Math.floor(Math.random() * letters.length));
   password += numbers.charAt(Math.floor(Math.random() * numbers.length));
   password += symbols.charAt(Math.floor(Math.random() * symbols.length));
-  
+
   const allChars = letters + lowercase + numbers + symbols;
   for (let i = 3; i < 10; i++) {
     password += allChars.charAt(Math.floor(Math.random() * allChars.length));
   }
-  
+
   // Shuffle to prevent predictable character position patterns
   return password.split('').sort(() => 0.5 - Math.random()).join('');
 }
@@ -100,7 +101,7 @@ export async function estadisticasClientes(gymId) {
     clientesRepository.statsGenero(gymId),
     clientesRepository.statsEdad(gymId)
   ]);
-  
+
   return { genero, edad };
 }
 
@@ -112,10 +113,14 @@ export async function estadisticasClientes(gymId) {
  * Orchestrates the full onboarding workflow for a new gym member.
  * Automation: If an email is provided, automatically provisions platform credentials.
  * 
+ * TRANSACTIONAL: Ensures that client creation and audit logging are atomic operations.
+ * If any step fails, the entire transaction is rolled back.
+ * 
  * @param {number} gymId - Target branch for enrollment.
  * @param {Object} data - Comprehensive member profile data.
  * @param {Object} admin - Identity of the performing administrator.
  * @returns {Promise<Object>} The persisted member entity.
+ * @throws {AppError} On validation failure or database error.
  */
 export async function crearCliente(gymId, data, admin) {
   // Integrity Guard: Mandatory profile attributes
@@ -126,7 +131,7 @@ export async function crearCliente(gymId, data, admin) {
   await validarPermisos(admin.id, gymId);
 
   let clientSubmissionData = { ...data };
-  
+
   // Logic: Automated Account Provisioning
   if (data.email) {
     const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email);
@@ -134,35 +139,51 @@ export async function crearCliente(gymId, data, admin) {
 
     const rawPassword = generarContraseñaAutomatica();
     const passwordHash = await hashPassword(rawPassword);
-    
+
     clientSubmissionData.email = data.email;
     clientSubmissionData.password = passwordHash;
     clientSubmissionData.tipo_usuario = 'CLIENTE';
-    
+
     // Transparent Field: Temporary capture of plain-text password for onboarding feedback
     clientSubmissionData._contraseña_generada = rawPassword;
   }
 
-  // Repository Layer: Persist the record
-  const client = await clientesRepository.create(gymId, clientSubmissionData);
+  // TRANSACTION: Begin atomic operation
+  const conn = await pool.getConnection();
 
-  const response = { ...client };
-  if (data.email) {
-    // Return the generated credentials once to allow the admin to notify the client
-    response.contraseña_generada = clientSubmissionData._contraseña_generada;
+  try {
+    await conn.beginTransaction();
+
+    // Repository Layer: Persist the record within transaction
+    const client = await clientesRepository.create(gymId, clientSubmissionData, conn);
+
+    // Audit Layer: Log the member acquisition event within transaction
+    await registrarOperacion({
+      adminId: admin.id,
+      gymId,
+      entidad: "CLIENTE",
+      entidadId: client.id,
+      accion: "CREAR",
+      detalles: { ...data, password: data.email ? "[AUTO_PROVISIONED]" : undefined },
+    });
+
+    // COMMIT: If we reach here, all operations succeeded
+    await conn.commit();
+
+    const response = { ...client };
+    if (data.email) {
+      // Return the generated credentials once to allow the admin to notify the client
+      response.contraseña_generada = clientSubmissionData._contraseña_generada;
+    }
+
+    return response;
+  } catch (err) {
+    // ROLLBACK: If any error occurs, revert both client creation and audit
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
   }
-
-  // Audit Layer: Log the member acquisition event
-  await registrarOperacion({
-    adminId: admin.id,
-    gymId,
-    entidad: "CLIENTE",
-    entidadId: client.id,
-    accion: "CREAR",
-    detalles: { ...data, password: data.email ? "[AUTO_PROVISIONED]" : undefined },
-  });
-
-  return response;
 }
 
 /* ============================================================
@@ -224,3 +245,28 @@ export async function eliminarCliente(gymId, id, admin) {
     detalles: `Member purged: ${existingClient.nombre} ${existingClient.apellido}`
   });
 }
+
+/**
+ * Manually triggers the data retention policy cleanup.
+ * Scoped to the gym branch and registers the operation in the audit trail.
+ */
+export async function cleanupClientesInactivos(gymId, admin) {
+  if (!admin?.id) throw new AppError("System Error: Invalid administrative context for cleanup", 400);
+
+  await validarPermisos(admin.id, gymId);
+
+  const result = await clientesRepository.deletePermanentlyInactiveClients(gymId, 4);
+
+  // Audit the cleanup operation
+  await registrarOperacion({
+    adminId: admin.id,
+    gymId,
+    entidad: "CLIENTE",
+    entidadId: null,
+    accion: "LIMPIEZA_INACTIVOS",
+    detalles: { cleanRecordsCount: result.affectedRows }
+  });
+
+  return result.affectedRows;
+}
+

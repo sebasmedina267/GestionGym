@@ -97,28 +97,32 @@ export async function findByGym(gymId, includeInactivos = true) {
  * 
  * @param {number} gymId - Branch identifier.
  * @param {Object} data - Profile attributes.
+ * @param {Object} conn - Optional database connection for transaction support.
  * @returns {Promise<Object>} The persisted member entity.
  */
-export async function create(gymId, data) {
+export async function create(gymId, data, conn = null) {
   validarDatosCliente(data);
 
-  const { 
-    nombre, 
-    apellido, 
-    edad = null, 
-    sexo = null, 
-    email = null, 
-    password = null, 
-    tipo_usuario = 'CLIENTE' 
+  const {
+    nombre,
+    apellido,
+    edad = null,
+    sexo = null,
+    email = null,
+    password = null,
+    tipo_usuario = 'CLIENTE'
   } = data;
 
-  const [result] = await pool.query(
+  // Use provided connection for transaction, or fall back to pool
+  const executor = conn || pool;
+
+  const [result] = await executor.query(
     `INSERT INTO clientes (gym_id, nombre, apellido, edad, sexo, email, password, tipo_usuario, activo)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`,
     [gymId, nombre, apellido, edad, sexo, email, password, tipo_usuario],
   );
 
-  return getById(gymId, result.insertId);
+  return getById(gymId, result.insertId, conn);
 }
 
 /* ============================================================
@@ -211,8 +215,9 @@ export async function update(gymId, id, data) {
    ============================================================ */
 
 /** Retrieves identity and profile data for a single member by ID. */
-export async function getById(gymId, id) {
-  const [rows] = await pool.query(
+export async function getById(gymId, id, conn = null) {
+  const executor = conn || pool;
+  const [rows] = await executor.query(
     "SELECT * FROM clientes WHERE gym_id = ? AND id = ?",
     [gymId, id],
   );

@@ -36,20 +36,35 @@ export const useLoginLogic = () => {
 
     /**
      * Executes the login operation via the auth service.
-     * Redirects to gym selection on success or catches and displays errors on failure.
+     * Redirects based on user type:
+     * - Admin → /select-gym
+     * - Client → /onboarding (if no gym) or /client/dashboard (if has gym)
      */
     const handleSubmit = async (e) => {
         if (e) e.preventDefault(); // Prevent standard browser form submission
-        
+
         setLoading(true);
         setError(null);
-        
+
         try {
             // Attempt to authenticate through the global auth context
             await login(form.email, form.password);
-            
-            // On success, redirect to the gym branch selection screen
-            navigate("/select-gym");
+
+            // Get user data from localStorage to determine type
+            const userData = JSON.parse(localStorage.getItem("admin") || "{}");
+
+            // Redirect based on user type
+            if (userData.tipo === "USUARIO_FINAL") {
+                // Client user - check if they have a gym
+                if (userData.gyms && userData.gyms.length > 0) {
+                    navigate("/client/dashboard");
+                } else {
+                    navigate("/onboarding");
+                }
+            } else {
+                // Admin user - send to gym selection
+                navigate("/select-gym");
+            }
         } catch (err) {
             console.error("Login lifecycle error:", err);
             // Extract server message or provide a localized fallback

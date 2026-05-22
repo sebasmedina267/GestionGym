@@ -1,0 +1,510 @@
+/* ClientEnroll Component Styles */
+
+.enroll-container {
+  background-color: #0a0b14;
+  color: #e5e7eb;
+  font-family: "Inter", sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.enroll-header {
+  background: linear-gradient(135deg, #111422 0%, #1a1f3a 100%);
+  border-bottom: 1px solid #1f2937;
+  padding: 1.5rem 2rem;
+}
+
+.enroll-header__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.enroll-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #06b6d4;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.btn-logout {
+  padding: 0.5rem 1rem;
+  background-color: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 0.5rem;
+  color: #f3f4f6;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-logout:hover {
+  background-color: #991b1b;
+  border-color: #dc2626;
+}
+
+/* Main Content */
+.enroll-main {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.enroll-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+}
+
+@media (max-width: 1024px) {
+  .enroll-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+/* Gym Info Section */
+.enroll-gym-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.gym-info-card {
+  background-color: #111422;
+  border: 1px solid #1f2937;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.gym-info-image {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  display: block;
+}
+
+.gym-info-body {
+  padding: 1.5rem;
+}
+
+.gym-info-body h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #f3f4f6;
+  margin-bottom: 1.5rem;
+}
+
+.gym-info-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.gym-info-details .detail {
+  font-size: 0.875rem;
+  color: #d1d5db;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.gym-info-details strong {
+  color: #f3f4f6;
+  font-weight: 600;
+}
+
+.gym-info-details a {
+  color: #06b6d4;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.gym-info-details a:hover {
+  text-decoration: underline;
+}
+
+/* Gym Stats */
+.gym-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #1f2937;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stat-icon {
+  font-size: 1.5rem;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #06b6d4;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+/* Checkout Section */
+.enroll-checkout {
+  display: flex;
+  flex-direction: column;
+}
+
+.enroll-checkout h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #f3f4f6;
+  margin-bottom: 1.5rem;
+}
+
+/* Error Alert */
+.enroll-error-alert {
+  background-color: #7f1d1d;
+  border: 1px solid #dc2626;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.enroll-error-alert p {
+  color: #fecaca;
+}
+
+.enroll-error {
+  text-align: center;
+  padding: 2rem;
+}
+
+.enroll-error p {
+  color: #f87171;
+  margin-bottom: 1rem;
+}
+
+/* Plans Grid */
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.plan-card {
+  background-color: #111422;
+  border: 2px solid #1f2937;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.plan-card:hover {
+  border-color: #06b6d4;
+  box-shadow: 0 10px 30px rgba(6, 182, 212, 0.1);
+  transform: translateY(-4px);
+}
+
+.plan-card.selected {
+  border-color: #06b6d4;
+  background: linear-gradient(135deg, #06b6d4/10 0%, #0891b2/10 100%);
+  box-shadow: 0 10px 30px rgba(6, 182, 212, 0.2);
+}
+
+.plan-badge {
+  position: absolute;
+  top: -10px;
+  right: 20px;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.plan-card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f3f4f6;
+  margin-bottom: 0.5rem;
+}
+
+.plan-duration {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  margin-bottom: 1rem;
+}
+
+.plan-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.plan-price .currency {
+  font-size: 1.25rem;
+  color: #06b6d4;
+  font-weight: 600;
+}
+
+.plan-price .amount {
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: #f3f4f6;
+}
+
+.plan-description {
+  font-size: 0.875rem;
+  color: #d1d5db;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.plan-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+  flex: 1;
+}
+
+.plan-features li {
+  font-size: 0.875rem;
+  color: #d1d5db;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.plan-features li:last-child {
+  margin-bottom: 0;
+}
+
+.feature-icon {
+  color: #06b6d4;
+  font-weight: 700;
+}
+
+.plan-select-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #1f2937;
+  color: #f3f4f6;
+  border: 1px solid #1f2937;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.plan-select-btn:hover {
+  background-color: #374151;
+  border-color: #06b6d4;
+}
+
+.plan-select-btn.active {
+  background-color: #06b6d4;
+  color: white;
+  border-color: #06b6d4;
+}
+
+/* Summary */
+.enroll-summary {
+  background: linear-gradient(135deg, #111422 0%, #0f1419 100%);
+  border: 1px solid #1f2937;
+  border-radius: 1rem;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.enroll-summary h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f3f4f6;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #1f2937;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  color: #d1d5db;
+}
+
+.summary-item span {
+  font-weight: 500;
+  color: #9ca3af;
+}
+
+.summary-item strong {
+  color: #f3f4f6;
+  font-weight: 600;
+}
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid #1f2937;
+  font-size: 1.125rem;
+}
+
+.summary-total span {
+  font-weight: 600;
+  color: #f3f4f6;
+}
+
+.summary-total strong {
+  font-size: 1.75rem;
+  color: #06b6d4;
+  font-weight: 900;
+}
+
+.btn-enroll {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 10px 25px rgba(6, 182, 212, 0.2);
+  margin: 1rem 0;
+}
+
+.btn-enroll:hover:not(:disabled) {
+  box-shadow: 0 15px 40px rgba(6, 182, 212, 0.3);
+  transform: translateY(-2px);
+}
+
+.btn-enroll:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.payment-info {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+/* Loading State */
+.enroll-container.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-direction: column;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #1f2937;
+  border-top-color: #06b6d4;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.enroll-container.loading-state p {
+  color: #06b6d4;
+  font-weight: 600;
+  font-size: 1.125rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .enroll-header__top {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .gym-info-body h1 {
+    font-size: 1.5rem;
+  }
+
+  .gym-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .plans-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .enroll-checkout h2 {
+    font-size: 1.5rem;
+  }
+
+  .enroll-main {
+    padding: 1rem;
+  }
+}
+
+/* Scrollbar */
+.enroll-main::-webkit-scrollbar {
+  width: 8px;
+}
+
+.enroll-main::-webkit-scrollbar-track {
+  background: #0a0b14;
+}
+
+.enroll-main::-webkit-scrollbar-thumb {
+  background: #1f2937;
+  border-radius: 4px;
+}
+
+.enroll-main::-webkit-scrollbar-thumb:hover {
+  background: #374151;
+}

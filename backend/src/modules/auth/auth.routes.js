@@ -2,6 +2,7 @@ import { Router } from 'express';
 import * as authController from './auth.controller.js';
 import { validate } from '../../middlewares/validate.middleware.js';
 import { authMiddleware } from '../../middlewares/auth.middleware.js';
+import { clientAuthMiddleware } from '../../middlewares/client.auth.middleware.js';
 import { upload } from '../../middlewares/upload.middleware.js';
 import {
   registerOwnerSchema,
@@ -51,6 +52,14 @@ router.post('/register-employee', authMiddleware, upload.single('foto'), validat
  */
 router.post('/login', loginLimiter, validate(loginSchema), authController.login);
 
+/**
+ * Unified login endpoint
+ * Automatically detects if user is admin or client and authenticates accordingly.
+ * Useful for a single login form that serves both types of users.
+ * Protected by rate limiter.
+ */
+router.post('/login-unified', loginLimiter, validate(loginSchema), authController.loginUnified);
+
 // --- Password Recovery ---
 
 /**
@@ -84,7 +93,7 @@ router.post('/user/login', loginLimiter, validate(loginSchema), authController.l
  * Enroll a user into a specific gym
  * Requires active authentication.
  */
-router.post('/user/enroll', authMiddleware, validate(enrollGymSchema), authController.enrollUserGym);
+router.post('/user/enroll', clientAuthMiddleware, validate(enrollGymSchema), authController.enrollUserGym);
 
 // --- Stripe Payment Confirmation Integration ---
 

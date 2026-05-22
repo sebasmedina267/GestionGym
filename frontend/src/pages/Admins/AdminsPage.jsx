@@ -193,6 +193,7 @@ export default function AdminsPage() {
           setForm={logic.setForm}
           errors={logic.errors}
           validatePassword={logic.validatePassword}
+          validateEmail={logic.validateEmail}
           passwordValid={logic.passwordValid}
           gyms={logic.gyms}
           saving={logic.saving}

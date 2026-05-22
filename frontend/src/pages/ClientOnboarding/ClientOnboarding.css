@@ -1,0 +1,333 @@
+/* ============================================================
+   CLIENT ONBOARDING PAGE STYLES
+   ============================================================ */
+
+.client-onboarding {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  color: #fff;
+}
+
+/* HEADER */
+.client-onboarding__header {
+  position: relative;
+  background: linear-gradient(90deg, rgba(47, 38, 145, 0.9), rgba(36, 36, 62, 0.9));
+  padding: 3rem 2rem;
+  text-align: center;
+  border-bottom: 2px solid rgba(189, 194, 255, 0.2);
+}
+
+.client-onboarding__logout-btn {
+  position: absolute;
+  top: 1.5rem;
+  right: 2rem;
+  background: rgba(220, 53, 69, 0.15);
+  color: #ffb3b3;
+  border: 1px solid rgba(220, 53, 69, 0.5);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.client-onboarding__logout-btn:hover {
+  background: rgba(220, 53, 69, 0.3);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.client-onboarding__hero h1 {
+  font-size: 2.5rem;
+  font-weight: 900;
+  margin: 0 0 0.5rem 0;
+  color: #bdc2ff;
+}
+
+.client-onboarding__hero p {
+  font-size: 1.1rem;
+  color: rgba(189, 194, 255, 0.8);
+  margin: 0;
+}
+
+/* MAIN CONTENT */
+.client-onboarding__main {
+  flex: 1;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+/* LOADING STATE */
+.client-onboarding__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 3rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(189, 194, 255, 0.3);
+  border-top-color: #bdc2ff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ERROR STATE */
+.client-onboarding__error {
+  background: rgba(220, 53, 69, 0.15);
+  border: 1px solid rgba(220, 53, 69, 0.5);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  max-width: 400px;
+}
+
+.client-onboarding__error p {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* CONTENT LAYOUT */
+.client-onboarding__content {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 2rem;
+  width: 100%;
+  max-width: 1400px;
+}
+
+.client-onboarding__gyms-list {
+  background: rgba(47, 38, 145, 0.3);
+  border: 1px solid rgba(189, 194, 255, 0.15);
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.client-onboarding__gyms-list h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #bdc2ff;
+}
+
+/* GYM CARDS GRID */
+.client-onboarding__gym-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.gym-card {
+  background: rgba(58, 51, 128, 0.4);
+  border: 1px solid rgba(189, 194, 255, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.gym-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(189, 194, 255, 0.5);
+  box-shadow: 0 8px 24px rgba(189, 194, 255, 0.15);
+}
+
+.gym-card__image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+.gym-card__content {
+  padding: 1.5rem;
+}
+
+.gym-card__content h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  color: #bdc2ff;
+}
+
+.gym-card__location {
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+  color: rgba(189, 194, 255, 0.7);
+}
+
+.gym-card__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.stat {
+  background: rgba(189, 194, 255, 0.1);
+  border: 1px solid rgba(189, 194, 255, 0.2);
+  border-radius: 999px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+  color: rgba(189, 194, 255, 0.8);
+}
+
+.gym-card__hours {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(189, 194, 255, 0.6);
+}
+
+/* EMPTY STATE */
+.client-onboarding__empty {
+  text-align: center;
+  padding: 2rem;
+  background: rgba(189, 194, 255, 0.05);
+  border-radius: 12px;
+}
+
+.client-onboarding__empty p {
+  margin-bottom: 1rem;
+  color: rgba(189, 194, 255, 0.7);
+}
+
+/* DETAILS SIDEBAR */
+.client-onboarding__details {
+  background: rgba(47, 38, 145, 0.3);
+  border: 1px solid rgba(189, 194, 255, 0.15);
+  border-radius: 12px;
+  padding: 2rem;
+  max-height: 600px;
+  overflow-y: auto;
+  position: sticky;
+  top: 2rem;
+}
+
+.gym-detail-card__image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  display: block;
+}
+
+.gym-detail-card__content h2 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+  color: #bdc2ff;
+}
+
+.detail-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(189, 194, 255, 0.1);
+}
+
+.detail-section:last-child {
+  border-bottom: none;
+  margin-bottom: 1rem;
+}
+
+.detail-section h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  color: rgba(189, 194, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+
+.detail-section p {
+  margin: 0.2rem 0;
+  font-size: 0.95rem;
+  color: rgba(189, 194, 255, 0.7);
+}
+
+.detail-section ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  list-style: none;
+}
+
+.detail-section li {
+  margin: 0.3rem 0;
+  font-size: 0.95rem;
+  color: rgba(189, 194, 255, 0.7);
+}
+
+/* BUTTONS */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn--primary {
+  background: linear-gradient(90deg, #7f5af0, #5a189a);
+  color: white;
+}
+
+.btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(127, 90, 240, 0.3);
+}
+
+.btn--block {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+  .client-onboarding__content {
+    grid-template-columns: 1fr;
+  }
+
+  .client-onboarding__details {
+    position: static;
+    max-height: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .client-onboarding__header {
+    padding: 2rem 1rem;
+  }
+
+  .client-onboarding__hero h1 {
+    font-size: 2rem;
+  }
+
+  .client-onboarding__hero p {
+    font-size: 1rem;
+  }
+
+  .client-onboarding__main {
+    padding: 1rem;
+  }
+
+  .client-onboarding__gyms-list,
+  .client-onboarding__details {
+    padding: 1.5rem;
+  }
+
+  .client-onboarding__gym-cards {
+    grid-template-columns: 1fr;
+  }
+}

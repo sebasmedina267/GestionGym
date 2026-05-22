@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { useFetch } from "../../hooks/useFetch";
 import { useGym } from "../../hooks/useGym";
 import { useAuth } from "../../hooks/useAuth";
+import { NotificationContext } from "../../context/NotificationContext";
 import api from "../../api/axios";
 import { createBranchSubscriptionPayment } from "../../api/stripe.api";
 
@@ -21,6 +22,7 @@ export const useAdminsLogic = () => {
   const navigate = useNavigate();
   const { admin } = useAuth();
   const { gym } = useGym();
+  const { addNotification } = useContext(NotificationContext);
   
   // Authorization flags based on JWT claims
   const isDueno = admin?.roles?.includes('DUENO');
@@ -86,6 +88,14 @@ export const useAdminsLogic = () => {
     return { hasMinLength, hasUppercase, hasNumber, hasSymbol };
   };
 
+  /**
+   * Validates email format in real-time.
+   * Returns true if email is valid, false otherwise.
+   */
+  const validateEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
   /** 
    * Filters the staff list based on the 'Organization View' toggle.
    * Owners can see all staff across all branches, while Managers are scoped to their branch.
@@ -137,16 +147,19 @@ export const useAdminsLogic = () => {
     const newErrors = {};
 
     // Base Validation
-    if (!form.nombre) newErrors.nombre = "Obligatorio";
-    if (!form.apellido) newErrors.apellido = "Obligatorio";
-    if (!form.email) newErrors.email = "Obligatorio";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) newErrors.email = "Formato de correo inválido";
-    if (!form.password) newErrors.password = "Obligatorio";
-    if (!passwordValid) newErrors.password = "No se cumplen los requisitos de seguridad";
-    if (!form.gymId) newErrors.gymId = "Selección de sucursal obligatoria";
+    if (!form.nombre) newErrors.nombre = "Nombre es obligatorio";
+    if (!form.apellido) newErrors.apellido = "Apellido es obligatorio";
+    if (!form.email) newErrors.email = "Correo electrónico es obligatorio";
+    else if (!validateEmail(form.email)) newErrors.email = "Formato de correo electrónico inválido";
+    if (!form.password) newErrors.password = "Contraseña es obligatoria";
+    if (!passwordValid) newErrors.password = "No cumple con los requisitos de seguridad";
+    if (!form.gymId) newErrors.gymId = "Seleccione una sucursal";
 
     setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
+    if (Object.keys(newErrors).length > 0) {
+      addNotification("Por favor completa todos los campos requeridos", "error");
+      return;
+    }
 
     try {
       setSaving(true);
@@ -172,11 +185,11 @@ export const useAdminsLogic = () => {
       setPhotoPreview(null);
       setPasswordValid(false);
       refetch();
-      alert("¡Miembro del personal contratado con éxito!");
+      addNotification(`¡${form.nombre} ha sido contratado exitosamente!`, "success");
     } catch (err) {
       console.error("Onboarding Error:", err.response?.data);
-      const errorMsg = err.response?.data?.message || err.response?.data?.error || "Error crítico durante la contratación del personal";
-      alert(errorMsg);
+      const errorMsg = err.response?.data?.message || err.response?.data?.error || "Error al contratar al personal";
+      addNotification(errorMsg, "error");
     } finally {
       setSaving(false);
     }
@@ -201,11 +214,15 @@ export const useAdminsLogic = () => {
   /** Persists profile updates */
   const handleEditSave = async () => {
     const newErrors = {};
-    if (!editForm.nombre) newErrors.nombre = "Obligatorio";
-    if (!editForm.apellido) newErrors.apellido = "Obligatorio";
+    if (!editForm.nombre) newErrors.nombre = "Nombre es obligatorio";
+    if (!editForm.apellido) newErrors.apellido = "Apellido es obligatorio";
+    if (editForm.email && !validateEmail(editForm.email)) newErrors.email = "Formato de correo electrónico inválido";
 
     setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
+    if (Object.keys(newErrors).length > 0) {
+      addNotification("Por favor corrige los errores en el formulario", "error");
+      return;
+    }
 
     try {
       setSaving(true);
@@ -222,9 +239,11 @@ export const useAdminsLogic = () => {
       setShowEdit(false);
       setSelectedAdmin(null);
       refetch();
+      addNotification("Perfil del personal actualizado exitosamente", "success");
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Error al actualizar el perfil del personal");
+      const errorMsg = err.response?.data?.message || "Error al actualizar el perfil";
+      addNotification(errorMsg, "error");
     } finally {
       setSaving(false);
     }
@@ -245,9 +264,11 @@ export const useAdminsLogic = () => {
       setShowDelete(false);
       setSelectedAdmin(null);
       refetch();
+      addNotification(`${selectedAdmin.nombre} ha sido eliminado del sistema`, "success");
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Error al eliminar al miembro del personal");
+      const errorMsg = err.response?.data?.message || "Error al eliminar al miembro del personal";
+      addNotification(errorMsg, "error");
     } finally {
       setSaving(false);
     }
@@ -259,10 +280,14 @@ export const useAdminsLogic = () => {
    */
   const handleCreateGym = async () => {
     const newErrors = {};
-    if (!formGym.nombre) newErrors.nombre = "Obligatorio";
+    if (!formGym.nombre) newErrors.nombre = "El nombre de la sucursal es obligatorio";
+    if (!formGym.direccion) newErrors.direccion = "La dirección es obligatoria";
 
     setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
+    if (Object.keys(newErrors).length > 0) {
+      addNotification("Por favor completa todos los campos requeridos", "error");
+      return;
+    }
 
     try {
       setSaving(true);
@@ -281,15 +306,18 @@ export const useAdminsLogic = () => {
         branchData: formGym,
       }));
 
-      alert("Serás redirigido al portal de pago seguro para completar la suscripción de la sucursal ($49 USD/año).");
+      addNotification("Redirigiendo al portal de pago seguro...", "info");
       
       setShowCreateGym(false);
+      setFormGym({ nombre: "", direccion: "" });
+      setErrors({});
       
       // Step 3: Shift to payment lifecycle
       navigate('/branch-payment');
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Fallo crítico durante la inicialización de la expansión de la sucursal");
+      const errorMsg = err.response?.data?.message || "Error al inicializar la creación de sucursal";
+      addNotification(errorMsg, "error");
     } finally {
       setSaving(false);
     }
@@ -319,6 +347,7 @@ export const useAdminsLogic = () => {
     saving, setSaving,
     passwordValid, setPasswordValid,
     validatePassword,
+    validateEmail,
     filteredAdmins,
     tableData,
     handlePhotoChange,

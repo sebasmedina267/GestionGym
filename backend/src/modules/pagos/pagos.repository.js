@@ -47,14 +47,20 @@ export async function findByGym(
 /**
  * Retrieves outstanding (unpaid) payment records for a gym branch.
  * Useful for desk debt collection and financial health monitoring.
+ * UPDATED: Excludes debts registered before client enrollment date.
  */
 export async function findPagnosPendientes(gymId, { claseId, clienteId, desde, hasta } = {}) {
   let query = `
-    SELECT p.*, c.nombre AS cliente_nombre, c.apellido AS cliente_apellido, cl.nombre AS clase_nombre
+    SELECT p.*, c.nombre AS cliente_nombre, c.apellido AS cliente_apellido, cl.nombre AS clase_nombre,
+           COALESCE(ufg.fecha_inscripcion, c.creado_en) AS cliente_fecha_inscripcion
     FROM pagos p
     JOIN clientes c ON c.id = p.cliente_id
     LEFT JOIN clases cl ON cl.id = p.clase_id
-    WHERE p.gym_id = ? AND p.pagado = FALSE`;
+    LEFT JOIN usuarios_finales uf ON uf.email = c.email
+    LEFT JOIN usuarios_finales_gimnasios ufg ON ufg.usuario_id = uf.id AND ufg.gym_id = p.gym_id
+    WHERE p.gym_id = ? 
+      AND p.pagado = FALSE
+      AND DATE(p.fecha_pago) >= DATE(COALESCE(ufg.fecha_inscripcion, c.creado_en))`;
   const params = [gymId];
 
   if (claseId) {

@@ -85,7 +85,7 @@ export async function createGymForOwner(req, res, next) {
       throw new AppError("Privilege Violation: Only primary Owners can initialize branch expansion", 403);
     }
 
-    const { nombre, direccion, ciudad, foto, urlWeb } = req.body;
+    const { nombre, direccion, ciudad, foto, urlWeb, latitud, longitud } = req.body;
 
     validarCampo(nombre, "Gym Branch Name");
 
@@ -94,7 +94,9 @@ export async function createGymForOwner(req, res, next) {
       direccion: direccion || null,
       ciudad: ciudad || null,
       foto: foto || null,
-      urlWeb: urlWeb || null
+      urlWeb: urlWeb || null,
+      latitud: latitud || null,
+      longitud: longitud || null
     });
 
     res.status(201).json({ ok: true, data: gym });
@@ -148,7 +150,7 @@ export async function updateGym(req, res, next) {
     validarAdmin(req);
 
     const { id } = req.params;
-    const { nombre, direccion, ciudad, foto, urlWeb } = req.body;
+    const { nombre, direccion, ciudad, foto, urlWeb, latitud, longitud } = req.body;
 
     if (!id) {
       throw new AppError("Target branch ID must be specified", 400);
@@ -159,7 +161,9 @@ export async function updateGym(req, res, next) {
       direccion,
       ciudad,
       foto,
-      urlWeb
+      urlWeb,
+      latitud,
+      longitud
     });
 
     if (!updatedGym) {

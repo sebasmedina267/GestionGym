@@ -17,7 +17,7 @@ import "./Styles/ClienteModal.css";
  * @param {Object} editing - Optional client record to pre-populate the form
  */
 export default function ClienteModal({ open, onClose, onSave, editing }) {
-  
+
   // Computes initial state based on whether we are creating or updating
   const getInitialForm = () => ({
     nombre: editing?.nombre || "",
@@ -46,34 +46,34 @@ export default function ClienteModal({ open, onClose, onSave, editing }) {
       clean // Instructs Modal to use raw container without default styling
     >
       <div className="modal-container">
-        
+
         {/* Modal Header: Displays action title and closes buttons */}
         <div className="cliente-modal-header">
-           <div className="cliente-modal-title-area">
-              <h2>{editing ? "Editar Perfil" : "Inscripción de Nuevo Cliente"}</h2>
-              <p className="cliente-modal-subtitle">Registro de Membresía Elite</p>
-           </div>
-           <button className="cliente-close-btn" onClick={onClose}>
-              <span className="material-symbols-outlined">close</span>
-           </button>
+          <div className="cliente-modal-title-area">
+            <h2>{editing ? "Editar Perfil" : "Inscripción de Nuevo Cliente"}</h2>
+            <p className="cliente-modal-subtitle">Registro de Membresía Elite</p>
+          </div>
+          <button className="cliente-close-btn" onClick={onClose}>
+            <span className="material-symbols-outlined">close</span>
+          </button>
         </div>
 
         {/* Primary Enrollment Form */}
         <form className="cliente-form-body" onSubmit={handleSubmit}>
-          
+
           {/* Identity Section */}
           <div className="cliente-form-row">
-            <Input 
-              label="Nombre" 
-              value={form.nombre} 
-              onChange={update("nombre")} 
+            <Input
+              label="Nombre"
+              value={form.nombre}
+              onChange={update("nombre")}
               variant="kinetic"
               placeholder="Ej. Ricardo"
             />
-            <Input 
-              label="Apellido" 
-              value={form.apellido} 
-              onChange={update("apellido")} 
+            <Input
+              label="Apellido"
+              value={form.apellido}
+              onChange={update("apellido")}
               variant="kinetic"
               placeholder="Ej. Miller"
             />
@@ -81,23 +81,23 @@ export default function ClienteModal({ open, onClose, onSave, editing }) {
 
           {/* Demographics Section */}
           <div className="cliente-bio-grid">
-            <Input 
-              label="Edad" 
-              type="number" 
-              value={form.edad} 
-              onChange={update("edad")} 
+            <Input
+              label="Edad"
+              type="number"
+              value={form.edad}
+              onChange={update("edad")}
               variant="kinetic"
               placeholder="28"
             />
-            
+
             <div className="ka-form-group">
-              <label className="ka-label">Sexo Biológico</label>
+              <label className="ka-label">Sexo</label>
               <div className="ka-input-wrapper">
-                <select 
-                  className="ka-select" 
-                  name="sexo" 
-                  value={form.sexo} 
-                  onChange={(e) => update("sexo")(e.target.value)} 
+                <select
+                  className="ka-select"
+                  name="sexo"
+                  value={form.sexo}
+                  onChange={(e) => update("sexo")(e.target.value)}
                   required
                 >
                   <option value="" disabled>Seleccionar Género</option>

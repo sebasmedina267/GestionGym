@@ -113,6 +113,35 @@ export default function EconomiaPage() {
     }
   };
 
+  /** Handles downloading financial reports as PDF */
+  const handleDownloadPDF = async (reportType) => {
+    try {
+      const params = new URLSearchParams();
+      if (startDate) params.append("desde", startDate);
+      if (endDate) params.append("hasta", endDate);
+
+      const response = await api.get(`/economia/pdf/${reportType}?${params}`, {
+        responseType: "blob",
+      });
+
+      // Create blob and download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `Reporte_${reportType}_${new Date().toISOString().split("T")[0]}.pdf`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Error descargando PDF:", err);
+      alert("Error al descargar el reporte PDF");
+    }
+  };
+
   return (
     <AppLayout title="Inteligencia Financiera">
       {/* --- Action Bar: Global Operations --- */}
@@ -133,7 +162,25 @@ export default function EconomiaPage() {
             movimientos: sortedMovimientos
           }, "FitFlow_Reporte_Financiero.pdf")}
         >
-          Generar Reporte PDF
+          Generar Reporte PDF (Local)
+        </button>
+        <button 
+          className="btn-info" 
+          onClick={() => handleDownloadPDF("resumen")}
+        >
+          Descargar Resumen PDF
+        </button>
+        <button 
+          className="btn-success" 
+          onClick={() => handleDownloadPDF("ingresos")}
+        >
+          Descargar Ingresos PDF
+        </button>
+        <button 
+          className="btn-warning" 
+          onClick={() => handleDownloadPDF("gastos")}
+        >
+          Descargar Gastos PDF
         </button>
       </div>
 

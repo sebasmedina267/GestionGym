@@ -49,12 +49,12 @@ export async function getGymById(gymId) {
  * @returns {Promise<Object>} The successfully persisted gym entity with its system ID.
  * @throws {AppError} If mandatory identity fields are missing.
  */
-export async function createGym({ nombre, direccion, ciudad, foto, urlWeb }) {
+export async function createGym({ nombre, direccion, ciudad, foto, urlWeb, latitud, longitud }) {
   if (!nombre) throw new AppError('Policy Violation: Branch identity (Name) is mandatory', 400);
 
   const [result] = await pool.query(
-    `INSERT INTO gyms (nombre, direccion, ciudad, foto, url_web) VALUES (?, ?, ?, ?, ?)`,
-    [nombre, direccion || null, ciudad || null, foto || null, urlWeb || null]
+    `INSERT INTO gyms (nombre, direccion, ciudad, foto, url_web, latitud, longitud) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [nombre, direccion || null, ciudad || null, foto || null, urlWeb || null, latitud || null, longitud || null]
   );
 
   const [rows] = await pool.query(
@@ -73,7 +73,7 @@ export async function createGym({ nombre, direccion, ciudad, foto, urlWeb }) {
  * @param {Object} updateData - Partial dataset for modification.
  * @returns {Promise<Object|null>} The post-update branch record.
  */
-export async function updateGym(gymId, { nombre, direccion, ciudad, foto, urlWeb }) {
+export async function updateGym(gymId, { nombre, direccion, ciudad, foto, urlWeb, latitud, longitud }) {
   if (!gymId) throw new AppError('Integrity Error: Target branch ID is mandatory for updates', 400);
 
   const fields = [];
@@ -99,6 +99,14 @@ export async function updateGym(gymId, { nombre, direccion, ciudad, foto, urlWeb
   if (urlWeb !== undefined) {
     fields.push('url_web = ?');
     values.push(urlWeb);
+  }
+  if (latitud !== undefined) {
+    fields.push('latitud = ?');
+    values.push(latitud);
+  }
+  if (longitud !== undefined) {
+    fields.push('longitud = ?');
+    values.push(longitud);
   }
 
   if (fields.length === 0) {

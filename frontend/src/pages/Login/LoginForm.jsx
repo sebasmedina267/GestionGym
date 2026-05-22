@@ -50,7 +50,7 @@ const LoginForm = ({ form, loading, error, handleInputChange, handleSubmit }) =>
         <div className="login-label-row">
           <label className="login-field-label">Contraseña</label>
           {/* External link for password recovery flow */}
-          <a className="login-forgot-link" href="#">¿Olvidaste tu contraseña?</a>
+          <Link className="login-forgot-link" to="/forgot-password">¿Olvidaste tu contraseña?</Link>
         </div>
 
         <div className="login-input-wrapper">

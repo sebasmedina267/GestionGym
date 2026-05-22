@@ -10,6 +10,7 @@ export default function CreateAdminModal({
   form, setForm,
   errors,
   validatePassword,
+  validateEmail,
   passwordValid,
   gyms,
   saving,
@@ -21,6 +22,9 @@ export default function CreateAdminModal({
     setOpen(false);
     setPhotoPreview(null);
   };
+
+  // Email validation feedback
+  const isEmailValid = form.email && validateEmail(form.email);
 
   return (
     <Modal
@@ -92,6 +96,16 @@ export default function CreateAdminModal({
                 placeholder="Ej. empleado@gym.com"
                 icon="mail"
               />
+              {form.email && (
+                <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px', color: isEmailValid ? '#10b981' : '#ef4444' }}>
+                    {isEmailValid ? 'check_circle' : 'error'}
+                  </span>
+                  <span style={{ color: isEmailValid ? '#10b981' : '#ef4444' }}>
+                    {isEmailValid ? 'Correo válido' : 'Formato inválido'}
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="create-admin-full-width">
@@ -114,7 +128,12 @@ export default function CreateAdminModal({
             {form.password && (
               <div className="create-admin-full-width">
                 <div className="create-admin-pwd-reqs">
-                  <p className="create-admin-pwd-title">Requisitos de contraseña:</p>
+                  <p className="create-admin-pwd-title">
+                    <span className="material-symbols-outlined" style={{ fontSize: '16px', marginRight: '0.5rem', color: passwordValid ? '#10b981' : '#ef4444' }}>
+                      {passwordValid ? 'check_circle' : 'info'}
+                    </span>
+                    Requisitos de contraseña ({passwordValid ? 'Cumplida' : 'Incompleta'}):
+                  </p>
                   <div className="create-admin-pwd-list">
                     {[
                       { label: "Mínimo 8 caracteres", valid: form.password.length >= 8 },
@@ -173,15 +192,25 @@ export default function CreateAdminModal({
                 type="button" 
                 className="btn-admin-cancel" 
                 onClick={closeAndReset}
+                disabled={saving}
               >
                 Cancelar
               </button>
               <button 
                 type="submit" 
                 className="btn-admin-submit"
-                disabled={saving || (!passwordValid && form.password)}
+                disabled={saving || (!passwordValid && form.password) || !form.nombre || !form.apellido || !form.email || !form.password || !form.gymId}
               >
-                {saving ? "Contratando..." : "Contratar"}
+                {saving ? (
+                  <>
+                    <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>
+                      sync
+                    </span>
+                    Contratando...
+                  </>
+                ) : (
+                  "Contratar"
+                )}
               </button>
             </div>
           </form>
