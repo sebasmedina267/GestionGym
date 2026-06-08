@@ -1,5 +1,6 @@
 import mysql from 'mysql2/promise';
 import { config } from './env.js';
+import logger from '../utils/logger.js';
 
 /**
  * Database Connection Pool
@@ -29,8 +30,8 @@ export const pool = mysql.createPool({
 export async function testConnection() {
   try {
     const [rows] = await pool.query('SELECT 1 + 1 AS result');
-    console.log('Database Connectivity Status: OK (MySQL Result:', rows[0].result, ')');
+    logger.info('SYSTEM', `Database Connectivity Status: OK (MySQL Result: ${rows[0].result})`);
   } catch (err) {
-    console.error('Critical Database Connectivity Error:', err);
+    logger.error('SYSTEM', 'Critical Database Connectivity Error', { error: err.message, stack: err.stack });
   }
 }

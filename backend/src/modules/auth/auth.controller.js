@@ -1,4 +1,7 @@
 import * as authService from "./auth.service.js";
+import * as ownerService from "./owner.service.js";
+import * as employeeService from "./employee.service.js";
+import * as clientAuthService from "./client.auth.service.js";
 import { AppError } from "../../utils/AppError.js";
 
 /**
@@ -40,7 +43,7 @@ export async function registerOwner(req, res, next) {
     const { nombre, apellido, email, password, gymNombre, gymDireccion, gymUrlWeb } = req.body;
     const gymFoto = req.file?.filename || null;
 
-    const result = await authService.registerOwnerWithEmail({
+    const result = await ownerService.registerOwnerWithEmail({
       nombre,
       apellido,
       email,
@@ -61,30 +64,14 @@ export async function registerOwner(req, res, next) {
 /**
  * Activate a pending owner account after payment
  * 
- * Called after successful Stripe payment to mark an owner account as active.
- * This completes the registration flow started by registerOwner.
- * 
- * Security: Should verify payment_intent status before activation
- * (currently lacks this validation - identified as potential issue)
+ * @deprecated Use confirmOwnerPayment instead. This endpoint lacks payment verification.
  * 
  * Request body:
  *   - email: {string} Owner's email address
- * 
- * Response (200 OK):
- *   - ok: true
- *   - message: Confirmation message
- * 
- * Errors:
- *   - 400: Email not found or already activated
- *   - 500: Database error
- * 
- * TODO: Add payment status verification before activation
  */
 export async function activateOwner(req, res, next) {
   try {
-    const { email } = req.body;
-    const result = await authService.activateOwner(email);
-    res.status(200).json({ ok: true, message: result.mensaje });
+    throw new AppError("Deprecated route. Use /confirm-payment instead to ensure payment verification.", 400);
   } catch (err) {
     next(err);
   }
@@ -134,7 +121,12 @@ export async function registerEmployee(req, res, next) {
     const { nombre, apellido, email, password, gymId, rol } = req.body;
     const foto = req.file?.filename || null;
 
-    const result = await authService.registerEmployeeWithEmail({
+    // Verify the authenticated owner actually owns the specified gym
+    if (!req.admin.gyms.includes(Number(gymId))) {
+      throw new AppError("Privilege Violation: You do not have permission to register employees for this gym", 403);
+    }
+
+    const result = await employeeService.registerEmployeeWithEmail({
       nombre,
       apellido,
       email,
@@ -225,7 +217,7 @@ export async function loginUnified(req, res, next) {
     } catch (adminErr) {
       // Admin login failed, try App User login
       try {
-        const clientResult = await authService.loginUserFinal({ email, password });
+        const clientResult = await clientAuthService.loginUserFinal({ email, password });
         return res.status(200).json({
           ok: true,
           data: { ...clientResult, tipo: "USUARIO_FINAL" },
@@ -233,7 +225,7 @@ export async function loginUnified(req, res, next) {
       } catch (clientErr) {
         // App User login failed, try Native Client login
         try {
-          const nativeResult = await authService.loginClienteNative({ email, password });
+          const nativeResult = await clientAuthService.loginClienteNative({ email, password });
           return res.status(200).json({
             ok: true,
             data: { ...nativeResult, tipo: "USUARIO_FINAL" },
@@ -353,7 +345,7 @@ export async function passwordReset(req, res, next) {
 export async function registerUserFinal(req, res, next) {
   try {
     const { email, nombre, apellido, password } = req.body;
-    const result = await authService.registerUserFinal({ email, nombre, apellido, password });
+    const result = await clientAuthService.registerUserFinal({ email, nombre, apellido, password });
     res.status(201).json({ ok: true, data: result });
   } catch (err) {
     next(err);
@@ -379,7 +371,7 @@ export async function registerUserFinal(req, res, next) {
 export async function loginUserFinal(req, res, next) {
   try {
     const { email, password } = req.body;
-    const result = await authService.loginUserFinal({ email, password });
+    const result = await clientAuthService.loginUserFinal({ email, password });
     res.status(200).json({ ok: true, data: result });
   } catch (err) {
     next(err);
@@ -412,7 +404,7 @@ export async function enrollUserGym(req, res, next) {
     const userId = req.admin.id; 
     const { gymId, metodo_pago } = req.body;
 
-    const result = await authService.enrollUserInGym({
+    const result = await clientAuthService.enrollUserInGym({
       userId,
       gymId: Number(gymId),
       metodo_pago
@@ -468,7 +460,7 @@ export async function confirmOwnerPayment(req, res, next) {
       throw new AppError("Email and Payment Intent ID required", 400);
     }
 
-    const result = await authService.confirmOwnerRegistrationAfterPayment(
+    const result = await ownerService.confirmOwnerRegistrationAfterPayment(
       email,
       paymentIntentId
     );
@@ -520,7 +512,7 @@ export async function createBranchAfterPayment(req, res, next) {
     const { nombre, direccion, ciudad, urlWeb, paymentIntentId } = req.body;
     const foto = req.file?.filename || null;
 
-    const result = await authService.createBranchAfterPayment({
+    const result = await ownerService.createBranchAfterPayment({
       ownerId: req.admin.id,
       nombre,
       direccion,

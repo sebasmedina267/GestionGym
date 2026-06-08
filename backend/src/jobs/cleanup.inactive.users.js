@@ -1,5 +1,6 @@
 import cron from "node-cron";
 import { pool } from "../config/db.js";
+import logger from "../utils/logger.js";
 
 /**
  * Cron Job: Cleanup Inactive Users
@@ -9,10 +10,10 @@ import { pool } from "../config/db.js";
  * 2. Have not logged in for > 30 days and are PAUSADO or no active gym.
  */
 export function startCleanupJob() {
-  console.log("🛠️  Cleanup job registered. Will run daily at 03:00 AM");
+  logger.info("SYSTEM", "Cleanup job registered. Will run daily at 03:00 AM");
 
   cron.schedule("0 3 * * *", async () => {
-    console.log("🧹 Running inactive user cleanup cron job...");
+    logger.info("SYSTEM", "Running inactive user cleanup cron job...");
     try {
       const conn = await pool.getConnection();
       
@@ -20,7 +21,6 @@ export function startCleanupJob() {
         await conn.beginTransaction();
 
         // 1. Find and delete users with no gym who registered more than 7 days ago
-        // Wait, 'usuarios_finales' vs 'usuarios_finales_gimnasios'
         // If they don't have ANY gym assigned.
         const [noGymResult] = await conn.query(`
           DELETE uf FROM usuarios_finales uf
@@ -29,7 +29,7 @@ export function startCleanupJob() {
           AND uf.fecha_registro < DATE_SUB(NOW(), INTERVAL 7 DAY)
         `);
 
-        console.log(`🗑️  Deleted ${noGymResult.affectedRows} users with no gym (> 7 days)`);
+        logger.info("SYSTEM", `Deleted ${noGymResult.affectedRows} users with no gym (> 7 days)`);
 
         // 2. Find and delete users inactive for > 30 days who don't have ACTIVO status anywhere
         const [inactiveResult] = await conn.query(`
@@ -41,18 +41,18 @@ export function startCleanupJob() {
           )
         `);
 
-        console.log(`🗑️  Deleted ${inactiveResult.affectedRows} inactive users (> 30 days, no active gym)`);
+        logger.info("SYSTEM", `Deleted ${inactiveResult.affectedRows} inactive users (> 30 days, no active gym)`);
 
         await conn.commit();
-        console.log("✅ Cleanup job completed successfully.");
+        logger.info("SYSTEM", "Cleanup job completed successfully.");
       } catch (err) {
         await conn.rollback();
-        console.error("❌ Error during cleanup transaction:", err);
+        logger.error("SYSTEM", "Error during cleanup transaction", { error: err.message, stack: err.stack });
       } finally {
         conn.release();
       }
     } catch (dbErr) {
-      console.error("❌ Failed to get connection for cleanup job:", dbErr);
+      logger.error("SYSTEM", "Failed to get connection for cleanup job", { error: dbErr.message, stack: dbErr.stack });
     }
   });
 }

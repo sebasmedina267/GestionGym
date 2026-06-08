@@ -13,11 +13,11 @@ import { useFetch } from "../../hooks/useFetch";
  */
 export function useClientes(gymId) {
   // Primary member directory query
-  const url = gymId ? `/clientes?gymId=${gymId}` : null;
+  const url = gymId ? `clientes?gymId=${gymId}` : null;
   const { data, loading, refetch } = useFetch(url);
 
   // Demographic analytics query
-  const statsUrl = gymId ? `/clientes/stats?gymId=${gymId}` : null;
+  const statsUrl = gymId ? `clientes/stats?gymId=${gymId}` : null;
   const { data: stats } = useFetch(statsUrl);
 
   return {

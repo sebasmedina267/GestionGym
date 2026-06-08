@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import { requireRole } from '../../middlewares/role.middleware.js';
 import { upload } from '../../middlewares/upload.middleware.js';
 import * as adminsController from './admins.controller.js';
@@ -11,10 +10,9 @@ const router = Router();
  * 
  * Handles operations related to gym administrators, instructors, and employees.
  * Restricted to authenticated users with specific roles (DUENO/EMPLEADO).
+ * 
+ * Note: authMiddleware is already applied in app.js for /api/admins
  */
-
-// All routes require valid session authentication
-router.use(authMiddleware);
 
 /**
  * List Staff Members

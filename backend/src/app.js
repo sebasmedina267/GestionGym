@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import helmet from 'helmet';
 
 import { errorMiddleware } from './middlewares/error.middleware.js';
 import { authMiddleware } from './middlewares/auth.middleware.js';
@@ -44,6 +45,7 @@ const app = express();
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 
 // SECURITY & UTILITY MIDDLEWARES
+app.use(helmet()); // Harden HTTP headers: XSS, clickjacking, MIME sniffing protection
 app.use(cors()); // Enable cross-origin resource sharing for the frontend
 app.use(express.json()); // Standard JSON payload parsing
 app.use(morgan('dev')); // Performance and request telemetry logging

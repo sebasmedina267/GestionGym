@@ -1,5 +1,6 @@
 import * as stripeService from './stripe.service.js';
 import { AppError } from '../../utils/AppError.js';
+import logger from '../../utils/logger.js';
 
 /**
  * Create a generic payment intent
@@ -234,23 +235,21 @@ export async function handleStripeWebhook(req, res, next) {
     // Process different types of Stripe events
     switch (event.type) {
       case 'payment_intent.succeeded':
-        console.log('✅ Payment succeeded:', event.data.object.id);
-        console.log('   Metadata:', event.data.object.metadata);
-        // Frontend confirms payment in the /confirm-owner-payment endpoint
+        logger.logPayment('succeeded', event.data.object.id, event.data.object.amount, 'succeeded', event.data.object.metadata);
         break;
       
       case 'payment_intent.payment_failed':
-        console.log('❌ Payment failed:', event.data.object.id);
+        logger.logPayment('failed', event.data.object.id, event.data.object.amount, 'failed', { error: event.data.object.last_payment_error });
         break;
       
       default:
-        console.log(`Unhandled event type ${event.type}`);
+        logger.info('PAYMENT', `Unhandled event type ${event.type}`);
     }
 
     // Always return success to Stripe (prevents retries)
     res.json({ received: true });
   } catch (err) {
-    console.error('Webhook error:', err);
+    logger.error('PAYMENT', 'Webhook error', { error: err.message, stack: err.stack });
     // Return 400 to Stripe for retries, but don't expose error details
     res.status(400).json({ error: 'webhook_error' });
   }

@@ -99,8 +99,8 @@ export const permissions = {
     VER_EMPLEADOS: ["DUENO", "ENCARGADO"],
   },
   ECONOMIA: {
-    VER: ["DUENO"],
-    EXPORTAR: ["DUENO"],
+    VER: ["DUENO", "ENCARGADO", "EMPLEADO"],
+    EXPORTAR: ["DUENO", "ENCARGADO"],
   },
 };
 

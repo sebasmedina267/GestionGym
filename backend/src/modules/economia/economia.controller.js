@@ -1,20 +1,15 @@
 import * as economiaService from "./economia.service.js";
 import { AppError } from "../../utils/AppError.js";
 import { validatePermission } from "../../utils/rolePermissions.js";
+import { validateAdminAuthenticated } from "../../utils/auth.utils.js";
+import logger from "../../utils/logger.js";
+import { LOG_CONTEXT } from "../../constants/index.js";
 import * as pdfService from "../../services/pdf.service.js";
 import { pool } from "../../config/db.js";
 
 /* ============================================================
    HELPERS
    ============================================================ */
-
-/**
- * Ensures the request is coming from an authenticated administrator.
- * @throws {AppError} 401 if not authenticated.
- */
-function validarAdmin(req) {
-  if (!req.admin) throw new AppError("Not authenticated", 401);
-}
 
 /**
  * Validates a date string and ensures it's in a recognizable format.
@@ -40,13 +35,14 @@ function validarFecha(fecha, nombre) {
  */
 export async function resumenEconomico(req, res, next) {
   try {
-    validarAdmin(req);
+    validateAdminAuthenticated(req);
     // RBAC: Ensure the user has viewing rights for financial data
     validatePermission(req.admin.roles, "ECONOMIA", "VER");
 
     const desde = validarFecha(req.query.desde, "desde");
     const hasta = validarFecha(req.query.hasta, "hasta");
 
+    logger.info(LOG_CONTEXT.REPORT, 'Fetching economic summary', { gymId: req.gym.id, desde, hasta });
     const resumen = await economiaService.resumenEconomico(req.gym.id, {
       desde,
       hasta,
@@ -54,6 +50,7 @@ export async function resumenEconomico(req, res, next) {
 
     res.status(200).json({ ok: true, data: resumen });
   } catch (err) {
+    logger.error(LOG_CONTEXT.REPORT, 'Error fetching economic summary', { gymId: req.gym.id, error: err.message });
     next(err);
   }
 }
@@ -68,7 +65,7 @@ export async function resumenEconomico(req, res, next) {
  */
 export async function crearIngresoManual(req, res, next) {
   try {
-    validarAdmin(req);
+    validateAdminAuthenticated(req);
 
     // Business Logic: Only Owners and Employees can register income
     if (
@@ -86,6 +83,7 @@ export async function crearIngresoManual(req, res, next) {
 
     res.status(201).json({ ok: true, data: ingreso });
   } catch (err) {
+    logger.error(LOG_CONTEXT.REPORT, 'Error creating manual income', { gymId: req.gym.id, error: err.message });
     next(err);
   }
 }
@@ -100,7 +98,7 @@ export async function crearIngresoManual(req, res, next) {
  */
 export async function crearGastoManual(req, res, next) {
   try {
-    validarAdmin(req);
+    validateAdminAuthenticated(req);
 
     // Policy: Expense registration is a high-privilege operation
     if (!req.admin.roles.includes("DUENO")) {
@@ -115,6 +113,7 @@ export async function crearGastoManual(req, res, next) {
 
     res.status(201).json({ ok: true, data: gasto });
   } catch (err) {
+    logger.error(LOG_CONTEXT.REPORT, 'Error creating manual expense', { gymId: req.gym.id, error: err.message });
     next(err);
   }
 }
@@ -129,11 +128,12 @@ export async function crearGastoManual(req, res, next) {
  */
 export async function listarIngresos(req, res, next) {
   try {
-    validarAdmin(req);
+    validateAdminAuthenticated(req);
 
     const desde = validarFecha(req.query.desde, "desde");
     const hasta = validarFecha(req.query.hasta, "hasta");
 
+    logger.info(LOG_CONTEXT.REPORT, 'Fetching income list', { gymId: req.gym.id, desde, hasta });
     const ingresos = await economiaService.listarIngresos(req.gym.id, {
       desde,
       hasta,
@@ -141,6 +141,7 @@ export async function listarIngresos(req, res, next) {
 
     res.status(200).json({ ok: true, data: ingresos });
   } catch (err) {
+    logger.error(LOG_CONTEXT.REPORT, 'Error fetching income list', { gymId: req.gym.id, error: err.message });
     next(err);
   }
 }
@@ -151,11 +152,12 @@ export async function listarIngresos(req, res, next) {
  */
 export async function listarGastos(req, res, next) {
   try {
-    validarAdmin(req);
+    validateAdminAuthenticated(req);
 
     const desde = validarFecha(req.query.desde, "desde");
     const hasta = validarFecha(req.query.hasta, "hasta");
 
+    logger.info(LOG_CONTEXT.REPORT, 'Fetching expense list', { gymId: req.gym.id, desde, hasta });
     const gastos = await economiaService.listarGastos(req.gym.id, {
       desde,
       hasta,
@@ -163,6 +165,7 @@ export async function listarGastos(req, res, next) {
 
     res.status(200).json({ ok: true, data: gastos });
   } catch (err) {
+    logger.error(LOG_CONTEXT.REPORT, 'Error fetching expense list', { gymId: req.gym.id, error: err.message });
     next(err);
   }
 }
@@ -176,7 +179,7 @@ export async function listarGastos(req, res, next) {
  */
 export async function descargarResumenPDF(req, res, next) {
   try {
-    validarAdmin(req);
+    validateAdminAuthenticated(req);
     validatePermission(req.admin.roles, "ECONOMIA", "VER");
 
     const desde = validarFecha(req.query.desde, "desde");
@@ -191,6 +194,7 @@ export async function descargarResumenPDF(req, res, next) {
       throw new AppError("Gym not found", 404);
     }
 
+    logger.info(LOG_CONTEXT.REPORT, 'Generating Summary PDF', { gymId: req.gym.id, desde, hasta });
     // Fetch financial data
     const resumen = await economiaService.resumenEconomico(req.gym.id, { desde, hasta });
     const ingresos = await economiaService.listarIngresos(req.gym.id, { desde, hasta });
@@ -213,6 +217,7 @@ export async function descargarResumenPDF(req, res, next) {
     doc.pipe(res);
     doc.end();
   } catch (err) {
+    logger.error(LOG_CONTEXT.REPORT, 'Error generating summary PDF', { gymId: req.gym.id, error: err.message });
     next(err);
   }
 }
@@ -222,7 +227,7 @@ export async function descargarResumenPDF(req, res, next) {
  */
 export async function descargarIngresoPDF(req, res, next) {
   try {
-    validarAdmin(req);
+    validateAdminAuthenticated(req);
     validatePermission(req.admin.roles, "ECONOMIA", "VER");
 
     const desde = validarFecha(req.query.desde, "desde");
@@ -237,6 +242,7 @@ export async function descargarIngresoPDF(req, res, next) {
       throw new AppError("Gym not found", 404);
     }
 
+    logger.info(LOG_CONTEXT.REPORT, 'Generating Income PDF', { gymId: req.gym.id, desde, hasta });
     // Fetch income data
     const ingresos = await economiaService.listarIngresos(req.gym.id, { desde, hasta });
 
@@ -254,6 +260,7 @@ export async function descargarIngresoPDF(req, res, next) {
     doc.pipe(res);
     doc.end();
   } catch (err) {
+    logger.error(LOG_CONTEXT.REPORT, 'Error generating income PDF', { gymId: req.gym.id, error: err.message });
     next(err);
   }
 }
@@ -263,7 +270,7 @@ export async function descargarIngresoPDF(req, res, next) {
  */
 export async function descargarGastoPDF(req, res, next) {
   try {
-    validarAdmin(req);
+    validateAdminAuthenticated(req);
     validatePermission(req.admin.roles, "ECONOMIA", "VER");
 
     const desde = validarFecha(req.query.desde, "desde");
@@ -278,6 +285,7 @@ export async function descargarGastoPDF(req, res, next) {
       throw new AppError("Gym not found", 404);
     }
 
+    logger.info(LOG_CONTEXT.REPORT, 'Generating Expense PDF', { gymId: req.gym.id, desde, hasta });
     // Fetch expense data
     const gastos = await economiaService.listarGastos(req.gym.id, { desde, hasta });
 
@@ -295,6 +303,7 @@ export async function descargarGastoPDF(req, res, next) {
     doc.pipe(res);
     doc.end();
   } catch (err) {
+    logger.error(LOG_CONTEXT.REPORT, 'Error generating expense PDF', { gymId: req.gym.id, error: err.message });
     next(err);
   }
 }

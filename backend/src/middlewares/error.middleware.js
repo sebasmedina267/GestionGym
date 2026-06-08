@@ -1,8 +1,15 @@
 import { ZodError } from "zod";
 import { AppError } from "../utils/AppError.js";
+import logger from "../utils/logger.js";
 
 export function errorMiddleware(err, req, res, next) {
-  console.error("ERROR:", err);
+  logger.error("SYSTEM", "Request failed with error", {
+    error: err.message || String(err),
+    stack: err.stack,
+    path: req.path,
+    method: req.method,
+    body: req.body
+  });
 
   if (err instanceof ZodError) {
     return res.status(400).json({

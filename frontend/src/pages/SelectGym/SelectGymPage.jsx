@@ -21,7 +21,7 @@ export default function SelectGymPage() {
   const navigate = useNavigate();
 
   // Retrieves the portfolio of branches managed by the authenticated administrator
-  const { data: gyms, loading } = useFetch(admin ? `/gyms` : null);
+  const { data: gyms, loading } = useFetch(admin ? "gyms" : null);
 
   /** Auth Guard: Ensures user context exists before rendering the selector */
   if (!admin) return (

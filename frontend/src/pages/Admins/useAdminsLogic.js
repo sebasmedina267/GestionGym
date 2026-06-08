@@ -30,8 +30,8 @@ export const useAdminsLogic = () => {
   const canManageStaff = isDueno || isEncargado;
 
   // --- Data Queries ---
-  const { data: admins, loading, refetch } = useFetch("/admins");
-  const { data: gyms, refetch: refetchGyms } = useFetch("/gyms");
+  const { data: admins, loading, refetch } = useFetch(gym?.id ? "admins" : null);
+  const { data: gyms, refetch: refetchGyms } = useFetch("gyms");
 
   // --- UI visibility state ---
   const [open, setOpen] = useState(false);

@@ -37,8 +37,8 @@ export function useGymsLogic() {
   const isDueno = admin?.roles?.includes("DUENO");
 
   // --- Primary Data Queries ---
-  const { data: allGyms, loading, refetch } = useFetch("/gyms/all");
-  const { data: myGyms, refetch: refetchMy } = useFetch("/gyms");
+  const { data: allGyms, loading, refetch } = useFetch("gyms/all");
+  const { data: myGyms, refetch: refetchMy } = useFetch("gyms");
 
   // --- UI Visibility State ---
   const [openCreateGym, setOpenCreateGym] = useState(false);

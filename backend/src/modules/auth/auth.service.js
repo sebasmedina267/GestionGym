@@ -2,7 +2,6 @@ import * as authRepository from "./auth.repository.js";
 import { hashPassword, comparePassword } from "../../utils/password.js";
 import { signToken } from "../../utils/jwt.js";
 import { registrarOperacion } from "../audit/audit.service.js";
-import { isPaymentSuccessful } from "../stripe/stripe.service.js";
 import { AppError } from "../../utils/AppError.js";
 import crypto from "crypto";
 import { pool } from "../../config/db.js";
@@ -17,176 +16,13 @@ import { pool } from "../../config/db.js";
  * @param {string} password - The plain-text password to validate
  * @throws {AppError} If password does not meet requirements
  */
-function validarPassword(password) {
+export function validarPassword(password) {
   const regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
   if (!regex.test(password)) {
     throw new AppError(
       "Password must have at least 8 characters, 1 uppercase, 1 number, and 1 symbol",
       400,
     );
-  }
-}
-
-/* ============================================================
-   GYM OWNER REGISTRATION (BASIC)
-   ============================================================ */
-
-/**
- * Legacy owner registration (without email).
- * Orchestrates the creation of an admin account and its primary gym branch.
- * @deprecated Use registerOwnerWithEmail instead for full feature support.
- * @param {Object} data - Owner and Gym base details.
- * @returns {Promise<Object>} Session data including JWT.
- */
-export async function registerOwner({
-  nombre,
-  apellido,
-  password,
-  gymNombre,
-  gymDireccion,
-}) {
-  if (!nombre || !apellido || !password || !gymNombre) {
-    throw new AppError("Incomplete data for owner registration", 400);
-  }
-
-  validarPassword(password);
-
-  const conn = await pool.getConnection();
-
-  try {
-    await conn.beginTransaction();
-
-    const passwordHash = await hashPassword(password);
-
-    // Create administrator account
-    const admin = await authRepository.createAdmin({
-      nombre,
-      apellido,
-      passwordHash,
-    });
-
-    // Create the gym record
-    const gym = await authRepository.createGym({
-      nombre: gymNombre,
-      direccion: gymDireccion || null,
-    });
-
-    // Link administrator to gym with 'OWNER' role
-    await authRepository.linkAdminToGym({
-      adminId: admin.id,
-      gymId: gym.id,
-      rol: "DUENO",
-    });
-
-    await conn.commit();
-
-    const gyms = await authRepository.getGymsByAdminId(admin.id);
-    const roles = await authRepository.getRolesByAdminId(admin.id);
-
-    const token = signToken({
-      id: admin.id,
-      nombre: admin.nombre,
-      apellido: admin.apellido,
-      roles,
-      gyms: gyms.map((g) => g.id),
-    });
-
-    // Log the operation for audit purposes
-    await registrarOperacion({
-      adminId: admin.id,
-      gymId: gym.id,
-      entidad: "ADMIN",
-      entidadId: admin.id,
-      accion: "REGISTRO_DUENO",
-      detalles: { nombre, apellido },
-    });
-
-    return { admin, gyms, roles, token };
-  } catch (err) {
-    await conn.rollback();
-    throw err;
-  } finally {
-    conn.release();
-  }
-}
-
-/* ============================================================
-   EMPLOYEE REGISTRATION
-   ============================================================ */
-
-/**
- * Registers a new employee for a specific gym branch.
- * Enforces business rules: target gym must have an owner, and employees are single-branch.
- * @param {Object} data - Employee details (name, lastname, password, gymId)
- * @returns {Promise<Object>} The new employee's data and session token.
- */
-export async function registerEmployee({ nombre, apellido, password, gymId }) {
-  if (!nombre || !apellido || !password || !gymId) {
-    throw new AppError("Incomplete data for employee registration", 400);
-  }
-
-  validarPassword(password);
-
-  // Verify that the target gym has an owner
-  const ownerExists = await authRepository.findOwnerByGymId(gymId);
-  if (!ownerExists) throw new AppError("No owner exists for this gym", 400);
-
-  const conn = await pool.getConnection();
-
-  try {
-    await conn.beginTransaction();
-
-    const passwordHash = await hashPassword(password);
-
-    // Create administrator account
-    const admin = await authRepository.createAdmin({
-      nombre,
-      apellido,
-      passwordHash,
-    });
-
-    // Employees are restricted to a single gym branch
-    const gymsPrevios = await authRepository.getGymsByAdminId(admin.id);
-    if (gymsPrevios.length > 0) {
-      throw new AppError("An employee can only belong to one gym", 400);
-    }
-
-    // Link administrator as an employee to the specified gym
-    await authRepository.linkAdminToGym({
-      adminId: admin.id,
-      gymId,
-      rol: "EMPLEADO",
-    });
-
-    await conn.commit();
-
-    const gyms = await authRepository.getGymsByAdminId(admin.id);
-    const roles = await authRepository.getRolesByAdminId(admin.id);
-
-    const token = signToken({
-      id: admin.id,
-      nombre: admin.nombre,
-      apellido: admin.apellido,
-      roles,
-      gyms: gyms.map((g) => g.id),
-    });
-
-    // Log registration in audit
-    await registrarOperacion({
-      adminId: admin.id,
-      gymId,
-      entidad: "ADMIN",
-      entidadId: admin.id,
-      accion: "REGISTRO_EMPLEADO",
-      detalles: { nombre, apellido },
-    });
-
-    return { admin, gyms, roles, token };
-  } catch (err) {
-    await conn.rollback();
-    throw err;
-  } finally {
-    conn.release();
   }
 }
 
@@ -241,6 +77,53 @@ export async function login({ nombre, apellido, password }) {
 }
 
 /* ============================================================
+   MODERN AUTHENTICATION (EMAIL-BASED)
+   ============================================================ */
+
+/**
+ * Authenticates a user using email and password.
+ * Hydrates full session context including managed branches and system roles.
+ * @param {Object} credentials - Email and password pairing.
+ * @returns {Promise<Object>} Authenticated session data.
+ */
+export async function loginWithEmail({ email, password }) {
+  if (!email || !password) {
+    throw new AppError("Email and password are required", 400);
+  }
+
+  const admin = await authRepository.findAdminByEmail(email);
+  if (!admin) throw new AppError("Invalid credentials", 401);
+
+  const ok = await comparePassword(password, admin.password);
+  if (!ok) throw new AppError("Invalid credentials", 401);
+
+  await authRepository.updateLastLogin(admin.id);
+
+  const gyms = await authRepository.getGymsByAdminId(admin.id);
+  const roles = await authRepository.getRolesByAdminId(admin.id);
+
+  const token = signToken({
+    id: admin.id,
+    nombre: admin.nombre,
+    apellido: admin.apellido,
+    email: admin.email,
+    roles,
+    gyms: gyms.map((g) => g.id),
+  });
+
+  // Audit login
+  await registrarOperacion({
+    adminId: admin.id,
+    gymId: gyms[0]?.id || null,
+    entidad: "ADMIN",
+    entidadId: admin.id,
+    accion: "LOGIN_EMAIL",
+  });
+
+  return { admin, gyms, roles, token };
+}
+
+/* ============================================================
    LEGACY PASSWORD RESET
    ============================================================ */
 
@@ -289,272 +172,6 @@ export async function passwordReset({ token }) {
   await authRepository.deletePasswordReset(token);
 
   return { mensaje: "Password updated successfully" };
-}
-
-/* ============================================================
-   MODERN AUTHENTICATION (EMAIL-BASED)
-   ============================================================ */
-
-/**
- * Modern owner registration using email.
- * Creates an inactive account that must be activated via payment.
- * Automatically cleans up failed previous attempts for the same email.
- * @param {Object} data - Owner and gym details including optional branding.
- * @returns {Promise<Object>} Tentative session data.
- */
-export async function registerOwnerWithEmail({
-  nombre,
-  apellido,
-  email,
-  password,
-  gymNombre,
-  gymDireccion,
-  gymUrlWeb,
-  gymFoto,
-}) {
-  console.log(">>> EXECUTING registerOwnerWithEmail v2 <<<");
-  if (!nombre || !apellido || !email || !password || !gymNombre) {
-    throw new AppError("Incomplete data for owner registration", 400);
-  }
-
-  validarPassword(password);
-
-  const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  if (!emailValido) throw new AppError("Invalid email address", 400);
-
-  // Check if user already exists
-  const existingUser = await authRepository.findAdminByEmailRaw(email);
-  if (existingUser) {
-    if (existingUser.activo) {
-      throw new AppError("Email is already registered and active", 409);
-    } else {
-      // If inactive, cleanup previous attempt to allow retry
-      await authRepository.deleteAdminByEmail(email);
-    }
-  }
-
-  const conn = await pool.getConnection();
-
-  try {
-    await conn.beginTransaction();
-
-    const passwordHash = await hashPassword(password);
-
-    // Create admin account (inactive)
-    const admin = await authRepository.createAdminWithEmail({
-      nombre,
-      apellido,
-      email,
-      passwordHash,
-      activo: false,
-    });
-
-    // Create initial gym branch
-    const gym = await authRepository.createGym({
-      nombre: gymNombre,
-      direccion: gymDireccion || null,
-      urlWeb: gymUrlWeb || null,
-      foto: gymFoto || null,
-    });
-
-    // Assign owner role to the gym
-    await authRepository.linkAdminToGym({
-      adminId: admin.id,
-      gymId: gym.id,
-      rol: "DUENO",
-    });
-
-    await conn.commit();
-
-    const gyms = await authRepository.getGymsByAdminId(admin.id);
-    const roles = await authRepository.getRolesByAdminId(admin.id);
-
-    const token = signToken({
-      id: admin.id,
-      nombre: admin.nombre,
-      apellido: admin.apellido,
-      email: admin.email,
-      roles,
-      gyms: gyms.map((g) => g.id),
-    });
-
-    // Audit the registration attempt
-    await registrarOperacion({
-      adminId: admin.id,
-      gymId: gym.id,
-      entidad: "ADMIN",
-      entidadId: admin.id,
-      accion: "REG_DUENO_EMAIL",
-      detalles: { nombre, apellido, email },
-    });
-
-    return { admin, gyms, roles, token };
-  } catch (err) {
-    await conn.rollback();
-    throw err;
-  } finally {
-    conn.release();
-  }
-}
-
-/**
- * Activates an owner account after manual verification or standard process.
- * Usually triggered by internal administration or verified webhooks.
- * @param {string} email - Owner email to activate.
- * @returns {Promise<Object>} Success confirmation.
- */
-export async function activateOwner(email) {
-  if (!email) throw new AppError("Email required", 400);
-
-  const admin = await authRepository.findAdminByEmailRaw(email);
-  if (!admin) throw new AppError("Administrator not found", 404);
-
-  if (admin.activo) return { mensaje: "Account is already active" };
-
-  await pool.query("UPDATE admins SET activo = 1 WHERE id = ?", [admin.id]);
-
-  const gyms = await authRepository.getGymsByAdminId(admin.id);
-
-  // Audit the activation
-  await registrarOperacion({
-    adminId: admin.id,
-    gymId: gyms[0]?.id,
-    entidad: "ADMIN",
-    entidadId: admin.id,
-    accion: "ACTIVACION_PAGO",
-    detalles: { email },
-  });
-
-  return { mensaje: "Account activated successfully" };
-}
-
-/**
- * Registers an employee account using email credentials.
- * Links the employee to a specific gym branch upon creation.
- * @param {Object} data - Employee profile and target branch ID.
- * @returns {Promise<Object>} Authenticated session data.
- */
-export async function registerEmployeeWithEmail({
-  nombre,
-  apellido,
-  email,
-  password,
-  gymId,
-  rol,
-  foto,
-}) {
-  if (!nombre || !apellido || !email || !password || !gymId) {
-    throw new AppError("Incomplete data for employee registration", 400);
-  }
-
-  validarPassword(password);
-
-  const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  if (!emailValido) throw new AppError("Invalid email address", 400);
-
-  if (await authRepository.emailExists(email)) {
-    throw new AppError("Email is already registered", 409);
-  }
-
-  const ownerExists = await authRepository.findOwnerByGymId(gymId);
-  if (!ownerExists) throw new AppError("Target gym must have an active owner", 400);
-
-  const conn = await pool.getConnection();
-
-  try {
-    await conn.beginTransaction();
-
-    const passwordHash = await hashPassword(password);
-
-    // Create employee administrator account
-    const admin = await authRepository.createAdminWithEmail({
-      nombre,
-      apellido,
-      email,
-      passwordHash,
-    });
-
-    // Link as employee or manager role
-    await authRepository.linkAdminToGym({
-      adminId: admin.id,
-      gymId,
-      rol: rol || "EMPLEADO",
-    });
-
-    await conn.commit();
-
-    const gyms = await authRepository.getGymsByAdminId(admin.id);
-    const roles = await authRepository.getRolesByAdminId(admin.id);
-
-    const token = signToken({
-      id: admin.id,
-      nombre: admin.nombre,
-      apellido: admin.apellido,
-      email: admin.email,
-      roles,
-      gyms: gyms.map((g) => g.id),
-    });
-
-    // Audit registration
-    await registrarOperacion({
-      adminId: admin.id,
-      gymId,
-      entidad: "ADMIN",
-      entidadId: admin.id,
-      accion: "REG_EMP_EMAIL",
-      detalles: { nombre, apellido, email },
-    });
-
-    return { admin, gyms, roles, token };
-  } catch (err) {
-    await conn.rollback();
-    throw err;
-  } finally {
-    conn.release();
-  }
-}
-
-/**
- * Authenticates a user using email and password.
- * Hydrates full session context including managed branches and system roles.
- * @param {Object} credentials - Email and password pairing.
- * @returns {Promise<Object>} Authenticated session data.
- */
-export async function loginWithEmail({ email, password }) {
-  if (!email || !password) {
-    throw new AppError("Email and password are required", 400);
-  }
-
-  const admin = await authRepository.findAdminByEmail(email);
-  if (!admin) throw new AppError("Invalid credentials", 401);
-
-  const ok = await comparePassword(password, admin.password);
-  if (!ok) throw new AppError("Invalid credentials", 401);
-
-  await authRepository.updateLastLogin(admin.id);
-
-  const gyms = await authRepository.getGymsByAdminId(admin.id);
-  const roles = await authRepository.getRolesByAdminId(admin.id);
-
-  const token = signToken({
-    id: admin.id,
-    nombre: admin.nombre,
-    apellido: admin.apellido,
-    email: admin.email,
-    roles,
-    gyms: gyms.map((g) => g.id),
-  });
-
-  // Audit login
-  await registrarOperacion({
-    adminId: admin.id,
-    gymId: gyms[0]?.id || null,
-    entidad: "ADMIN",
-    entidadId: admin.id,
-    accion: "LOGIN_EMAIL",
-  });
-
-  return { admin, gyms, roles, token };
 }
 
 /* ============================================================
@@ -629,319 +246,4 @@ export async function resetPassword({ token, newPassword }) {
   await authRepository.usePasswordResetToken(resetToken.id);
 
   return { mensaje: "Password updated successfully" };
-}
-
-/* ============================================================
-   END-USER (APP CLIENT) MANAGEMENT
-   ============================================================ */
-
-/**
- * Registers a regular gym member (consumer/client).
- * @param {Object} data - Client personal data and credentials.
- * @returns {Promise<Object>} New user profile and session token.
- */
-export async function registerUserFinal({ email, nombre, apellido, password }) {
-  if (!email || !nombre || !apellido || !password) {
-    throw new AppError("Incomplete registration data", 400);
-  }
-
-  validarPassword(password);
-
-  const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  if (!emailValido) throw new AppError("Invalid email address", 400);
-
-  if (await authRepository.userFinalEmailExists(email)) {
-    throw new AppError("Email is already registered", 409);
-  }
-
-  const passwordHash = await hashPassword(password);
-
-  // TRANSACTION: Begin atomic operation for user creation and audit logging
-  const conn = await pool.getConnection();
-
-  try {
-    await conn.beginTransaction();
-
-    const user = await authRepository.createUserFinal({
-      email,
-      nombre,
-      apellido,
-      passwordHash,
-    });
-
-    // Audit user registration
-    await registrarOperacion({
-      adminId: null, // Final users are not linked to admins
-      gymId: null,   // Not yet enrolled in any gym
-      entidad: "USUARIO_FINAL",
-      entidadId: user.id,
-      accion: "REGISTRO",
-      detalles: { email, nombre, apellido },
-    });
-
-    // COMMIT: If we reach here, registration is complete
-    await conn.commit();
-
-    const token = signToken({
-      id: user.id,
-      email: user.email,
-      nombre: user.nombre,
-      apellido: user.apellido,
-      tipo: "USUARIO_FINAL",
-    });
-
-    return { user, token };
-  } catch (err) {
-    // ROLLBACK: If any error occurs, revert user creation
-    await conn.rollback();
-    throw err;
-  } finally {
-    conn.release();
-  }
-}
-
-/**
- * Authenticates a regular gym member for the consumer mobile/web app.
- * @param {Object} credentials - Email and password.
- * @returns {Promise<Object>} Profile and associated memberships.
- */
-export async function loginUserFinal({ email, password }) {
-  if (!email || !password) {
-    throw new AppError("Email and password required", 400);
-  }
-
-  const user = await authRepository.findUserFinalByEmail(email);
-  if (!user) throw new AppError("Invalid credentials", 401);
-
-  const ok = await comparePassword(password, user.password);
-  if (!ok) throw new AppError("Invalid credentials", 401);
-
-  const gyms = await authRepository.getGymsForUser(user.id);
-
-  const token = signToken({
-    id: user.id,
-    email: user.email,
-    nombre: user.nombre,
-    apellido: user.apellido,
-    tipo: "USUARIO_FINAL",
-    gyms: gyms.map((g) => g.id),
-  });
-
-  return { user, gyms, token };
-}
-
-/** Authenticates a native client from the dashboard. */
-export async function loginClienteNative({ email, password }) {
-  if (!email || !password) {
-    throw new AppError("Email and password required", 400);
-  }
-
-  const user = await authRepository.findClienteNativeByEmail(email);
-  if (!user) throw new AppError("Invalid credentials", 401);
-
-  const ok = await comparePassword(password, user.password);
-  if (!ok) throw new AppError("Invalid credentials", 401);
-
-  // For native clients, we only have one gym associated
-  const token = signToken({
-    id: user.id,
-    email: user.email,
-    nombre: user.nombre,
-    apellido: user.apellido,
-    tipo: "USUARIO_FINAL", // We treat them as the same type for the frontend
-    gymId: user.gym_id
-  });
-
-  return { user, gyms: [{ id: user.gym_id }], token };
-}
-
-
-/**
- * Links an app consumer to a specific gym branch membership.
- * @param {Object} data - Identity and target branch mapping.
- * @returns {Promise<Object>} Success confirmation.
- */
-export async function enrollUserInGym({ userId, gymId, metodo_pago = "APP" }) {
-  if (!userId || !gymId) {
-    throw new AppError("User and gym IDs required", 400);
-  }
-
-  const gym = await authRepository.gymExists(gymId);
-  if (!gym) throw new AppError("Gym not found", 404);
-
-  const user = await authRepository.findUserFinalById(userId);
-  if (!user) throw new AppError("User not found", 404);
-
-  await authRepository.enrollUserInGym({
-    userId,
-    gymId,
-    metodo_pago,
-  });
-
-  return { mensaje: "User enrolled successfully" };
-}
-
-/* ============================================================
-   STRIPE PAYMENT INTEGRATION FLOWS
-   ============================================================ */
-
-/**
- * Finalizes and activates an owner's administrative account after payment confirmation.
- * This is the post-checkout hook for standard platform onboarding.
- * 
- * SECURITY: Validates that payment was actually successful via Stripe before activating account.
- * TRANSACTIONAL: Ensures payment verification and account activation are atomic.
- * 
- * @param {string} email - The pending owner's email.
- * @param {string} paymentIntentId - Stripe transaction reference.
- * @returns {Promise<Object>} Fully activated session and business data.
- * @throws {AppError} If payment not found, not successful, or activation fails.
- */
-export async function confirmOwnerRegistrationAfterPayment(email, paymentIntentId) {
-  if (!email || !paymentIntentId) {
-    throw new AppError("Email and Payment Intent ID required", 400);
-  }
-
-  // SECURITY CHECK: Verify payment was actually successful before activating account
-  const paymentSuccessful = await isPaymentSuccessful(paymentIntentId);
-  if (!paymentSuccessful) {
-    throw new AppError("Payment was not completed or failed. Account cannot be activated.", 402);
-  }
-
-  const admin = await authRepository.findAdminByEmailRaw(email);
-  if (!admin) throw new AppError("Registration record not found", 404);
-
-  // TRANSACTION: Begin atomic operation
-  const conn = await pool.getConnection();
-
-  try {
-    await conn.beginTransaction();
-
-    // Activate the account within transaction
-    await conn.query(
-      "UPDATE admins SET activo = 1 WHERE id = ?",
-      [admin.id]
-    );
-
-    // Audit payment confirmation within transaction
-    await registrarOperacion({
-      adminId: admin.id,
-      gymId: (await authRepository.getGymsByAdminId(admin.id))[0]?.id,
-      entidad: "ADMIN",
-      entidadId: admin.id,
-      accion: "CONFIRMACION_PAGO_DUENO",
-      detalles: { email, paymentIntentId },
-    });
-
-    // COMMIT: If we reach here, payment is confirmed and account activated
-    await conn.commit();
-
-    // Fetch updated data after activation
-    const updatedAdmin = await authRepository.findAdminByEmailRaw(email);
-    const gyms = await authRepository.getGymsByAdminId(updatedAdmin.id);
-    const roles = await authRepository.getRolesByAdminId(updatedAdmin.id);
-
-    // Return full session data for immediate login
-    const token = signToken({
-      id: updatedAdmin.id,
-      nombre: updatedAdmin.nombre,
-      apellido: updatedAdmin.apellido,
-      email: updatedAdmin.email,
-      roles,
-      gyms: gyms.map((g) => g.id),
-    });
-
-    return {
-      mensaje: "Payment confirmed, account activated",
-      admin: updatedAdmin,
-      gyms,
-      roles,
-      token,
-    };
-  } catch (err) {
-    // ROLLBACK: If any error occurs, account stays inactive
-    await conn.rollback();
-    throw err;
-  } finally {
-    conn.release();
-  }
-}
-
-/**
- * Provisioning: Creates and links a new business branch for an existing owner.
- * Triggered after a successful "Branch Expansion" payment.
- * 
- * SECURITY: Validates that payment was actually successful via Stripe before creating branch.
- * TRANSACTIONAL: Ensures payment verification and branch creation are atomic.
- * 
- * @param {Object} data - Branch profile and expansion transaction reference.
- * @returns {Promise<Object>} The newly established branch record.
- * @throws {AppError} If payment not successful or branch creation fails.
- */
-export async function createBranchAfterPayment({
-  ownerId,
-  nombre,
-  direccion,
-  ciudad,
-  urlWeb,
-  foto,
-  paymentIntentId,
-}) {
-  if (!ownerId || !nombre || !paymentIntentId) {
-    throw new AppError("Incomplete data for branch creation", 400);
-  }
-
-  // SECURITY CHECK: Verify payment was actually successful before creating branch
-  const paymentSuccessful = await isPaymentSuccessful(paymentIntentId);
-  if (!paymentSuccessful) {
-    throw new AppError("Payment was not completed or failed. Branch cannot be created.", 402);
-  }
-
-  const ownerRole = await authRepository.getAdminRole(ownerId);
-  if (!ownerRole || !ownerRole.includes("DUENO")) {
-    throw new AppError("Only gym owners can purchase additional branches", 403);
-  }
-
-  const conn = await pool.getConnection();
-
-  try {
-    await conn.beginTransaction();
-
-    // Create the new gym record
-    const gym = await authRepository.createGym({
-      nombre,
-      direccion: direccion || null,
-      ciudad: ciudad || null,
-      urlWeb: urlWeb || null,
-      foto: foto || null,
-    });
-
-    // Link current owner to the new branch
-    await authRepository.linkAdminToGym({
-      adminId: ownerId,
-      gymId: gym.id,
-      rol: "DUENO",
-    });
-
-    // Audit branch creation
-    await registrarOperacion({
-      adminId: ownerId,
-      gymId: gym.id,
-      entidad: "GYM",
-      entidadId: gym.id,
-      accion: "CREAR_SUCURSAL_PAGO",
-      detalles: { nombre, paymentIntentId },
-    });
-
-    // COMMIT: If we reach here, all operations succeeded
-    await conn.commit();
-
-    return gym;
-  } catch (err) {
-    // ROLLBACK: If any error occurs, branch creation is reverted
-    await conn.rollback();
-    throw err;
-  } finally {
-    conn.release();
-  }
 }

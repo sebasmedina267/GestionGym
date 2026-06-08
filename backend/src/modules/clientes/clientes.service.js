@@ -4,6 +4,9 @@ import { registrarOperacion } from "../audit/audit.service.js";
 import { requireFields } from "../../utils/validators.js";
 import { AppError } from "../../utils/AppError.js";
 import { hashPassword } from "../../utils/password.js";
+import { validateGymAccess } from "../../utils/auth.utils.js";
+import logger from "../../utils/logger.js";
+import { BUSINESS_RULES, LOG_CONTEXT, HTTP_STATUS } from "../../constants/index.js";
 import { pool } from "../../config/db.js";
 import crypto from "crypto";
 
@@ -13,15 +16,13 @@ import crypto from "crypto";
 
 /**
  * Validates that an administrator has permission to operate within a specific gym branch.
+ * DEPRECATED: Use validateGymAccess from auth.utils instead
  * @param {number} adminId - The administrator's unique identifier.
  * @param {number} gymId - The target gym branch identifier.
  * @throws {AppError} 403 if the administrator is not linked to the branch.
  */
 async function validarPermisos(adminId, gymId) {
-  const gyms = await authRepository.getGymsByAdminId(adminId);
-  if (!gyms.some((g) => g.id === gymId)) {
-    throw new AppError("Access Denied: You do not have management rights for this gym branch", 403);
-  }
+  await validateGymAccess(adminId, gymId, authRepository);
 }
 
 /* ============================================================
@@ -63,11 +64,27 @@ function generarContraseñaAutomatica() {
  * Strategy: Permanently remove members with zero activity for over 4 months.
  * @param {number} gymId - The specific branch registry to clean.
  */
-async function eliminarClientesInactivosMuchotiempo(gymId) {
+async function cleanupInactiveClients(gymId) {
+  const monthsThreshold = BUSINESS_RULES.INACTIVITY.MONTHS_THRESHOLD;
+  
   try {
-    await clientesRepository.deletePermanentlyInactiveClients(gymId, 4);
+    logger.info(LOG_CONTEXT.CLIENT, "Starting inactive clients cleanup", {
+      gymId,
+      monthsThreshold
+    });
+    
+    const result = await clientesRepository.deletePermanentlyInactiveClients(gymId, monthsThreshold);
+    
+    logger.info(LOG_CONTEXT.CLIENT, "Inactive clients cleanup completed successfully", {
+      gymId,
+      deletedCount: result || 0
+    });
   } catch (err) {
-    console.error("Critical Failure: Automated client data cleanup task failed:", err);
+    logger.error(LOG_CONTEXT.CLIENT, "Inactive clients cleanup failed", {
+      gymId,
+      error: err.message,
+      stack: err.stack
+    });
   }
 }
 
@@ -83,7 +100,7 @@ async function eliminarClientesInactivosMuchotiempo(gymId) {
  */
 export async function listarClientes(gymId) {
   // Maintenance task: ensure the list reflects active members by purging long-term stale records
-  await eliminarClientesInactivosMuchotiempo(gymId);
+  await cleanupInactiveClients(gymId);
   return clientesRepository.findByGym(gymId);
 }
 
@@ -222,7 +239,8 @@ export async function actualizarCliente(gymId, id, data, admin) {
    ============================================================ */
 
 /**
- * Permanently removes a member record from the organizational registry.
+ * Executes a soft delete to deactivate a member record, triggering the retention policy.
+ * Sets deleted_at timestamp to mark the deletion point (useful for auditing and retention).
  */
 export async function eliminarCliente(gymId, id, admin) {
   if (!admin?.id) throw new AppError("System Error: Invalid administrative context for deletion", 400);
@@ -232,17 +250,21 @@ export async function eliminarCliente(gymId, id, admin) {
   const existingClient = await clientesRepository.getById(gymId, id);
   if (!existingClient) throw new AppError("Resource Error: Member record not found", 404);
 
-  // Repository Layer: Cascading deletion
-  await clientesRepository.remove(gymId, id);
+  // Repository Layer: Soft Deletion (triggers retention clock)
+  // Sets both activo=0 (backwards compatibility) and deleted_at=NOW() (for audit trail)
+  await clientesRepository.update(gymId, id, { 
+    activo: 0,
+    deleted_at: new Date()
+  });
 
-  // Audit Layer: Securely log the destruction of member data
+  // Audit Layer: Securely log the soft deletion of member data
   await registrarOperacion({
     adminId: admin.id,
     gymId,
     entidad: "CLIENTE",
     entidadId: id,
-    accion: "ELIMINAR",
-    detalles: `Member purged: ${existingClient.nombre} ${existingClient.apellido}`
+    accion: "DESACTIVAR",
+    detalles: `Member deactivated (soft delete): ${existingClient.nombre} ${existingClient.apellido} at ${new Date().toISOString()}`
   });
 }
 

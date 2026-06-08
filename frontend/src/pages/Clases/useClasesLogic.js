@@ -30,12 +30,12 @@ export function useClasesLogic(gym) {
 
   // --- Primary Data Queries ---
   const { data: clases, loading, error, refetch: refetchClases } = useFetch(
-    gymReady ? `/clases` : null
+    gymReady ? `clases` : null
   );
   const { data: todosLosClientes } = useFetch(
-    gymReady ? `/clientes?gymId=${gym.id}` : null
+    gymReady ? `clientes?gymId=${gym.id}` : null
   );
-  const { data: adminsData } = useFetch(gymReady ? `/admins` : null);
+  const { data: adminsData } = useFetch(gymReady ? "admins" : null);
 
   // --- General Entity State ---
   const [selectedClase, setSelectedClase]       = useState(null);
