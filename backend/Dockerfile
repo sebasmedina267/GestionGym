@@ -1,20 +1,15 @@
-# Imagen base
-FROM node:18
+FROM node:20-alpine AS base
 
-# Carpeta de trabajo
 WORKDIR /app
 
-# Copiar dependencias
 COPY package*.json ./
+RUN npm ci --omit=dev
 
-# Instalar deps
-RUN npm install
-
-# Copiar código
 COPY . .
 
-# Exponer puerto
-EXPOSE 3000
+ENV NODE_ENV=production
+ENV PORT=4000
 
-# Ejecutar app
-CMD ["npm", "run", "dev"]
+EXPOSE 4000
+
+CMD ["npm", "run", "start"]

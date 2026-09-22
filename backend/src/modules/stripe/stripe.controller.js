@@ -236,6 +236,16 @@ export async function handleStripeWebhook(req, res, next) {
     switch (event.type) {
       case 'payment_intent.succeeded':
         logger.logPayment('succeeded', event.data.object.id, event.data.object.amount, 'succeeded', event.data.object.metadata);
+        
+        // Automated activation of membership payments
+        if (event.data.object.metadata?.type === 'CLIENT_MEMBERSHIP') {
+          const pagoId = Number(event.data.object.metadata.pagoId);
+          const gymId = Number(event.data.object.metadata.gymId);
+          const clienteId = Number(event.data.object.metadata.clienteId);
+          const importe = Number(event.data.object.metadata.importe);
+          
+          await stripeService.settleMembershipPayment(pagoId, gymId, clienteId, importe);
+        }
         break;
       
       case 'payment_intent.payment_failed':
@@ -252,5 +262,40 @@ export async function handleStripeWebhook(req, res, next) {
     logger.error('PAYMENT', 'Webhook error', { error: err.message, stack: err.stack });
     // Return 400 to Stripe for retries, but don't expose error details
     res.status(400).json({ error: 'webhook_error' });
+  }
+}
+
+/**
+ * Create a payment intent for client membership/cuota checkout
+ * 
+ * Request body:
+ *   - pagoId: {number} The ID of the pending payment in the pagos table
+ */
+export async function createMembershipCheckoutPayment(req, res, next) {
+  try {
+    const { pagoId } = req.body;
+    if (!pagoId) {
+      throw new AppError('Payment ID is required', 400);
+    }
+
+    if (!req.client) {
+      throw new AppError('Client authentication required', 401);
+    }
+
+    const paymentIntent = await stripeService.createMembershipCheckoutPayment({
+      pagoId,
+      clientEmail: req.client.email,
+      clientId: req.client.id,
+      isNative: Boolean(req.client.gymId)
+    });
+
+    res.json({
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id,
+      amount: paymentIntent.amount,
+      description: paymentIntent.description
+    });
+  } catch (err) {
+    next(err);
   }
 }

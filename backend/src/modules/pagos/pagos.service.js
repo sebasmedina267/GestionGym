@@ -3,6 +3,7 @@ import { requireFields } from '../../utils/validators.js';
 import { AppError } from '../../utils/AppError.js';
 import { registrarOperacion } from '../audit/audit.service.js';
 import * as authRepository from '../auth/auth.repository.js';
+import { validateGymAccess } from '../../utils/auth.utils.js';
 
 /**
  * Retrieves a filtered list of all payment records for a gym branch.
@@ -57,10 +58,7 @@ export async function crearPago(gymId, data, admin) {
   }
 
   // Security Guard: Ensure the administrator has authority over the branch
-  const gyms = await authRepository.getGymsByAdminId(admin.id);
-  if (!gyms.some(g => g.id === gymId)) {
-    throw new AppError('Access Denied: You do not have permission to operate in this gym branch', 403);
-  }
+  await validateGymAccess(admin.id, gymId, authRepository);
 
   // The repository handles atomic transaction: Payment Record + Economy Income Entry
   const pago = await pagosRepository.createPago(gymId, data, admin.id);
@@ -94,10 +92,7 @@ export async function actualizarPago(gymId, id, data, admin) {
   }
 
   // Security Guard: Verify branch management rights
-  const gyms = await authRepository.getGymsByAdminId(admin.id);
-  if (!gyms.some(g => g.id === gymId)) {
-    throw new AppError('Access Denied: You do not have permission to operate in this gym branch', 403);
-  }
+  await validateGymAccess(admin.id, gymId, authRepository);
 
   const pagoAntes = await pagosRepository.getById(gymId, id);
   if (!pagoAntes) throw new AppError('Payment record not found', 404);

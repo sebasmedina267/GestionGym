@@ -9,6 +9,7 @@ import logger from "../../utils/logger.js";
 import { BUSINESS_RULES, LOG_CONTEXT, HTTP_STATUS } from "../../constants/index.js";
 import { pool } from "../../config/db.js";
 import crypto from "crypto";
+import { sendTemporaryPassword } from "../../services/email.service.js";
 
 /* ============================================================
    PERMISSION VALIDATION
@@ -191,6 +192,10 @@ export async function crearCliente(gymId, data, admin) {
     if (data.email) {
       // Return the generated credentials once to allow the admin to notify the client
       response.contraseña_generada = clientSubmissionData._contraseña_generada;
+      
+      // Send temporary password email in the background so it doesn't block the API response
+      sendTemporaryPassword(data.email, data.nombre, clientSubmissionData._contraseña_generada)
+        .catch(err => logger.error(LOG_CONTEXT.CLIENT, "Error sending temporary password email", { error: err.message }));
     }
 
     return response;

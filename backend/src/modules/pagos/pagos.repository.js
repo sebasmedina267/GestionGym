@@ -46,43 +46,108 @@ export async function findByGym(
 
 /**
  * Retrieves outstanding (unpaid) payment records for a gym branch.
- * Useful for desk debt collection and financial health monitoring.
- * UPDATED: Excludes debts registered before client enrollment date.
+ * Covers BOTH native clients (clientes table) and app users (usuarios_finales).
+ * Temporal validation: Excludes debts registered before the client's enrollment date.
+ * 
+ * @param {number} gymId - The target gym branch identifier.
+ * @param {Object} filters - Search criteria (claseId, clienteId, desde, hasta).
+ * @returns {Promise<Array>} Combined list of outstanding payment records with tipo_cliente field.
  */
-export async function findPagnosPendientes(gymId, { claseId, clienteId, desde, hasta } = {}) {
-  let query = `
-    SELECT p.*, c.nombre AS cliente_nombre, c.apellido AS cliente_apellido, cl.nombre AS clase_nombre,
-           COALESCE(ufg.fecha_inscripcion, c.creado_en) AS cliente_fecha_inscripcion
-    FROM pagos p
-    JOIN clientes c ON c.id = p.cliente_id
-    LEFT JOIN clases cl ON cl.id = p.clase_id
-    LEFT JOIN usuarios_finales uf ON uf.email = c.email
-    LEFT JOIN usuarios_finales_gimnasios ufg ON ufg.usuario_id = uf.id AND ufg.gym_id = p.gym_id
-    WHERE p.gym_id = ? 
-      AND p.pagado = FALSE
-      AND DATE(p.fecha_pago) >= DATE(COALESCE(ufg.fecha_inscripcion, c.creado_en))`;
-  const params = [gymId];
+export async function findPagnosPendientes(gymId, { claseId, clienteId, desde, hasta, includeAppClients = true } = {}) {
+  // Build dynamic filter clauses shared by both branches of the UNION
+  const extraNative = [];
+  const extraApp = [];
+  const paramsNative = [gymId];
+  const paramsApp = [gymId];
 
   if (claseId) {
-    query += " AND p.clase_id = ?";
-    params.push(claseId);
+    extraNative.push("AND p.clase_id = ?");
+    extraApp.push("AND p.clase_id = ?");
+    paramsNative.push(claseId);
+    paramsApp.push(claseId);
   }
   if (clienteId) {
-    query += " AND p.cliente_id = ?";
-    params.push(clienteId);
+    // Only applicable to native clients — app clients use their own id space
+    extraNative.push("AND p.cliente_id = ?");
+    paramsNative.push(clienteId);
   }
   if (desde) {
-    query += " AND p.fecha_pago >= ?";
-    params.push(desde);
+    extraNative.push("AND p.fecha_pago >= ?");
+    extraApp.push("AND p.fecha_pago >= ?");
+    paramsNative.push(desde);
+    paramsApp.push(desde);
   }
   if (hasta) {
-    query += " AND p.fecha_pago <= ?";
-    params.push(hasta);
+    extraNative.push("AND p.fecha_pago <= ?");
+    extraApp.push("AND p.fecha_pago <= ?");
+    paramsNative.push(hasta);
+    paramsApp.push(hasta);
   }
 
-  query += " ORDER BY p.fecha_pago ASC";
+  const nativeFilters = extraNative.join(" ");
+  const appFilters = extraApp.join(" ");
 
-  const [rows] = await pool.query(query, params);
+  // ─── Branch 1: Native clients (tabla clientes) ───────────────────────────
+  const nativeQuery = `
+    SELECT
+      p.*,
+      c.nombre                                          AS cliente_nombre,
+      c.apellido                                        AS cliente_apellido,
+      cl.nombre                                         AS clase_nombre,
+      COALESCE(ufg.fecha_inscripcion, c.creado_en)      AS cliente_fecha_inscripcion,
+      'NATIVO'                                          AS tipo_cliente
+    FROM pagos p
+    JOIN  clientes c                    ON c.id = p.cliente_id
+    LEFT JOIN clases cl                 ON cl.id = p.clase_id
+    LEFT JOIN usuarios_finales uf       ON uf.email = c.email
+    LEFT JOIN usuarios_finales_gimnasios ufg
+      ON ufg.usuario_id = uf.id AND ufg.gym_id = p.gym_id
+    WHERE p.gym_id = ?
+      AND p.pagado  = FALSE
+      AND DATE(p.fecha_pago) >= DATE(COALESCE(ufg.fecha_inscripcion, c.creado_en))
+      ${nativeFilters}`;
+
+  // ─── Branch 2: App users (tabla usuarios_finales) ─────────────────────────
+  // These users pay via the app; their cliente_id in pagos references clientes
+  // linked by email. We query via join on email to pick up app-user debts.
+  const appQuery = `
+    SELECT
+      p.*,
+      uf.nombre                                         AS cliente_nombre,
+      uf.apellido                                       AS cliente_apellido,
+      cl.nombre                                         AS clase_nombre,
+      ufg.fecha_inscripcion                             AS cliente_fecha_inscripcion,
+      'APP'                                             AS tipo_cliente
+    FROM pagos p
+    JOIN  clientes c_link               ON c_link.id = p.cliente_id
+    JOIN  usuarios_finales uf           ON uf.email = c_link.email
+    JOIN  usuarios_finales_gimnasios ufg
+      ON ufg.usuario_id = uf.id AND ufg.gym_id = p.gym_id
+    LEFT JOIN clases cl                 ON cl.id = p.clase_id
+    WHERE p.gym_id = ?
+      AND p.pagado  = FALSE
+      AND ufg.estado_inscripcion = 'ACTIVO'
+      AND DATE(p.fecha_pago) >= DATE(ufg.fecha_inscripcion)
+      ${appFilters}`;
+
+  let combinedQuery;
+  let allParams;
+
+  if (includeAppClients) {
+    combinedQuery = `
+      (${nativeQuery})
+      UNION ALL
+      (${appQuery})
+      ORDER BY fecha_pago ASC`;
+    allParams = [...paramsNative, ...paramsApp];
+  } else {
+    combinedQuery = `
+      ${nativeQuery}
+      ORDER BY fecha_pago ASC`;
+    allParams = paramsNative;
+  }
+
+  const [rows] = await pool.query(combinedQuery, allParams);
   return rows;
 }
 

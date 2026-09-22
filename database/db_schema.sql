@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS admins (
 CREATE TABLE IF NOT EXISTS admins_gyms (
     admin_id INT,
     gym_id INT,
-    rol ENUM('DUENO','TRABAJADOR') NOT NULL,
+    rol ENUM('DUENO','TRABAJADOR','ENCARGADO','EMPLEADO') NOT NULL,
     PRIMARY KEY (admin_id, gym_id),
     FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE CASCADE,
     FOREIGN KEY (gym_id) REFERENCES gyms(id) ON DELETE CASCADE

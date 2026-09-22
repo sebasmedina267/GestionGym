@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import api from "../../api/axios";
 import "./ClientDashboard.css";
+import ClassEnrollModal from "./ClassEnrollModal";
 
 /**
  * ClientEnrolled Component
@@ -19,6 +20,9 @@ export default function ClientEnrolled({ gym, onUnenroll }) {
   const [products, setProducts] = useState([]);
   const [classLoading, setClassLoading] = useState(false);
   const [enrollingClass, setEnrollingClass] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalClass, setModalClass] = useState(null);
+  const [modalAction, setModalAction] = useState("enroll");
 
   // Fetch available classes when tab changes to "classes"
   useEffect(() => {
@@ -78,44 +82,41 @@ export default function ClientEnrolled({ gym, onUnenroll }) {
     }
   };
 
-  const handleEnrollClass = async (classScheduleId) => {
-    try {
-      setEnrollingClass(classScheduleId);
-      await api.post(
-        `/client/dashboard/classes/${classScheduleId}/enroll`,
-        {}
-      );
-      // Refresh classes
-      await fetchClasses();
-      alert("¡Inscrito en la clase exitosamente!");
-    } catch (err) {
-      console.error("Error enrolling in class:", err);
-      alert(
-        err.response?.data?.message || "Error al inscribirse en la clase"
-      );
-    } finally {
-      setEnrollingClass(null);
-    }
+  const onConfirmEnroll = async (classScheduleId) => {
+    await api.post(`/client/dashboard/classes/${classScheduleId}/enroll`, {});
+    await fetchClasses();
   };
 
-  const handleUnenrollClass = async (classScheduleId) => {
-    if (window.confirm("¿Desapuntarte de esta clase?")) {
-      try {
-        await api.delete(
-          `/client/dashboard/classes/${classScheduleId}/unenroll`
-        );
-        // Refresh classes
-        await fetchClasses();
-        alert("Desapuntado de la clase");
-      } catch (err) {
-        console.error("Error unenrolling from class:", err);
-        alert(
-          err.response?.data?.message || "Error al desapuntarse de la clase"
-        );
-      }
-    }
+  const onConfirmUnenroll = async (classScheduleId) => {
+    await api.delete(`/client/dashboard/classes/${classScheduleId}/unenroll`);
+    await fetchClasses();
   };
 
+  const handleEnrollClick = (clase, horario, horarioId) => {
+    setModalClass({
+      id: clase.id,
+      horarioId: horarioId,
+      nombre: clase.nombre,
+      inicio: horario.inicio || clase.inicio,
+      monitor: clase.monitor || "Por asignar",
+      aforo_maximo: horario.aforo_maximo || clase.aforo_maximo
+    });
+    setModalAction("enroll");
+    setModalOpen(true);
+  };
+
+  const handleUnenrollClick = (clase, horario, horarioId) => {
+    setModalClass({
+      id: clase.id,
+      horarioId: horarioId,
+      nombre: clase.nombre,
+      inicio: horario.inicio || clase.inicio,
+      monitor: clase.monitor || "Por asignar",
+      aforo_maximo: horario.aforo_maximo || clase.aforo_maximo
+    });
+    setModalAction("unenroll");
+    setModalOpen(true);
+  };
   const handleUnenroll = async () => {
     if (window.confirm("¿Estás seguro de que quieres desapuntarte de este gimnasio?")) {
       try {
@@ -552,11 +553,10 @@ export default function ClientEnrolled({ gym, onUnenroll }) {
                         </p>
                         <button
                           className="mt-4 px-4 py-2 rounded-lg bg-gym-accent text-[#0a0b14] text-sm font-bold disabled:opacity-60"
-                          disabled={enrollingClass === horarioId}
                           onClick={() =>
                             alreadyEnrolled
-                              ? handleUnenrollClass(horarioId)
-                              : handleEnrollClass(horarioId)
+                              ? handleUnenrollClick(clase, horario, horarioId)
+                              : handleEnrollClick(clase, horario, horarioId)
                           }
                         >
                           {alreadyEnrolled ? "Desapuntarme" : "Inscribirme"}
@@ -616,6 +616,14 @@ export default function ClientEnrolled({ gym, onUnenroll }) {
           </div>
         </section>
       )}
+      {/* Class Enrollment Modal */}
+      <ClassEnrollModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        clase={modalClass}
+        actionType={modalAction}
+        onConfirm={modalAction === "enroll" ? onConfirmEnroll : onConfirmUnenroll}
+      />
     </div>
   );
 }

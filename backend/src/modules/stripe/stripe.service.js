@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
 import { config } from '../../config/env.js';
 import { AppError } from '../../utils/AppError.js';
+import { pool } from '../../config/db.js';
 
 // Initialize Stripe SDK with API secret key
 const stripe = new Stripe(config.stripeSecretKey);
@@ -210,5 +211,97 @@ export async function verifyWebhookSignature(body, signature) {
   } catch (error) {
     console.error('Error verifying webhook signature:', error);
     throw new AppError('Invalid webhook signature', 401);
+  }
+}
+
+/**
+ * Create a payment intent for client membership/cuota checkout
+ */
+export async function createMembershipCheckoutPayment({ pagoId, clientEmail, clientId, isNative }) {
+  const pagoId_num = Number(pagoId);
+  if (isNaN(pagoId_num)) throw new AppError('Invalid payment ID', 400);
+
+  // Fetch the payment details from database
+  const [pagoRows] = await pool.query(
+    `SELECT p.*, c.email as client_email, c.nombre, c.apellido 
+     FROM pagos p
+     JOIN clientes c ON c.id = p.cliente_id
+     WHERE p.id = ?`,
+    [pagoId_num]
+  );
+
+  const pago = pagoRows[0];
+  if (!pago) {
+    throw new AppError('Payment record not found', 404);
+  }
+
+  if (pago.pagado) {
+    throw new AppError('This payment is already settled', 400);
+  }
+
+  // Security Check: Verify that this payment belongs to the authenticated client
+  if (isNative) {
+    if (pago.cliente_id !== clientId) {
+      throw new AppError('Access Denied: This payment does not belong to you', 403);
+    }
+  } else {
+    if (pago.client_email !== clientEmail) {
+      throw new AppError('Access Denied: This payment does not belong to you', 403);
+    }
+  }
+
+  const amountCents = Math.round(pago.importe * 100);
+
+  const metadata = {
+    type: 'CLIENT_MEMBERSHIP',
+    pagoId: String(pago.id),
+    clienteId: String(pago.cliente_id),
+    gymId: String(pago.gym_id),
+    importe: String(pago.importe)
+  };
+
+  const paymentIntent = await createPaymentIntent(amountCents, 'eur', metadata);
+  paymentIntent.description = `Membership Payment - ${pago.nombre} ${pago.apellido}`;
+  return paymentIntent;
+}
+
+/**
+ * Atomically marks a membership payment as paid and registers the income in economy.
+ * Called automatically from the Stripe webhook when a payment intent succeeds.
+ */
+export async function settleMembershipPayment(pagoId, gymId, clienteId, importe) {
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    // Mark payment as paid, set method to TARJETA and set date
+    await conn.query(
+      `UPDATE pagos 
+       SET pagado = TRUE, 
+           metodo_pago = 'TARJETA', 
+           fecha_pago = CURRENT_DATE 
+       WHERE id = ?`,
+      [pagoId]
+    );
+
+    // Insert corresponding income transaction in the economy ledger
+    await conn.query(
+      `INSERT INTO ingresos (gym_id, fuente_tipo, fuente_id, descripcion, importe, fecha, admin_id)
+       VALUES (?, 'PAGO_CLIENTE', ?, ?, ?, CURRENT_DATE, NULL)`,
+      [
+        gymId,
+        pagoId,
+        `Stripe payment from client ID ${clienteId}`,
+        importe
+      ]
+    );
+
+    await conn.commit();
+    return true;
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
   }
 }

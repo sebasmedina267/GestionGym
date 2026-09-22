@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as stripeController from './stripe.controller.js';
 import { authMiddleware } from '../../middlewares/auth.middleware.js';
+import { clientAuthMiddleware } from '../../middlewares/client.auth.middleware.js';
 
 const router = Router();
 
@@ -15,6 +16,9 @@ router.post('/branch-subscription', authMiddleware, stripeController.createBranc
 
 // Verificar estado de pago
 router.post('/verify-payment', stripeController.verifyPaymentIntent);
+
+// Pago de cuota / membresía (requiere autenticación de cliente)
+router.post('/checkout-cuota', clientAuthMiddleware, stripeController.createMembershipCheckoutPayment);
 
 // Webhook de Stripe (sin auth)
 router.post('/webhook', stripeController.handleStripeWebhook);

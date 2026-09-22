@@ -62,9 +62,8 @@ export function useDashboardLogic() {
 
     const clasesTotales = Array.isArray(clases) ? clases.length : 0;
 
-    const pagosPendientes = Array.isArray(pagosPendientesData)
-      ? pagosPendientesData.length
-      : 0;
+    const pagosPendientesDataArr = Array.isArray(pagosPendientesData) ? pagosPendientesData : [];
+    const pagosPendientes = pagosPendientesDataArr.length;
 
     // Normalizing financial data for safe arithmetic
     const ingresos = Number(economiaResumen?.ingresos) || 0;
@@ -75,6 +74,7 @@ export function useDashboardLogic() {
       clientesActivos,
       clasesTotales,
       pagosPendientes,
+      pagosPendientesList: pagosPendientesDataArr,
       ingresos,
       gastos,
       balance,
