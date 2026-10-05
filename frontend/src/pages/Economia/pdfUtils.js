@@ -1,6 +1,11 @@
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import html2canvas from "html2canvas";
+const loadPdfLibraries = async () => {
+  const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+    import("jspdf"),
+    import("jspdf-autotable"),
+  ]);
+
+  return { jsPDF, autoTable };
+};
 
 /**
  * exportDashboardPDF
@@ -16,6 +21,7 @@ import html2canvas from "html2canvas";
  * @param {string} filename - The target filename for the generated PDF.
  */
 export const exportDashboardPDF = async (data, filename) => {
+  const { jsPDF, autoTable } = await loadPdfLibraries();
   const { gym, stats, clases } = data;
   const doc = new jsPDF();
 
@@ -90,6 +96,12 @@ export const exportEconomiaPDF = async (data, filename) => {
     return html2pdf().from(data).set({ margin: 0.5, filename }).save();
   }
 
+  const [{ default: jsPDF }, { default: autoTable }, { default: html2canvas }] =
+    await Promise.all([
+      import("jspdf"),
+      import("jspdf-autotable"),
+      import("html2canvas"),
+    ]);
   const { gym, resumen, movimientos } = data;
   const doc = new jsPDF();
 
@@ -203,6 +215,96 @@ export const exportEconomiaPDF = async (data, filename) => {
     doc.setTextColor(150);
     doc.text(
       `Página ${i} de ${pageCount} - Generado por FitFlow Management Engine`,
+      105,
+      doc.internal.pageSize.getHeight() - 10,
+      { align: "center" }
+    );
+  }
+
+  doc.save(filename);
+};
+
+/**
+ * exportPagosPDF
+ * 
+ * Generates an executive payment status report for classes and members in PDF format.
+ * 
+ * @param {Object} data - Payment, class, and gym context data.
+ * @param {string} filename - Target filename.
+ */
+export const exportPagosPDF = async (data, filename = "Reporte_Pagos_FitFlow.pdf") => {
+  const { jsPDF, autoTable } = await loadPdfLibraries();
+  const { gym, mes, claseNombre, clasePrecio, estadoClase, classStats } = data;
+  const doc = new jsPDF();
+
+  // Header: Navy background with centered title
+  doc.setFillColor(15, 23, 42);
+  doc.rect(0, 0, 210, 42, 'F');
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  doc.setTextColor(255, 255, 255);
+  doc.text("FITFLOW - REPORTE DE CONTROL DE PAGOS", 105, 18, { align: "center" });
+  doc.setFontSize(10);
+  doc.text(`Gimnasio: ${gym?.nombre || "N/A"}  |  Período: ${mes}  |  Disciplina: ${claseNombre || "Todas"}`, 105, 28, { align: "center" });
+  doc.text(`Generado: ${new Date().toLocaleDateString()} a las ${new Date().toLocaleTimeString()}`, 105, 35, { align: "center" });
+
+  // Summary Metrics Section
+  doc.setTextColor(15, 23, 42);
+  doc.setFontSize(15);
+  doc.text("Resumen Financiero de la Disciplina", 14, 54);
+
+  autoTable(doc, {
+    startY: 58,
+    head: [['Métrica', 'Valor']],
+    body: [
+      ['Total Alumnos Matriculados', classStats?.total || 0],
+      ['Pagos Completados', `${classStats?.pagados || 0} (${classStats?.total > 0 ? Math.round((classStats.pagados / classStats.total) * 100) : 0}%)`],
+      ['Pagos Pendientes', classStats?.pendientes || 0],
+      ['Precio Oficial de Clase', clasePrecio ? `€${Number(clasePrecio).toFixed(2)}` : 'No configurado'],
+      ['Total Recaudado', `€${(classStats?.totalRecaudado || 0).toLocaleString()}`],
+    ],
+    theme: 'striped',
+    headStyles: { fillColor: [99, 102, 241] }
+  });
+
+  // Detailed Ledger Section
+  let currentY = doc.lastAutoTable.finalY + 12;
+  doc.setFontSize(15);
+  doc.text("Listado Detallado de Alumnos y Estado de Pagos", 14, currentY);
+
+  autoTable(doc, {
+    startY: currentY + 5,
+    head: [['Alumno', 'Estado', 'Importe', 'Método de Pago', 'Fecha de Pago']],
+    body: (estadoClase || []).map(a => [
+      `${a.cliente_nombre || ''} ${a.cliente_apellido || ''}`.trim() || 'Sin Nombre',
+      a.pagado ? 'PAGADO' : 'PENDIENTE',
+      a.importe ? `€${Number(a.importe).toFixed(2)}` : (clasePrecio ? `€${Number(clasePrecio).toFixed(2)}` : '-'),
+      a.metodo_pago || (a.pagado ? 'EFECTIVO' : '-'),
+      a.fecha_pago ? new Date(a.fecha_pago).toLocaleDateString() : '-'
+    ]),
+    theme: 'grid',
+    headStyles: { fillColor: [30, 41, 59] },
+    didParseCell: function(data) {
+      if (data.column.index === 1) {
+        if (data.cell.raw === 'PAGADO') {
+          data.cell.styles.textColor = [16, 185, 129];
+          data.cell.styles.fontStyle = 'bold';
+        } else {
+          data.cell.styles.textColor = [239, 68, 68];
+          data.cell.styles.fontStyle = 'bold';
+        }
+      }
+    }
+  });
+
+  // Footer: Page numbers
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text(
+      `Página ${i} de ${pageCount} - Generado por FitFlow Pagos Engine`,
       105,
       doc.internal.pageSize.getHeight() - 10,
       { align: "center" }

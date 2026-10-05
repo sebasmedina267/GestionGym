@@ -12,7 +12,7 @@ import "./Styles/MovimientosTable.css";
  * @param {string} filtroTipo - The active filter state.
  * @param {Function} setFiltroTipo - State updater for filtering.
  */
-export default function MovimientosTable({ movimientos, filtroTipo, setFiltroTipo }) {
+export default function MovimientosTable({ movimientos, filtroTipo, setFiltroTipo, onEdit, onDelete }) {
   /** 
    * Client-side filtering for high-speed UI interaction 
    */
@@ -77,7 +77,7 @@ export default function MovimientosTable({ movimientos, filtroTipo, setFiltroTip
                   </td>
                   <td>
                     <div className="economia-table-description">
-                      {m.fuente_tipo.replace("_", " ")}
+                      {m.fuente_tipo ? m.fuente_tipo.replace("_", " ") : "MANUAL"}
                     </div>
                     <div className="economia-table-description-sub">{m.descripcion}</div>
                   </td>
@@ -88,10 +88,21 @@ export default function MovimientosTable({ movimientos, filtroTipo, setFiltroTip
                     <span className="economia-table-status">✔ Finalizado</span>
                   </td>
                   <td>
-                    {/* Placeholder for future inline editing/deletion of manual records */}
                     <div className="economia-table-actions">
-                      <button className="economia-table-action-btn" title="Editar entrada">✏️</button>
-                      <button className="economia-table-action-btn" title="Eliminar entrada">🗑️</button>
+                      <button 
+                        className="economia-table-action-btn" 
+                        title="Editar entrada"
+                        onClick={() => onEdit && onEdit(m)}
+                      >
+                        ✏️
+                      </button>
+                      <button 
+                        className="economia-table-action-btn" 
+                        title="Eliminar entrada"
+                        onClick={() => onDelete && onDelete(m)}
+                      >
+                        🗑️
+                      </button>
                     </div>
                   </td>
                 </tr>

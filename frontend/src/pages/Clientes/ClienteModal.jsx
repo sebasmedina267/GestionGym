@@ -22,6 +22,8 @@ export default function ClienteModal({ open, onClose, onSave, editing }) {
   const getInitialForm = () => ({
     nombre: editing?.nombre || "",
     apellido: editing?.apellido || "",
+    email: editing?.email || "",
+    telefono: editing?.telefono || "",
     edad: editing?.edad || "",
     sexo: editing?.sexo || "",
   });
@@ -50,8 +52,8 @@ export default function ClienteModal({ open, onClose, onSave, editing }) {
         {/* Modal Header: Displays action title and closes buttons */}
         <div className="cliente-modal-header">
           <div className="cliente-modal-title-area">
-            <h2>{editing ? "Editar Perfil" : "Inscripción de Nuevo Cliente"}</h2>
-            <p className="cliente-modal-subtitle">Registro de Membresía Elite</p>
+            <h2>{editing ? "Editar Perfil de Cliente" : "Inscripción de Nuevo Cliente"}</h2>
+            <p className="cliente-modal-subtitle">Gestión de Membresías y Afiliados</p>
           </div>
           <button className="cliente-close-btn" onClick={onClose}>
             <span className="material-symbols-outlined">close</span>
@@ -69,6 +71,7 @@ export default function ClienteModal({ open, onClose, onSave, editing }) {
               onChange={update("nombre")}
               variant="kinetic"
               placeholder="Ej. Ricardo"
+              required
             />
             <Input
               label="Apellido"
@@ -76,11 +79,34 @@ export default function ClienteModal({ open, onClose, onSave, editing }) {
               onChange={update("apellido")}
               variant="kinetic"
               placeholder="Ej. Miller"
+              required
+            />
+          </div>
+
+          {/* Contact Details (Email & Phone) */}
+          <div className="cliente-form-row" style={{ marginTop: "0.75rem" }}>
+            <Input
+              label="Correo Electrónico"
+              type="email"
+              value={form.email}
+              onChange={update("email")}
+              variant="kinetic"
+              placeholder="cliente@ejemplo.com"
+              icon="mail"
+            />
+            <Input
+              label="Teléfono (Opcional)"
+              type="tel"
+              value={form.telefono}
+              onChange={update("telefono")}
+              variant="kinetic"
+              placeholder="Ej. 612 345 678"
+              icon="call"
             />
           </div>
 
           {/* Demographics Section */}
-          <div className="cliente-bio-grid">
+          <div className="cliente-bio-grid" style={{ marginTop: "0.75rem" }}>
             <Input
               label="Edad"
               type="number"
@@ -88,6 +114,7 @@ export default function ClienteModal({ open, onClose, onSave, editing }) {
               onChange={update("edad")}
               variant="kinetic"
               placeholder="28"
+              required
             />
 
             <div className="ka-form-group">
@@ -110,17 +137,26 @@ export default function ClienteModal({ open, onClose, onSave, editing }) {
             </div>
           </div>
 
-          {/* Aesthetic Feature Card: High-tech mockup for premium feel */}
-          <div className="cliente-feature-card">
-            <div className="feature-icon-wrapper">
-              <span className="material-symbols-outlined feature-icon" style={{ fontVariationSettings: "'FILL' 1" }}>add_a_photo</span>
+          {/* Information Tip: Automatic App Credential generation */}
+          {!editing && form.email && (
+            <div style={{
+              marginTop: "1rem",
+              padding: "0.75rem 1rem",
+              borderRadius: "10px",
+              background: "rgba(56, 189, 248, 0.08)",
+              border: "1px solid rgba(56, 189, 248, 0.2)",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem"
+            }}>
+              <span className="material-symbols-outlined" style={{ color: "var(--ka-primary)", fontSize: "20px" }}>
+                key
+              </span>
+              <p style={{ margin: 0, fontSize: "0.78rem", color: "var(--ka-on-surface-variant)", lineHeight: 1.4 }}>
+                Se generará automáticamente una <strong>contraseña temporal</strong> de acceso para este usuario y se enviará a su correo. Podrás visualizarla en pantalla para proporcionársela al cliente en el momento.
+              </p>
             </div>
-            <div className="feature-content">
-              <p>Captura Biométrica</p>
-              <p>Sincroniza la imagen de perfil con el sistema de identificación Onyx Pass.</p>
-            </div>
-            <button className="feature-btn" type="button">Inicializar</button>
-          </div>
+          )}
 
           {/* Footer Actions */}
           <div className="cliente-modal-actions">

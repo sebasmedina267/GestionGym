@@ -163,6 +163,100 @@ export async function insertGasto({
   }
 }
 
+/** Retrieves an income record by ID and gymId. */
+export async function findIngresoById(id, gymId) {
+  const [rows] = await pool.query(
+    "SELECT * FROM ingresos WHERE id = ? AND gym_id = ?",
+    [id, gymId]
+  );
+  return rows[0] || null;
+}
+
+/** Updates an existing income record. */
+export async function updateIngreso(id, gymId, { descripcion, importe, fecha }) {
+  const fields = [];
+  const params = [];
+
+  if (descripcion !== undefined) {
+    fields.push("descripcion = ?");
+    params.push(descripcion);
+  }
+  if (importe !== undefined) {
+    fields.push("importe = ?");
+    params.push(importe);
+  }
+  if (fecha !== undefined) {
+    fields.push("fecha = ?");
+    params.push(fecha);
+  }
+
+  if (fields.length === 0) return await findIngresoById(id, gymId);
+
+  params.push(id, gymId);
+  await pool.query(
+    `UPDATE ingresos SET ${fields.join(", ")} WHERE id = ? AND gym_id = ?`,
+    params
+  );
+
+  return await findIngresoById(id, gymId);
+}
+
+/** Deletes an income record by ID and gymId. */
+export async function deleteIngreso(id, gymId) {
+  const [result] = await pool.query(
+    "DELETE FROM ingresos WHERE id = ? AND gym_id = ?",
+    [id, gymId]
+  );
+  return result.affectedRows > 0;
+}
+
+/** Retrieves an expense record by ID and gymId. */
+export async function findGastoById(id, gymId) {
+  const [rows] = await pool.query(
+    "SELECT * FROM gastos WHERE id = ? AND gym_id = ?",
+    [id, gymId]
+  );
+  return rows[0] || null;
+}
+
+/** Updates an existing expense record. */
+export async function updateGasto(id, gymId, { descripcion, importe, fecha }) {
+  const fields = [];
+  const params = [];
+
+  if (descripcion !== undefined) {
+    fields.push("descripcion = ?");
+    params.push(descripcion);
+  }
+  if (importe !== undefined) {
+    fields.push("importe = ?");
+    params.push(importe);
+  }
+  if (fecha !== undefined) {
+    fields.push("fecha = ?");
+    params.push(fecha);
+  }
+
+  if (fields.length === 0) return await findGastoById(id, gymId);
+
+  params.push(id, gymId);
+  await pool.query(
+    `UPDATE gastos SET ${fields.join(", ")} WHERE id = ? AND gym_id = ?`,
+    params
+  );
+
+  return await findGastoById(id, gymId);
+}
+
+/** Deletes an expense record by ID and gymId. */
+export async function deleteGasto(id, gymId) {
+  const [result] = await pool.query(
+    "DELETE FROM gastos WHERE id = ? AND gym_id = ?",
+    [id, gymId]
+  );
+  return result.affectedRows > 0;
+}
+
 /* ============================================================
    HISTORICAL LISTING QUERIES
    ============================================================ */

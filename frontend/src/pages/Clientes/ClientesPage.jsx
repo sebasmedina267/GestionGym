@@ -5,6 +5,7 @@ import { useGym } from "../../hooks/useGym";
 import { NotificationContext } from "../../context/NotificationContext";
 import api from "../../api/axios";
 import { useClientes } from "./useClientes";
+import Modal from "../../components/ui/Modal";
 import ClienteModal from "./ClienteModal";
 import ClientesTable from "./ClientesTable";
 import "./Styles/ClientesPage.css";
@@ -27,6 +28,7 @@ export default function ClientesPage() {
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [createdCredentials, setCreatedCredentials] = useState(null);
 
   /**
    * Filtered client list based on search input. 
@@ -57,8 +59,15 @@ export default function ClientesPage() {
         await api.patch(`/clientes/${editing.id}`, payload);
         addNotification(`${form.nombre} ha sido actualizado exitosamente`, "success");
       } else {
-        await api.post(`/clientes`, payload);
+        const res = await api.post(`/clientes`, payload);
         addNotification(`${form.nombre} ha sido registrado como nuevo cliente`, "success");
+        if (res.data?.data?.contraseña_generada) {
+          setCreatedCredentials({
+            nombre: `${form.nombre} ${form.apellido}`,
+            email: form.email,
+            password: res.data.data.contraseña_generada
+          });
+        }
       }
 
       setModalOpen(false);

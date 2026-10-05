@@ -40,6 +40,31 @@ export const useProfileLogic = () => {
   const [employeeToDelete, setEmployeeToDelete] = useState(null);
 
   const isDueno = admin?.roles?.includes('DUENO');
+  const isEncargado = admin?.roles?.includes('ENCARGADO');
+  const canViewEmployees = isDueno || isEncargado;
+
+  // Self Profile Editing State (Available for all roles)
+  const [showEditMyProfile, setShowEditMyProfile] = useState(false);
+  const [myProfileForm, setMyProfileForm] = useState({
+    nombre: "",
+    apellido: "",
+    email: "",
+    foto: null,
+    photoPreview: null
+  });
+  const [savingMyProfile, setSavingMyProfile] = useState(false);
+
+  useEffect(() => {
+    if (admin) {
+      setMyProfileForm({
+        nombre: admin.nombre || "",
+        apellido: admin.apellido || "",
+        email: admin.email || "",
+        foto: null,
+        photoPreview: admin.foto ? `/uploads/${admin.foto}` : null
+      });
+    }
+  }, [admin]);
 
   /** Synchronizes personal activity audit trail upon component mount */
   useEffect(() => {
@@ -57,10 +82,10 @@ export const useProfileLogic = () => {
     if (admin) fetchLogs();
   }, [admin]);
 
-  /** Retrieves the branch staff list if the administrator has appropriate privileges (Owner) */
+  /** Retrieves the branch staff list if the administrator has appropriate privileges (Owner or Manager) */
   useEffect(() => {
     const fetchEmpleados = async () => {
-      if (!gym?.id || !isDueno) return;
+      if (!gym?.id || !canViewEmployees) return;
       try {
         setLoadingEmpleados(true);
         const res = await api.get(`/admins?gymId=${gym.id}`);
@@ -72,7 +97,7 @@ export const useProfileLogic = () => {
       }
     };
     fetchEmpleados();
-  }, [gym, isDueno]);
+  }, [gym, canViewEmployees]);
 
   /** 
    * Orchestrates the creation of a new gym branch infrastructure.
@@ -173,8 +198,51 @@ export const useProfileLogic = () => {
     }
   };
 
+  const handleMyPhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setMyProfileForm(prev => ({
+      ...prev,
+      foto: file,
+      photoPreview: URL.createObjectURL(file)
+    }));
+  };
+
+  const handleSaveMyProfile = async () => {
+    if (!myProfileForm.nombre.trim() || !myProfileForm.apellido.trim()) {
+      alert("Por favor completa nombre y apellido");
+      return;
+    }
+
+    try {
+      setSavingMyProfile(true);
+      const formData = new FormData();
+      formData.append("nombre", myProfileForm.nombre);
+      formData.append("apellido", myProfileForm.apellido);
+      if (myProfileForm.email) formData.append("email", myProfileForm.email);
+      if (myProfileForm.foto) formData.append("foto", myProfileForm.foto);
+
+      await api.put(`/admins/${admin.id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+
+      alert("Perfil actualizado correctamente");
+      setShowEditMyProfile(false);
+      window.location.reload();
+    } catch (err) {
+      console.error("Error al actualizar perfil:", err);
+      alert(err.response?.data?.message || "Error al actualizar perfil");
+    } finally {
+      setSavingMyProfile(false);
+    }
+  };
+
   /** Semantic badge mapping based on administrative privileges */
-  const rolBadge = admin?.roles?.includes('DUENO') ? 'Socio Fundador (Dueño)' : 'Staff Operativo';
+  const rolBadge = isDueno 
+    ? 'Socio Fundador (Dueño)' 
+    : isEncargado 
+    ? 'Encargado de Sucursal' 
+    : 'Staff Operativo';
 
   return {
     admin,
@@ -199,11 +267,20 @@ export const useProfileLogic = () => {
     setShowConfirmDelete,
     employeeToDelete,
     isDueno,
+    isEncargado,
+    canViewEmployees,
     rolBadge,
     handleCreateGym,
     handleEditEmpleado,
     handleSaveEmpleado,
     handleDeleteEmpleado,
-    confirmDelete
+    confirmDelete,
+    showEditMyProfile,
+    setShowEditMyProfile,
+    myProfileForm,
+    setMyProfileForm,
+    savingMyProfile,
+    handleMyPhotoChange,
+    handleSaveMyProfile
   };
 };

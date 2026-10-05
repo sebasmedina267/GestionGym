@@ -9,27 +9,28 @@ import { AppError } from '../../utils/AppError.js';
  * @returns {Promise<Array>} A list of staff members with basic profile info.
  */
 export async function findAdminsByOwner(ownerId) {
-  // Integrity Check: Ensure the requesting administrator is a verified owner (DUENO)
-  const [ownerRows] = await pool.query(
+  // Integrity Check: Ensure the requesting administrator is a verified manager (DUENO or ENCARGADO)
+  const [adminRows] = await pool.query(
     `SELECT a.*
      FROM admins a
      JOIN admins_gyms ag ON ag.admin_id = a.id
-     WHERE a.id = ? AND ag.rol = 'DUENO' AND a.activo = 1
+     WHERE a.id = ? AND ag.rol IN ('DUENO', 'ENCARGADO') AND a.activo = 1
      LIMIT 1`,
     [ownerId]
   );
 
-  if (!ownerRows[0]) {
-    throw new AppError('Administrator record not found or lacks OWNER privileges', 404);
+  if (!adminRows[0]) {
+    throw new AppError('Administrator record not found or lacks management privileges', 404);
   }
 
-  // Cross-reference: Find all other administrators linked to the owner's gym branches
+  // Cross-reference: Find all other administrators linked to the user's gym branches
   const [rows] = await pool.query(
-    `SELECT DISTINCT a.id, a.nombre, a.apellido, a.ultimo_login
+    `SELECT DISTINCT a.id, a.nombre, a.apellido, a.email, a.ultimo_login, ap.foto
      FROM admins a
      JOIN admins_gyms ag ON ag.admin_id = a.id
+     LEFT JOIN admins_perfil ap ON ap.admin_id = a.id
      WHERE ag.gym_id IN (
-       SELECT gym_id FROM admins_gyms WHERE admin_id = ? AND rol = 'DUENO'
+       SELECT gym_id FROM admins_gyms WHERE admin_id = ? AND rol IN ('DUENO', 'ENCARGADO')
      )
      AND a.id != ?
      ORDER BY a.nombre ASC`,
@@ -42,8 +43,9 @@ export async function findAdminsByOwner(ownerId) {
 /** Retrieves basic identity data for a single staff member by ID. */
 export async function findAdminById(adminId) {
   const [rows] = await pool.query(
-    `SELECT a.id, a.nombre, a.apellido, a.activo
+    `SELECT a.id, a.nombre, a.apellido, a.email, a.activo, ap.foto, ap.edad, ap.sexo, ap.direccion
      FROM admins a
+     LEFT JOIN admins_perfil ap ON ap.admin_id = a.id
      WHERE a.id = ?`,
     [adminId]
   );
@@ -56,14 +58,14 @@ export async function findAdminById(adminId) {
  * Handles partial updates via COALESCE.
  */
 export async function updateAdmin(adminId, data) {
-  const { nombre, apellido, edad, sexo, direccion, foto, gymId, rol } = data;
+  const { nombre, apellido, email, edad, sexo, direccion, foto, gymId, rol } = data;
 
   // Transaction Layer 1: Base identity update
-  if (nombre || apellido) {
+  if (nombre || apellido || email) {
     await pool.query(
-      `UPDATE admins SET nombre = COALESCE(?, nombre), apellido = COALESCE(?, apellido)
+      `UPDATE admins SET nombre = COALESCE(?, nombre), apellido = COALESCE(?, apellido), email = COALESCE(?, email)
        WHERE id = ?`,
-      [nombre, apellido, adminId]
+      [nombre, apellido, email, adminId]
     );
   }
 

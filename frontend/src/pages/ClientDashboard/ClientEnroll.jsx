@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import api from "../../api/axios";
@@ -14,25 +14,16 @@ export default function ClientEnroll() {
   const { logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   const { gymId } = location.state || {};
-  
+
   const [gym, setGym] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [enrolling, setEnrolling] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("monthly");
 
-  useEffect(() => {
-    if (!gymId) {
-      navigate("/client/dashboard");
-      return;
-    }
-    
-    fetchGymDetails();
-  }, [gymId, navigate]);
-
-  const fetchGymDetails = async () => {
+  const fetchGymDetails = useCallback(async () => {
     try {
       setLoading(true);
       const response = await api.get(`/client/gyms/${gymId}/details`);
@@ -43,7 +34,16 @@ export default function ClientEnroll() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [gymId]);
+
+  useEffect(() => {
+    if (!gymId) {
+      navigate("/client/dashboard");
+      return;
+    }
+
+    fetchGymDetails();
+  }, [fetchGymDetails, gymId, navigate]);
 
   const handleEnroll = async () => {
     try {

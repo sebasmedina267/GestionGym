@@ -35,6 +35,7 @@ export default function EconomiaPage() {
   const [filtroTipo, setFiltroTipo] = useState("TODOS");
   const [openModal, setOpenModal] = useState(false);
   const [formType, setFormType] = useState(null); // 'INGRESO' or 'GASTO'
+  const [editingItem, setEditingItem] = useState(null);
   const [form, setForm] = useState({ 
     descripcion: "", 
     importe: "", 
@@ -82,6 +83,7 @@ export default function EconomiaPage() {
 
   /** Initializes the registration form for a financial event */
   const handleOpenForm = (type) => {
+    setEditingItem(null);
     setFormType(type);
     setForm({ 
       descripcion: "", 
@@ -92,22 +94,59 @@ export default function EconomiaPage() {
     setOpenModal(true);
   };
 
-  /** Persists a financial transaction to the ledger */
+  /** Prepares an entry for editing */
+  const handleEdit = (movimiento) => {
+    setEditingItem(movimiento);
+    setFormType(movimiento.tipo);
+    setForm({
+      descripcion: movimiento.descripcion || "",
+      importe: String(movimiento.importe || ""),
+      fecha: movimiento.fecha ? new Date(movimiento.fecha).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+      categoria: movimiento.categoria || ""
+    });
+    setOpenModal(true);
+  };
+
+  /** Deletes a financial record with confirmation */
+  const handleDelete = async (movimiento) => {
+    if (!window.confirm(`¿Estás seguro de que deseas eliminar este ${movimiento.tipo.toLowerCase()} ("${movimiento.descripcion}") por $${movimiento.importe}?`)) {
+      return;
+    }
+
+    try {
+      const endpoint = movimiento.tipo === "INGRESO" ? `/economia/ingresos/${movimiento.id}` : `/economia/gastos/${movimiento.id}`;
+      await api.delete(endpoint);
+      fetchData();
+    } catch (err) {
+      console.error("Error deleting financial record:", err);
+      alert(err.response?.data?.message || "Error al eliminar el registro.");
+    }
+  };
+
+  /** Persists a financial transaction to the ledger (Create or Update) */
   const handleSubmitForm = async () => {
     if (!form.descripcion || !form.importe || !form.fecha) return alert("Faltan campos obligatorios.");
     
     try {
       setSaving(true);
       const payload = { ...form, importe: Number(form.importe) };
-      const endpoint = formType === "INGRESO" ? "/economia/ingresos" : "/economia/gastos";
       
-      await api.post(endpoint, payload);
+      if (editingItem) {
+        const endpoint = formType === "INGRESO" 
+          ? `/economia/ingresos/${editingItem.id}` 
+          : `/economia/gastos/${editingItem.id}`;
+        await api.put(endpoint, payload);
+      } else {
+        const endpoint = formType === "INGRESO" ? "/economia/ingresos" : "/economia/gastos";
+        await api.post(endpoint, payload);
+      }
       
       setOpenModal(false);
+      setEditingItem(null);
       fetchData(); // Refresh the ledger and summary
     } catch (err) {
       console.error("Financial Write Error:", err);
-      alert("Error al guardar el registro financiero.");
+      alert(err.response?.data?.message || "Error al guardar el registro financiero.");
     } finally {
       setSaving(false);
     }
@@ -201,19 +240,25 @@ export default function EconomiaPage() {
           movimientos={sortedMovimientos} 
           filtroTipo={filtroTipo} 
           setFiltroTipo={setFiltroTipo} 
+          onEdit={handleEdit}
+          onDelete={handleDelete}
         />
       </div>
 
       {/* --- Entry Portal: Financial Form Modal --- */}
       <EconomiaModalForm
         open={openModal}
-        onClose={() => setOpenModal(false)}
+        onClose={() => {
+          setOpenModal(false);
+          setEditingItem(null);
+        }}
         formType={formType}
         form={form}
         setForm={setForm}
         saving={saving}
         onSubmit={handleSubmitForm}
         categorias={formType === "INGRESO" ? incomeCategories : expenseCategories}
+        isEditing={Boolean(editingItem)}
       />
     </AppLayout>
   );

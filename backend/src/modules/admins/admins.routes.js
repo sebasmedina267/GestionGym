@@ -17,16 +17,16 @@ const router = Router();
 /**
  * List Staff Members
  * Retrieves all administrators/staff members associated with the current gym branches.
- * Accessible by Owners and Employees.
+ * Accessible by Owners, Encargados and Employees.
  */
-router.get('/', requireRole('DUENO', 'EMPLEADO'), adminsController.listAdminsForMyGyms);
+router.get('/', requireRole('DUENO', 'ENCARGADO', 'EMPLEADO'), adminsController.listAdminsForMyGyms);
 
 /**
  * Update Staff Member
- * Modifies an existing staff member's profile, including profile picture upload.
- * Restricted to Owners only.
+ * Modifies a staff member's profile (photo, names, details).
+ * Accessible by Owners (for any staff) and staff members for their own profile.
  */
-router.put('/:id', requireRole('DUENO'), upload.single('foto'), adminsController.updateAdmin);
+router.put('/:id', requireRole('DUENO', 'ENCARGADO', 'EMPLEADO'), upload.single('foto'), adminsController.updateAdmin);
 
 /**
  * Remove Staff Member

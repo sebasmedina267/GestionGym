@@ -7,6 +7,7 @@ import { errorMiddleware } from './middlewares/error.middleware.js';
 import { authMiddleware } from './middlewares/auth.middleware.js';
 import { gymMiddleware } from './middlewares/gym.middleware.js';
 import { auditMiddleware } from './middlewares/audit.middleware.js';
+import { pool } from './config/db.js';
 
 import authRoutes from './modules/auth/auth.routes.js';
 import adminsRoutes from './modules/admins/admins.routes.js';
@@ -49,6 +50,15 @@ app.use(helmet()); // Harden HTTP headers: XSS, clickjacking, MIME sniffing prot
 app.use(cors()); // Enable cross-origin resource sharing for the frontend
 app.use(express.json()); // Standard JSON payload parsing
 app.use(morgan('dev')); // Performance and request telemetry logging
+
+app.get('/health', async (_req, res, next) => {
+  try {
+    await pool.query('SELECT 1');
+    res.status(200).json({ status: 'ok' });
+  } catch (err) {
+    next(err);
+  }
+});
 
 import path from 'path';
 import { fileURLToPath } from 'url';

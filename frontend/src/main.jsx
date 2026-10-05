@@ -5,8 +5,7 @@ import App from "./App.jsx";
 import { AuthProvider } from "./context/AuthProvider.jsx";
 import { GymProvider } from "./context/GymProvider.jsx";
 import { UIProvider } from "./context/UIProvider.jsx";
-import { NotificationProvider } from "./context/NotificationContext.jsx";
-
+import { NotificationProvider } from "./context/NotificationContext";
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

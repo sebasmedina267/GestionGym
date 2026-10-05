@@ -45,9 +45,18 @@ export default function ProfilePage() {
     employeeToDelete,
     confirmDelete,
     isDueno,
+    isEncargado,
+    canViewEmployees,
     rolBadge,
     handleEditEmpleado,
-    handleDeleteEmpleado
+    handleDeleteEmpleado,
+    showEditMyProfile,
+    setShowEditMyProfile,
+    myProfileForm,
+    setMyProfileForm,
+    savingMyProfile,
+    handleMyPhotoChange,
+    handleSaveMyProfile
   } = useProfileLogic();
 
   return (
@@ -70,6 +79,7 @@ export default function ProfilePage() {
             isDueno={isDueno} 
             setShowCreateGym={setShowCreateGym} 
             rolBadge={rolBadge} 
+            onEditProfile={() => setShowEditMyProfile(true)}
           />
           {/* Audit Ledger: Recent system interactions */}
           <ActivityLogs 
@@ -78,12 +88,14 @@ export default function ProfilePage() {
           />
         </div>
 
-        {/* Strategic Team Oversight: Scoped to Owners for branch management */}
-        {isDueno && (
+        {/* Strategic Team Oversight: Scoped to Owners and Managers */}
+        {canViewEmployees && (
           <EmployeesSection 
             gym={gym} 
             loadingEmpleados={loadingEmpleados} 
             empleados={empleados} 
+            isDueno={isDueno}
+            isEncargado={isEncargado}
             handleEditEmpleado={handleEditEmpleado} 
             handleDeleteEmpleado={handleDeleteEmpleado} 
           />
@@ -109,6 +121,13 @@ export default function ProfilePage() {
         setShowConfirmDelete={setShowConfirmDelete}
         confirmDelete={confirmDelete}
         employeeToDelete={employeeToDelete}
+        showEditMyProfile={showEditMyProfile}
+        setShowEditMyProfile={setShowEditMyProfile}
+        myProfileForm={myProfileForm}
+        setMyProfileForm={setMyProfileForm}
+        savingMyProfile={savingMyProfile}
+        handleMyPhotoChange={handleMyPhotoChange}
+        handleSaveMyProfile={handleSaveMyProfile}
       />
     </AppLayout>
   );

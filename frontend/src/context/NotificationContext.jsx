@@ -1,5 +1,6 @@
-import React, { useCallback, useState } from "react";
-import { NotificationContext } from "./NotificationContext.js";
+import React, { createContext, useCallback, useState } from "react";
+
+export const NotificationContext = createContext();
 
 /**
  * NotificationProvider Component
@@ -16,7 +17,7 @@ export function NotificationProvider({ children }) {
 
   const addNotification = useCallback(
     (message, type = "info", duration = 4000) => {
-      const id = Date.now() + "-" + Math.random().toString(36).substr(2, 9);
+      const id = Date.now();
       const notification = { id, message, type };
 
       setNotifications((prev) => [...prev, notification]);

@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import api from "../../api/axios";
-import "./ClientDashboard.css";
 import ClassEnrollModal from "./ClassEnrollModal";
+import "./ClientDashboard.css";
 
 /**
  * ClientEnrolled Component
@@ -15,108 +15,122 @@ export default function ClientEnrolled({ gym, onUnenroll }) {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [availableClasses, setAvailableClasses] = useState([]);
-  const [enrolledClasses, setEnrolledClasses] = useState([]);
+  const [myClasses, setMyClasses] = useState([]);
+  const [classLoading, setClassLoading] = useState(false);
+  const [classError, setClassError] = useState("");
   const [machines, setMachines] = useState([]);
   const [products, setProducts] = useState([]);
-  const [classLoading, setClassLoading] = useState(false);
-  const [enrollingClass, setEnrollingClass] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalClass, setModalClass] = useState(null);
+  const [machineLoading, setMachineLoading] = useState(false);
+  const [productLoading, setProductLoading] = useState(false);
+  const [machineError, setMachineError] = useState("");
+  const [productError, setProductError] = useState("");
+  const [selectedClass, setSelectedClass] = useState(null);
   const [modalAction, setModalAction] = useState("enroll");
 
-  // Fetch available classes when tab changes to "classes"
-  useEffect(() => {
-    if (activeTab === "classes" && gym?.id) {
-      fetchClasses();
-    }
-  }, [activeTab, gym?.id]);
+  const formatDateTime = (value) => {
+    if (!value) return "Horario por confirmar";
 
-  // Fetch machines when tab changes to "machines"
-  useEffect(() => {
-    if (activeTab === "machines" && gym?.id) {
-      fetchMachines();
-    }
-  }, [activeTab, gym?.id]);
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
 
-  // Fetch products when tab changes to "products"
-  useEffect(() => {
-    if (activeTab === "products" && gym?.id) {
-      fetchProducts();
-    }
-  }, [activeTab, gym?.id]);
+    return new Intl.DateTimeFormat("es-ES", {
+      weekday: "short",
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(date);
+  };
 
-  const fetchClasses = async () => {
+  const loadClasses = async () => {
+    if (!gym?.id) return;
+
     try {
       setClassLoading(true);
-      // Get available classes
-      const availRes = await api.get(
-        `/client/dashboard/my-gyms/${gym.id}/available-classes?includeEnrolled=true`
-      );
-      setAvailableClasses(availRes.data.data || []);
+      setClassError("");
 
-      // Get enrolled classes
-      const enrolledRes = await api.get(`/client/dashboard/my-classes`);
-      setEnrolledClasses(enrolledRes.data.data || []);
+      const [availableResponse, enrolledResponse] = await Promise.all([
+        api.get(`/client/dashboard/my-gyms/${gym.id}/available-classes?includeEnrolled=true`),
+        api.get("/client/dashboard/my-classes?status=upcoming"),
+      ]);
+
+      setAvailableClasses(
+        Array.isArray(availableResponse?.data?.data) ? availableResponse.data.data : []
+      );
+      setMyClasses(Array.isArray(enrolledResponse?.data?.data) ? enrolledResponse.data.data : []);
     } catch (err) {
-      console.error("Error fetching classes:", err);
+      console.error("Error loading classes:", err);
+      setClassError("No se pudieron cargar las clases disponibles.");
     } finally {
       setClassLoading(false);
     }
   };
 
-  const fetchMachines = async () => {
+  const loadMachines = async () => {
+    if (!gym?.id) return;
+
     try {
-      const res = await api.get(`/client/dashboard/my-gyms/${gym.id}/machines`);
-      setMachines(res.data.data || []);
+      setMachineLoading(true);
+      setMachineError("");
+      const response = await api.get(`/client/dashboard/my-gyms/${gym.id}/machines`);
+      setMachines(Array.isArray(response?.data?.data) ? response.data.data : []);
     } catch (err) {
-      console.error("Error fetching machines:", err);
+      console.error("Error loading machines:", err);
+      setMachineError("No se pudieron cargar las máquinas del gimnasio.");
+    } finally {
+      setMachineLoading(false);
     }
   };
 
-  const fetchProducts = async () => {
+  const loadProducts = async () => {
+    if (!gym?.id) return;
+
     try {
-      const res = await api.get(`/client/dashboard/my-gyms/${gym.id}/products`);
-      setProducts(res.data.data || []);
+      setProductLoading(true);
+      setProductError("");
+      const response = await api.get(`/client/dashboard/my-gyms/${gym.id}/products`);
+      setProducts(Array.isArray(response?.data?.data) ? response.data.data : []);
     } catch (err) {
-      console.error("Error fetching products:", err);
+      console.error("Error loading products:", err);
+      setProductError("No se pudieron cargar los productos del gimnasio.");
+    } finally {
+      setProductLoading(false);
     }
   };
 
-  const onConfirmEnroll = async (classScheduleId) => {
-    await api.post(`/client/dashboard/classes/${classScheduleId}/enroll`, {});
-    await fetchClasses();
+  useEffect(() => {
+    if (activeTab === "classes" && gym?.id) {
+      loadClasses();
+    }
+
+    if (activeTab === "machines" && gym?.id) {
+      loadMachines();
+    }
+
+    if (activeTab === "products" && gym?.id) {
+      loadProducts();
+    }
+  }, [activeTab, gym?.id]);
+
+  const openClassModal = (clase, action) => {
+    setSelectedClass(clase);
+    setModalAction(action);
   };
 
-  const onConfirmUnenroll = async (classScheduleId) => {
-    await api.delete(`/client/dashboard/classes/${classScheduleId}/unenroll`);
-    await fetchClasses();
+  const handleClassAction = async (horarioId) => {
+    const route = modalAction === "enroll"
+      ? `/client/dashboard/classes/${horarioId}/enroll`
+      : `/client/dashboard/classes/${horarioId}/unenroll`;
+
+    if (modalAction === "enroll") {
+      await api.post(route);
+    } else {
+      await api.delete(route);
+    }
+
+    await loadClasses();
   };
 
-  const handleEnrollClick = (clase, horario, horarioId) => {
-    setModalClass({
-      id: clase.id,
-      horarioId: horarioId,
-      nombre: clase.nombre,
-      inicio: horario.inicio || clase.inicio,
-      monitor: clase.monitor || "Por asignar",
-      aforo_maximo: horario.aforo_maximo || clase.aforo_maximo
-    });
-    setModalAction("enroll");
-    setModalOpen(true);
-  };
-
-  const handleUnenrollClick = (clase, horario, horarioId) => {
-    setModalClass({
-      id: clase.id,
-      horarioId: horarioId,
-      nombre: clase.nombre,
-      inicio: horario.inicio || clase.inicio,
-      monitor: clase.monitor || "Por asignar",
-      aforo_maximo: horario.aforo_maximo || clase.aforo_maximo
-    });
-    setModalAction("unenroll");
-    setModalOpen(true);
-  };
   const handleUnenroll = async () => {
     if (window.confirm("¿Estás seguro de que quieres desapuntarte de este gimnasio?")) {
       try {
@@ -192,9 +206,9 @@ export default function ClientEnrolled({ gym, onUnenroll }) {
 
       {/* --- NAVIGATION --- */}
       <nav className="border-b border-[#1f2937]">
-        <ul className="flex space-x-8 text-sm font-medium overflow-x-auto">
+        <ul className="flex space-x-8 text-sm font-medium">
           <li
-            className={`pb-3 cursor-pointer transition-colors whitespace-nowrap ${
+            className={`pb-3 cursor-pointer transition-colors ${
               activeTab === "overview"
                 ? "relative text-gym-accent border-b-2 border-gym-accent"
                 : "text-gray-400 hover:text-white"
@@ -220,7 +234,7 @@ export default function ClientEnrolled({ gym, onUnenroll }) {
             </a>
           </li>
           <li
-            className={`pb-3 cursor-pointer transition-colors whitespace-nowrap ${
+            className={`pb-3 cursor-pointer transition-colors ${
               activeTab === "classes"
                 ? "relative text-gym-accent border-b-2 border-gym-accent"
                 : "text-gray-400 hover:text-white"
@@ -246,7 +260,7 @@ export default function ClientEnrolled({ gym, onUnenroll }) {
             </a>
           </li>
           <li
-            className={`pb-3 cursor-pointer transition-colors whitespace-nowrap ${
+            className={`pb-3 cursor-pointer transition-colors ${
               activeTab === "machines"
                 ? "relative text-gym-accent border-b-2 border-gym-accent"
                 : "text-gray-400 hover:text-white"
@@ -272,7 +286,7 @@ export default function ClientEnrolled({ gym, onUnenroll }) {
             </a>
           </li>
           <li
-            className={`pb-3 cursor-pointer transition-colors whitespace-nowrap ${
+            className={`pb-3 cursor-pointer transition-colors ${
               activeTab === "products"
                 ? "relative text-gym-accent border-b-2 border-gym-accent"
                 : "text-gray-400 hover:text-white"
@@ -300,10 +314,6 @@ export default function ClientEnrolled({ gym, onUnenroll }) {
         </ul>
       </nav>
 
-      {/* --- TAB CONTENT --- */}
-      {activeTab === "overview" && (
-        <div className="space-y-4">
-
       {/* --- HERO SECTION --- */}
       <section className="relative w-full h-44 bg-[#111422] rounded-2xl overflow-hidden border border-[#1f2937] flex flex-col justify-end p-8">
         {/* Background Image or Gradient */}
@@ -314,9 +324,15 @@ export default function ClientEnrolled({ gym, onUnenroll }) {
             className="absolute inset-0 w-full h-full object-cover opacity-30"
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0b14] to-transparent opacity-60"></div>
+          <div
+            className="absolute inset-0 opacity-60"
+            style={{ background: "linear-gradient(to top, #0a0b14, transparent)" }}
+          ></div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-l from-gym-accent/10 to-transparent"></div>
+        <div
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(to left, rgba(56, 189, 248, 0.1), transparent)" }}
+        ></div>
 
         <div className="relative z-10">
           <h2 className="text-5xl font-black tracking-tighter text-white">
@@ -348,129 +364,50 @@ export default function ClientEnrolled({ gym, onUnenroll }) {
         </div>
       </section>
 
-      {/* --- CONTENT GRID --- */}
-      <main className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Card: Facilities */}
-        <div className="bg-[#111422] border border-[#1f2937] rounded-2xl p-6 flex flex-col shadow-xl">
-          <div className="flex items-center space-x-2 text-gym-accent mb-8">
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-              ></path>
-            </svg>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em]">
-              Instalaciones
-            </span>
-          </div>
-          <div className="grid grid-cols-3 gap-4 flex-1 items-center">
-            <div className="text-center">
-              <p className="text-4xl font-black text-white">{gym?.total_clases || 0}</p>
-              <p className="text-[9px] uppercase text-gray-500 font-bold mt-1">Clases</p>
-            </div>
-            <div className="text-center border-x border-[#1f2937]">
-              <p className="text-4xl font-black text-white">{gym?.total_maquinas || 0}</p>
-              <p className="text-[9px] uppercase text-gray-500 font-bold mt-1">Máquinas</p>
-            </div>
-            <div className="text-center">
-              <p className="text-4xl font-black text-white">{gym?.total_productos || 0}</p>
-              <p className="text-[9px] uppercase text-gray-500 font-bold mt-1">Productos</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Card: Schedule Quick View */}
-        <div className="bg-[#111422] border border-[#1f2937] rounded-2xl p-6 flex flex-col shadow-xl">
-          <div className="flex items-center space-x-2 text-gym-accent mb-6">
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-              ></path>
-            </svg>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em]">
-              Horarios
-            </span>
-          </div>
-          <div className="flex-1 flex flex-col justify-center space-y-4">
-            <div className="flex justify-between items-center py-3 border-b border-[#1f2937]/50">
-              <span className="text-sm text-gray-400">Apertura del centro</span>
-              <span className="font-mono text-lg font-bold text-white">
-                {gym?.horario_inicio || "06:00:00"}
-              </span>
-            </div>
-            <div className="flex justify-between items-center py-3">
-              <span className="text-sm text-gray-400">Cierre del centro</span>
-              <span className="font-mono text-lg font-bold text-white">
-                {gym?.horario_fin || "22:00:00"}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Card: Contact */}
-        <div className="bg-[#111422] border border-[#1f2937] rounded-2xl p-6 flex flex-col shadow-xl">
-          <div className="flex items-center space-x-2 text-gym-accent mb-6">
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-              ></path>
-              <path
-                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-              ></path>
-            </svg>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em]">
-              Contacto
-            </span>
-          </div>
-          <div className="flex-1 space-y-5">
-            <div>
-              <p className="text-[10px] uppercase text-gray-500 font-bold mb-1">Teléfono</p>
-              <p className="text-sm text-gray-200">{gym?.telefono || "No disponible"}</p>
-            </div>
-            <div className="pt-4 border-t border-[#1f2937]/50">
-              <p className="text-[10px] uppercase text-gray-500 font-bold mb-1">Email</p>
-              <p className="text-sm text-gray-200 truncate">
-                {gym?.email_contacto || "No disponible"}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Banner: Large Center Hours */}
-        <div className="bg-[#111422] border border-gym-accent/30 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between col-span-1 md:col-span-2 lg:col-span-3 shadow-2xl">
-          <div className="flex items-center space-x-6 mb-6 md:mb-0">
-            <div className="bg-gym-accent/10 p-5 rounded-full text-gym-accent">
+      {activeTab === "overview" && (
+        <main className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Card: Facilities */}
+          <div className="bg-[#111422] border border-[#1f2937] rounded-2xl p-6 flex flex-col shadow-xl">
+            <div className="flex items-center space-x-2 text-gym-accent mb-8">
               <svg
-                className="h-8 w-8"
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                ></path>
+              </svg>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+                Instalaciones
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-4 flex-1 items-center">
+              <div className="text-center">
+                <p className="text-4xl font-black text-white">{gym?.total_clases || 0}</p>
+                <p className="text-[9px] uppercase text-gray-500 font-bold mt-1">Clases</p>
+              </div>
+              <div className="text-center border-x border-[#1f2937]">
+                <p className="text-4xl font-black text-white">{gym?.total_maquinas || 0}</p>
+                <p className="text-[9px] uppercase text-gray-500 font-bold mt-1">Máquinas</p>
+              </div>
+              <div className="text-center">
+                <p className="text-4xl font-black text-white">{gym?.total_productos || 0}</p>
+                <p className="text-[9px] uppercase text-gray-500 font-bold mt-1">Productos</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Card: Schedule Quick View */}
+          <div className="bg-[#111422] border border-[#1f2937] rounded-2xl p-6 flex flex-col shadow-xl">
+            <div className="flex items-center space-x-2 text-gym-accent mb-6">
+              <svg
+                className="h-5 w-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -483,147 +420,378 @@ export default function ClientEnrolled({ gym, onUnenroll }) {
                   strokeWidth="2"
                 ></path>
               </svg>
-            </div>
-            <div>
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gym-accent">
-                Horario del Centro
+              <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+                Horarios
               </span>
-              <p className="text-sm text-gray-400 mt-1">
-                Lunes a Viernes (Consultar fines de semana)
-              </p>
+            </div>
+            <div className="flex-1 flex flex-col justify-center space-y-4">
+              <div className="flex justify-between items-center py-3 border-b border-[#1f2937]/50">
+                <span className="text-sm text-gray-400">Apertura del centro</span>
+                <span className="font-mono text-lg font-bold text-white">
+                  {gym?.horario_inicio || "06:00:00"}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-3">
+                <span className="text-sm text-gray-400">Cierre del centro</span>
+                <span className="font-mono text-lg font-bold text-white">
+                  {gym?.horario_fin || "22:00:00"}
+                </span>
+              </div>
             </div>
           </div>
-          <div className="flex items-center space-x-6">
-            <span className="text-5xl lg:text-7xl font-black text-gym-accent tracking-tighter">
-              {gym?.horario_inicio?.substring(0, 5) || "06:00"}
-            </span>
-            <span className="text-2xl text-gray-600 font-bold mt-4">a</span>
-            <span className="text-5xl lg:text-7xl font-black text-gym-accent tracking-tighter">
-              {gym?.horario_fin?.substring(0, 5) || "22:00"}
-            </span>
-          </div>
-        </div>
 
-        {/* Action: Unenroll Button */}
-        <div className="bg-red-900/10 border border-red-500/30 rounded-2xl p-6 col-span-1 md:col-span-2 lg:col-span-3">
-          <button
-            onClick={handleUnenroll}
-            disabled={loading}
-            className="w-full px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            ❌ Desapuntarse de {gym?.nombre}
-          </button>
-        </div>
-      </main>
-        </div>
+          {/* Card: Contact */}
+          <div className="bg-[#111422] border border-[#1f2937] rounded-2xl p-6 flex flex-col shadow-xl">
+            <div className="flex items-center space-x-2 text-gym-accent mb-6">
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                ></path>
+                <path
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                ></path>
+              </svg>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+                Contacto
+              </span>
+            </div>
+            <div className="flex-1 space-y-5">
+              <div>
+                <p className="text-[10px] uppercase text-gray-500 font-bold mb-1">Teléfono</p>
+                <p className="text-sm text-gray-200">{gym?.telefono || "No disponible"}</p>
+              </div>
+              <div className="pt-4 border-t border-[#1f2937]/50">
+                <p className="text-[10px] uppercase text-gray-500 font-bold mb-1">Email</p>
+                <p className="text-sm text-gray-200 truncate">
+                  {gym?.email_contacto || "No disponible"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Banner: Large Center Hours */}
+          <div className="bg-[#111422] border border-gym-accent/30 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between col-span-1 md:col-span-2 lg:col-span-3 shadow-2xl">
+            <div className="flex items-center space-x-6 mb-6 md:mb-0">
+              <div className="bg-gym-accent/10 p-5 rounded-full text-gym-accent">
+                <svg
+                  className="h-8 w-8"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                  ></path>
+                </svg>
+              </div>
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gym-accent">
+                  Horario del Centro
+                </span>
+                <p className="text-sm text-gray-400 mt-1">
+                  Lunes a Viernes (Consultar fines de semana)
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-6">
+              <span className="text-5xl lg:text-7xl font-black text-gym-accent tracking-tighter">
+                {gym?.horario_inicio?.substring(0, 5) || "06:00"}
+              </span>
+              <span className="text-2xl text-gray-600 font-bold mt-4">a</span>
+              <span className="text-5xl lg:text-7xl font-black text-gym-accent tracking-tighter">
+                {gym?.horario_fin?.substring(0, 5) || "22:00"}
+              </span>
+            </div>
+          </div>
+
+          {/* Action: Unenroll Button */}
+          <div className="bg-red-900/10 border border-red-500/30 rounded-2xl p-6 col-span-1 md:col-span-2 lg:col-span-3">
+            <button
+              onClick={handleUnenroll}
+              disabled={loading}
+              className="w-full px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              ❌ Desapuntarse de {gym?.nombre}
+            </button>
+          </div>
+        </main>
       )}
 
       {activeTab === "classes" && (
-        <section className="bg-[#111422] border border-[#1f2937] rounded-2xl p-6 space-y-6">
-          <div>
-            <h2 className="text-2xl font-black text-white">Clases</h2>
-            <p className="text-sm text-gray-400">Reserva y gestiona tus sesiones.</p>
-          </div>
-
-          {classLoading ? (
-            <p className="text-sm text-gray-400">Cargando clases...</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {availableClasses.length === 0 ? (
-                <p className="text-sm text-gray-400">No hay clases disponibles.</p>
-              ) : (
-                availableClasses.flatMap((clase) =>
-                  (clase.horarios?.length ? clase.horarios : [clase]).map((horario) => {
-                    const horarioId = horario.id || clase.horario_id;
-                    const alreadyEnrolled = enrolledClasses.some(
-                      (item) =>
-                        item.horario_id === horarioId ||
-                        item.clase_horario_id === horarioId ||
-                        item.id === horarioId
-                    );
-
-                    return (
-                      <article
-                        key={`${clase.id}-${horarioId}`}
-                        className="border border-[#1f2937] rounded-xl p-4 bg-[#0a0b14]"
-                      >
-                        <h3 className="font-bold text-white">{clase.nombre}</h3>
-                        <p className="text-xs text-gray-400 mt-1">
-                          {horario.inicio || clase.inicio || "Horario pendiente"}
-                        </p>
-                        <button
-                          className="mt-4 px-4 py-2 rounded-lg bg-gym-accent text-[#0a0b14] text-sm font-bold disabled:opacity-60"
-                          onClick={() =>
-                            alreadyEnrolled
-                              ? handleUnenrollClick(clase, horario, horarioId)
-                              : handleEnrollClick(clase, horario, horarioId)
-                          }
-                        >
-                          {alreadyEnrolled ? "Desapuntarme" : "Inscribirme"}
-                        </button>
-                      </article>
-                    );
-                  })
-                )
-              )}
+        <main className="space-y-5">
+          <div className="rounded-2xl border border-[#1f2937] bg-[#111422] p-6 shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-gym-accent font-bold">
+                  Clases del gimnasio
+                </p>
+                <h3 className="text-2xl font-black text-white mt-2">Inscripciones activas</h3>
+              </div>
+              <button
+                type="button"
+                onClick={loadClasses}
+                className="rounded-xl border border-[#1f2937] bg-[#0a0b14] px-4 py-2 text-sm font-medium text-gray-200 hover:bg-[#1f2937]/60"
+              >
+                Actualizar
+              </button>
             </div>
-          )}
-        </section>
+
+            {classError && (
+              <div className="mb-4 rounded-xl border border-red-500/30 bg-red-950/20 p-3 text-sm text-red-300">
+                {classError}
+              </div>
+            )}
+
+            {classLoading ? (
+              <div className="rounded-xl border border-[#1f2937] bg-[#0a0b14] p-6 text-sm text-gray-300">
+                Cargando clases disponibles...
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <section>
+                  <h4 className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-gray-400">
+                    Mis clases
+                  </h4>
+                  {myClasses.length === 0 ? (
+                    <div className="rounded-xl border border-dashed border-[#1f2937] bg-[#0a0b14] p-5 text-sm text-gray-400">
+                      Todavía no tienes ninguna clase reservada.
+                    </div>
+                  ) : (
+                    <div className="grid gap-3 md:grid-cols-2">
+                      {myClasses.map((clase) => (
+                        <div key={clase.horario_id || clase.id} className="rounded-xl border border-[#1f2937] bg-[#0a0b14] p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <h5 className="text-lg font-bold text-white">{clase.clase_nombre || clase.nombre}</h5>
+                              <p className="mt-1 text-sm text-gray-400">{clase.descripcion || "Sin descripción"}</p>
+                            </div>
+                            <span className="rounded-full bg-emerald-500/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-400">
+                              Inscrito
+                            </span>
+                          </div>
+                          <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-gray-300">
+                            <div>
+                              <p className="text-[10px] uppercase tracking-[0.18em] text-gray-500">Inicio</p>
+                              <p className="mt-1 font-medium">{formatDateTime(clase.inicio)}</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] uppercase tracking-[0.18em] text-gray-500">Fin</p>
+                              <p className="mt-1 font-medium">{formatDateTime(clase.fin)}</p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => openClassModal(clase, "unenroll")}
+                            className="mt-4 w-full rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-500"
+                          >
+                            Darme de baja
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </section>
+
+                <section>
+                  <h4 className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-gray-400">
+                    Disponibles
+                  </h4>
+                  {availableClasses.length === 0 ? (
+                    <div className="rounded-xl border border-dashed border-[#1f2937] bg-[#0a0b14] p-5 text-sm text-gray-400">
+                      No hay clases pendientes para inscripción en este momento.
+                    </div>
+                  ) : (
+                    <div className="grid gap-3 md:grid-cols-2">
+                      {availableClasses.map((clase) => {
+                        const enrolled = myClasses.some(
+                          (item) => Number(item.horario_id || item.id) === Number(clase.horario_id || clase.id)
+                        );
+
+                        return (
+                          <div key={clase.horario_id || clase.id} className="rounded-xl border border-[#1f2937] bg-[#0a0b14] p-4">
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <h5 className="text-lg font-bold text-white">{clase.nombre}</h5>
+                                <p className="mt-1 text-sm text-gray-400">{clase.descripcion || "Sin descripción"}</p>
+                              </div>
+                              <span className="rounded-full bg-[#1f2937] px-2 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-200">
+                                {clase.disponibles ?? 0} plazas
+                              </span>
+                            </div>
+                            <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-gray-300">
+                              <div>
+                                <p className="text-[10px] uppercase tracking-[0.18em] text-gray-500">Inicio</p>
+                                <p className="mt-1 font-medium">{formatDateTime(clase.inicio)}</p>
+                              </div>
+                              <div>
+                                <p className="text-[10px] uppercase tracking-[0.18em] text-gray-500">Monitor</p>
+                                <p className="mt-1 font-medium">{clase.monitores || "Por confirmar"}</p>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => openClassModal(clase, enrolled ? "unenroll" : "enroll")}
+                              className={`mt-4 w-full rounded-xl px-4 py-2 text-sm font-semibold text-white transition ${
+                                enrolled
+                                  ? "bg-red-600 hover:bg-red-500"
+                                  : "bg-indigo-600 hover:bg-indigo-500"
+                              }`}
+                            >
+                              {enrolled ? "Darme de baja" : "Inscribirme"}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </section>
+              </div>
+            )}
+          </div>
+        </main>
       )}
 
       {activeTab === "machines" && (
-        <section className="bg-[#111422] border border-[#1f2937] rounded-2xl p-6 space-y-6">
-          <div>
-            <h2 className="text-2xl font-black text-white">Maquinas</h2>
-            <p className="text-sm text-gray-400">Equipamiento disponible en tu gimnasio.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {machines.length === 0 ? (
-              <p className="text-sm text-gray-400">No hay maquinas registradas.</p>
+        <main className="space-y-5">
+          <div className="rounded-2xl border border-[#1f2937] bg-[#111422] p-6 shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-gym-accent font-bold">
+                  Máquinas del gimnasio
+                </p>
+                <h3 className="text-2xl font-black text-white mt-2">Equipamiento disponible</h3>
+              </div>
+              <button
+                type="button"
+                onClick={loadMachines}
+                className="rounded-xl border border-[#1f2937] bg-[#0a0b14] px-4 py-2 text-sm font-medium text-gray-200 hover:bg-[#1f2937]/60"
+              >
+                Actualizar
+              </button>
+            </div>
+
+            {machineError && (
+              <div className="mb-4 rounded-xl border border-red-500/30 bg-red-950/20 p-3 text-sm text-red-300">
+                {machineError}
+              </div>
+            )}
+
+            {machineLoading ? (
+              <div className="rounded-xl border border-[#1f2937] bg-[#0a0b14] p-6 text-sm text-gray-300">
+                Cargando máquinas...
+              </div>
+            ) : machines.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-[#1f2937] bg-[#0a0b14] p-5 text-sm text-gray-400">
+                No hay máquinas registradas para este gimnasio.
+              </div>
             ) : (
-              machines.map((machine) => (
-                <article key={machine.id} className="border border-[#1f2937] rounded-xl p-4 bg-[#0a0b14]">
-                  <h3 className="font-bold text-white">{machine.nombre}</h3>
-                  <p className="text-xs text-gray-400 mt-2">{machine.ubicacion || machine.uso || "Sin ubicacion"}</p>
-                  <p className="text-sm text-gym-accent mt-3">Cantidad: {machine.cantidad || 1}</p>
-                </article>
-              ))
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {machines.map((machine) => (
+                  <div key={machine.id} className="rounded-xl border border-[#1f2937] bg-[#0a0b14] p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h4 className="text-lg font-bold text-white">{machine.nombre}</h4>
+                        <p className="mt-1 text-sm text-gray-400">{machine.uso || "Uso general"}</p>
+                      </div>
+                      <span className="rounded-full bg-emerald-500/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-400">
+                        {machine.cantidad ?? 0} uds.
+                      </span>
+                    </div>
+                    <div className="mt-4 text-sm text-gray-300 space-y-2">
+                      <p>{machine.descripcion || "Sin descripción disponible."}</p>
+                      <p className="text-gray-400">Ubicación: {machine.ubicacion || "Por confirmar"}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
-        </section>
+        </main>
       )}
 
       {activeTab === "products" && (
-        <section className="bg-[#111422] border border-[#1f2937] rounded-2xl p-6 space-y-6">
-          <div>
-            <h2 className="text-2xl font-black text-white">Productos</h2>
-            <p className="text-sm text-gray-400">Productos disponibles para compra.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {products.length === 0 ? (
-              <p className="text-sm text-gray-400">No hay productos disponibles.</p>
+        <main className="space-y-5">
+          <div className="rounded-2xl border border-[#1f2937] bg-[#111422] p-6 shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-gym-accent font-bold">
+                  Productos del gimnasio
+                </p>
+                <h3 className="text-2xl font-black text-white mt-2">Compra disponible</h3>
+              </div>
+              <button
+                type="button"
+                onClick={loadProducts}
+                className="rounded-xl border border-[#1f2937] bg-[#0a0b14] px-4 py-2 text-sm font-medium text-gray-200 hover:bg-[#1f2937]/60"
+              >
+                Actualizar
+              </button>
+            </div>
+
+            {productError && (
+              <div className="mb-4 rounded-xl border border-red-500/30 bg-red-950/20 p-3 text-sm text-red-300">
+                {productError}
+              </div>
+            )}
+
+            {productLoading ? (
+              <div className="rounded-xl border border-[#1f2937] bg-[#0a0b14] p-6 text-sm text-gray-300">
+                Cargando productos...
+              </div>
+            ) : products.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-[#1f2937] bg-[#0a0b14] p-5 text-sm text-gray-400">
+                No hay productos disponibles para compra en este momento.
+              </div>
             ) : (
-              products.map((product) => (
-                <article key={product.id} className="border border-[#1f2937] rounded-xl p-4 bg-[#0a0b14]">
-                  <h3 className="font-bold text-white">{product.nombre}</h3>
-                  <p className="text-xs text-gray-400 mt-2">{product.descripcion || "Sin descripcion"}</p>
-                  <p className="text-lg font-black text-gym-accent mt-3">
-                    {product.precio ?? product.precio_unitario ?? 0} EUR
-                  </p>
-                </article>
-              ))
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {products.map((product) => (
+                  <div key={product.id} className="rounded-xl border border-[#1f2937] bg-[#0a0b14] p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h4 className="text-lg font-bold text-white">{product.nombre}</h4>
+                        <p className="mt-1 text-sm text-gray-400">{product.descripcion || "Sin descripción"}</p>
+                      </div>
+                      <span className="rounded-full bg-gym-accent/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-gym-accent">
+                        {product.cantidad ?? 0} stock
+                      </span>
+                    </div>
+                    <div className="mt-4 flex items-center justify-between text-sm text-gray-300">
+                      <span>Precio</span>
+                      <span className="text-lg font-black text-white">{Number(product.precio_unitario ?? 0).toFixed(2)} €</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
-        </section>
+        </main>
       )}
-      {/* Class Enrollment Modal */}
-      <ClassEnrollModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        clase={modalClass}
-        actionType={modalAction}
-        onConfirm={modalAction === "enroll" ? onConfirmEnroll : onConfirmUnenroll}
-      />
+
+      {selectedClass && (
+        <ClassEnrollModal
+          isOpen={Boolean(selectedClass)}
+          onClose={() => setSelectedClass(null)}
+          clase={selectedClass}
+          actionType={modalAction}
+          onConfirm={handleClassAction}
+        />
+      )}
     </div>
   );
 }

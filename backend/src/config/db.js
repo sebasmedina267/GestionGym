@@ -13,6 +13,7 @@ import logger from '../utils/logger.js';
  */
 export const pool = mysql.createPool({
   host: config.db.host,
+  port: config.db.port,
   user: config.db.user,
   password: config.db.password,
   database: config.db.database,

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { validateForm } from "../../utils/validators";
 import api from "../../api/axios";
 import { useNavigate } from "react-router-dom";
+import { useNotification } from "../../hooks/useNotification";
 
 /**
  * Password Security Requirements:
@@ -26,6 +27,7 @@ const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
  */
 export const useRegisterFlow = () => {
   const navigate = useNavigate();
+  const { success: notifySuccess, error: notifyError } = useNotification();
   const [currentStep, setCurrentStep] = useState(0); 
   const [userType, setUserType] = useState(null); // 'DUENO' (Owner) or 'USUARIO' (User)
   const [loading, setLoading] = useState(false);
@@ -184,6 +186,7 @@ export const useRegisterFlow = () => {
       }
 
       await api.post("/auth/register-owner", formDataToSubmit);
+      notifySuccess("Cuenta creada correctamente. Continúa con el pago para activar tu gimnasio.");
 
       // Store context for post-checkout processing
       sessionStorage.setItem("pendingRegistrationEmail", formData.email);
@@ -209,7 +212,9 @@ export const useRegisterFlow = () => {
       });
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || "Error al preparar el registro y el pago");
+      const message = err.response?.data?.message || "Error al preparar el registro y el pago";
+      setError(message);
+      notifyError(message);
       setLoading(false);
     }
   };
@@ -231,11 +236,14 @@ export const useRegisterFlow = () => {
         sexo: formData.sexo || null,
       });
 
+      notifySuccess("¡Registro completado! Ya puedes iniciar sesión.");
       setSuccess("¡Registro exitoso! Redirigiéndote al login...");
       setCurrentStep(2.5); // Displays success view
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
-      setError(err.response?.data?.message || "Error durante el registro");
+      const message = err.response?.data?.message || "Error durante el registro";
+      setError(message);
+      notifyError(message);
     } finally {
       setLoading(false);
     }

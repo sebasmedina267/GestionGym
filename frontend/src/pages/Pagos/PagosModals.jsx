@@ -2,7 +2,7 @@ import React from 'react';
 import Modal from "../../components/ui/Modal";
 import './Styles/PagosModals.css';
 
-const METODOS_PAGO = ['EFECTIVO', 'TARJETA', 'TRANSFERENCIA', 'CHEQUE', 'CRIPTOMONEDA'];
+const METODOS_PAGO = ['EFECTIVO', 'TARJETA'];
 
 export default function PagosModals({
   alertModal,

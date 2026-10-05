@@ -18,6 +18,18 @@ import "./Styles/DashboardPage.css";
 export default function DashboardPage() {
   // Leverage custom logic hook for data fetching and state management
   const { gym, clases, stats, refetchAll } = useDashboardLogic();
+  const [syncing, setSyncing] = React.useState(false);
+
+  const handleSync = async () => {
+    try {
+      setSyncing(true);
+      await refetchAll();
+    } catch (err) {
+      console.error("Sync error:", err);
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   return (
     <AppLayout>
@@ -27,7 +39,8 @@ export default function DashboardPage() {
         <DashboardHeader 
            gym={gym} 
            onExport={() => exportDashboardPDF({ gym, stats, clases }, "Dashboard_FitFlow.pdf")} 
-           onSync={refetchAll} 
+           onSync={handleSync}
+           syncing={syncing}
         />
 
         {/* Numeric Overview: High-level metrics grid (Users, Revenue, Occupancy) */}

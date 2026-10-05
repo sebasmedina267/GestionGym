@@ -12,4 +12,12 @@ FitFlow focuses on optimizing administrative tasks and strategic decision-making
 - Financial Suite & Monthly Balance: A robust economic module that tracks monthly revenue vs expenses. It automatically calculates the net balance, providing administration with a clear view of the gym's financial health and profitability at any given time.
 - Class & Staff Coordination: Centralized control of schedules, pricing, instructors, and user enrollment per session.
 
-Note: This MVP is currently an Admin-facing dashboard and is not completed yet with all functions. A client-side mobile/web app is planned for future releases.
+Note: FitFlow is in active development. The web application includes member registration, gym discovery, class booking, profile management, and payment history. Attendance check-in, digital access cards, and a dedicated mobile app remain planned work.
+
+## Production deployment
+
+Docker Compose requires `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`, `STRIPE_SECRET_KEY`, and `STRIPE_WEBHOOK_SECRET`; `DB_PORT` defaults to `3306`. Set these values in an untracked root `.env` file or in the deployment platform's secret manager. Use a `JWT_SECRET` with at least 32 characters and terminate HTTPS at the production reverse proxy. The backend health endpoint at `/health` also checks database connectivity.
+
+## Tests
+
+Run backend tests with `cd backend && npm test` and frontend component tests with `cd frontend && npm test`.

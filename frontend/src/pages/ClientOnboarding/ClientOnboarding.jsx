@@ -9,6 +9,7 @@ import { useRef, useEffect, useContext, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { useGymDiscovery } from "../../hooks/useGymDiscovery";
+import GymMap from "../../components/ui/GymMap";
 import "./ClientOnboarding.css";
 
 export default function ClientOnboarding() {
@@ -16,9 +17,10 @@ export default function ClientOnboarding() {
     gyms,
     loading,
     error,
+    userLocation,
     searchNearbyFromCurrentLocation,
     getGymDetails,
-    selectedGym
+    selectedGym,
   } = useGymDiscovery();
 
   const navigate = useNavigate();
@@ -102,43 +104,54 @@ export default function ClientOnboarding() {
                   </button>
                 </div>
               ) : (
-                <div className="client-onboarding__gym-cards">
-                  {gyms.map((gym) => (
-                    <div
-                      key={gym.id}
-                      className="gym-card"
-                      onClick={() => handleSelectGym(gym)}
-                    >
-                      {gym.foto && (
-                        <img
-                          src={`/uploads/${gym.foto}`}
-                          alt={gym.nombre}
-                          className="gym-card__image"
-                        />
-                      )}
+                <>
+                  <div className="client-onboarding__map-wrapper">
+                    <GymMap
+                      gyms={gyms}
+                      selectedGym={selectedGym}
+                      userLocation={userLocation}
+                      onSelectGym={handleSelectGym}
+                    />
+                  </div>
 
-                      <div className="gym-card__content">
-                        <h3>{gym.nombre}</h3>
-                        <p className="gym-card__location">{gym.ciudad || gym.direccion}</p>
-
-                        <div className="gym-card__stats">
-                          <span className="stat">
-                            📍 {gym.distancia_km.toFixed(1)} km
-                          </span>
-                          <span className="stat">👥 {gym.miembros_activos} miembros</span>
-                          <span className="stat">💪 {gym.total_maquinas} máquinas</span>
-                          <span className="stat">🏋️ {gym.total_clases} clases</span>
-                        </div>
-
-                        {gym.horario_inicio && (
-                          <p className="gym-card__hours">
-                            ⏰ {gym.horario_inicio} - {gym.horario_fin}
-                          </p>
+                  <div className="client-onboarding__gym-cards">
+                    {gyms.map((gym) => (
+                      <div
+                        key={gym.id}
+                        className="gym-card"
+                        onClick={() => handleSelectGym(gym)}
+                      >
+                        {gym.foto && (
+                          <img
+                            src={`/uploads/${gym.foto}`}
+                            alt={gym.nombre}
+                            className="gym-card__image"
+                          />
                         )}
+
+                        <div className="gym-card__content">
+                          <h3>{gym.nombre}</h3>
+                          <p className="gym-card__location">{gym.ciudad || gym.direccion}</p>
+
+                          <div className="gym-card__stats">
+                            <span className="stat">
+                              📍 {gym.distancia_km.toFixed(1)} km
+                            </span>
+                            <span className="stat">👥 {gym.miembros_activos} miembros</span>
+                            <span className="stat">💪 {gym.total_maquinas} máquinas</span>
+                            <span className="stat">🏋️ {gym.total_clases} clases</span>
+                          </div>
+
+                          {gym.horario_inicio && (
+                            <p className="gym-card__hours">
+                              ⏰ {gym.horario_inicio} - {gym.horario_fin}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
 

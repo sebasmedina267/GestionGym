@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useNotification } from "../../hooks/useNotification";
+import GymMap from "../../components/ui/GymMap";
 import api from "../../api/axios";
 import "./ClientWelcome.css";
 
@@ -19,19 +20,15 @@ export default function ClientWelcome() {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const { success, error: notifyError, info } = useNotification();
-  
+
   const [gyms, setGyms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState(null);
   const [selectedGym, setSelectedGym] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
 
-  // Auto-search on mount
-  useEffect(() => {
-    searchNearbyGyms();
-  }, []);
-
-  const searchNearbyGyms = async () => {
+  const searchNearbyGyms = useCallback(async () => {
     try {
       setSearching(true);
       setError(null);
@@ -45,21 +42,22 @@ export default function ClientWelcome() {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
+          setUserLocation({ latitude, longitude });
 
           // Search nearby gyms
           const response = await api.get("/client/gyms/near", {
-            params: { lat: latitude, lng: longitude, radius: 10 },
+            params: { latitude, longitude, radius: 10 },
           });
 
           const foundGyms = response.data?.data || [];
           setGyms(foundGyms);
-          
+
           if (foundGyms.length > 0) {
             success(`✓ Encontramos ${foundGyms.length} gimnasios cerca de ti`);
           } else {
             notifyError("📍 No hay gimnasios disponibles en tu área");
           }
-          
+
           setLoading(false);
         },
         (err) => {
@@ -77,7 +75,12 @@ export default function ClientWelcome() {
     } finally {
       setSearching(false);
     }
-  };
+  }, [info, notifyError, success]);
+
+  // Auto-search on mount
+  useEffect(() => {
+    searchNearbyGyms();
+  }, [searchNearbyGyms]);
 
   const handleSelectGym = async (gym) => {
     try {
@@ -203,6 +206,14 @@ export default function ClientWelcome() {
             {/* Gyms List */}
             <section className="client-welcome-gyms">
               <h2>Gimnasios Cercanos ({gyms.length})</h2>
+              <div className="client-welcome-map-wrapper">
+                <GymMap
+                  gyms={gyms}
+                  selectedGym={selectedGym}
+                  userLocation={userLocation}
+                  onSelectGym={handleSelectGym}
+                />
+              </div>
               <div className="gyms-list">
                 {gyms.map((gym) => (
                   <div

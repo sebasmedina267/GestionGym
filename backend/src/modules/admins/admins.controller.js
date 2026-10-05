@@ -31,17 +31,30 @@ export async function updateAdmin(req, res, next) {
     if (!req.admin) throw new AppError("Not authenticated", 401);
 
     const adminId = parseInt(req.params.id);
-    const { nombre, apellido, edad, sexo, direccion, gymId, rol } = req.body;
+    const isOwner = req.admin.roles?.includes("DUENO");
+
+    // Authorization: Non-owners can only update their own profile
+    if (!isOwner && req.admin.id !== adminId) {
+      throw new AppError("You can only edit your own profile", 403);
+    }
+
+    const { nombre, apellido, email, edad, sexo, direccion, gymId, rol } = req.body;
 
     // Filter and prepare update payload
     const updateData = {};
     if (nombre) updateData.nombre = nombre;
     if (apellido) updateData.apellido = apellido;
+    if (email) updateData.email = email;
     if (edad !== undefined) updateData.edad = edad;
     if (sexo) updateData.sexo = sexo;
     if (direccion !== undefined) updateData.direccion = direccion;
-    if (gymId) updateData.gymId = gymId;
-    if (rol) updateData.rol = rol;
+    
+    // Security: Only owners can alter assigned branch or role
+    if (isOwner) {
+      if (gymId) updateData.gymId = gymId;
+      if (rol) updateData.rol = rol;
+    }
+
     if (req.file) updateData.foto = req.file.filename;
 
     const updated = await adminsService.updateAdmin(req.admin.id, adminId, updateData);

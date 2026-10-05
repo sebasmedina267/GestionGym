@@ -27,7 +27,8 @@ export default function EconomiaModalForm({
   setForm, 
   saving, 
   onSubmit,
-  categorias = []
+  categorias = [],
+  isEditing = false
 }) {
 
   /** Standardized dismissal handler */
@@ -66,12 +67,16 @@ export default function EconomiaModalForm({
         <div className="economia-form">
           <div className="economia-title-area">
             <h3 className="economia-title">
-              {formType === "INGRESO" ? "Registrar Nuevo Ingreso" : "Registrar Gasto Operativo"}
+              {isEditing 
+                ? (formType === "INGRESO" ? "Editar Ingreso" : "Editar Gasto Operativo")
+                : (formType === "INGRESO" ? "Registrar Nuevo Ingreso" : "Registrar Gasto Operativo")}
             </h3>
             <p className="economia-subtitle">
-              {formType === "INGRESO" 
-                ? "Añade manualmente un ingreso al libro contable de la sucursal." 
-                : "Registra un gasto relacionado con las instalaciones o costes fijos."}
+              {isEditing
+                ? "Modifica los datos del registro contable seleccionado."
+                : (formType === "INGRESO" 
+                    ? "Añade manualmente un ingreso al libro contable de la sucursal." 
+                    : "Registra un gasto relacionado con las instalaciones o costes fijos.")}
             </p>
           </div>
 
@@ -150,7 +155,7 @@ export default function EconomiaModalForm({
                 className={`btn-economia-submit ${formType === "INGRESO" ? "btn-ingreso" : "btn-gasto"}`}
                 disabled={saving || !form.descripcion || !form.importe || !form.fecha}
               >
-                {saving ? "Procesando..." : "Confirmar Transacción"}
+                {saving ? "Procesando..." : isEditing ? "Actualizar Registro" : "Confirmar Transacción"}
               </button>
             </div>
           </form>

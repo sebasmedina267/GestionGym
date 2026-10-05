@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 /**
  * Toast Component
@@ -8,12 +8,20 @@ import React, { useState } from "react";
 export default function Toast({ notification, onClose }) {
   const [isExiting, setIsExiting] = useState(false);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsExiting(true);
     setTimeout(() => {
       onClose();
     }, 300); // Match animation duration
-  };
+  }, [onClose]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleClose();
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [handleClose]);
 
   const getIcon = () => {
     switch (notification.type) {

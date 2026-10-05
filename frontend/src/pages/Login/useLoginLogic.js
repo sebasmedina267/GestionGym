@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { useNotification } from "../../hooks/useNotification";
 
 /**
  * useLoginLogic Custom Hook
@@ -11,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 export const useLoginLogic = () => {
     const { login } = useAuth();
     const navigate = useNavigate();
+    const { success, error: notifyError } = useNotification();
 
     // Core form state for user credentials
     const [form, setForm] = useState({
@@ -52,9 +54,12 @@ export const useLoginLogic = () => {
 
             // Get user data from localStorage to determine type
             const userData = JSON.parse(localStorage.getItem("admin") || "{}");
+            const isClient = userData.tipo === "USUARIO_FINAL";
+
+            success(isClient ? "Bienvenido de nuevo. Estamos preparando tu experiencia." : "Sesión iniciada correctamente.");
 
             // Redirect based on user type
-            if (userData.tipo === "USUARIO_FINAL") {
+            if (isClient) {
                 // Client user - check if they have a gym
                 if (userData.gyms && userData.gyms.length > 0) {
                     navigate("/client/dashboard");
@@ -67,8 +72,9 @@ export const useLoginLogic = () => {
             }
         } catch (err) {
             console.error("Login lifecycle error:", err);
-            // Extract server message or provide a localized fallback
-            setError(err.response?.data?.message || "Error al iniciar sesión. Por favor, verifica tus credenciales.");
+            const message = err.response?.data?.message || "Error al iniciar sesión. Por favor, verifica tus credenciales.";
+            setError(message);
+            notifyError(message);
         } finally {
             setLoading(false);
         }

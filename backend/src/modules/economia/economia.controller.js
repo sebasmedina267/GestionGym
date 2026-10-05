@@ -67,9 +67,10 @@ export async function crearIngresoManual(req, res, next) {
   try {
     validateAdminAuthenticated(req);
 
-    // Business Logic: Only Owners and Employees can register income
+    // Business Logic: Owners, Encargados, and Employees can register income
     if (
       !req.admin.roles.includes("DUENO") &&
+      !req.admin.roles.includes("ENCARGADO") &&
       !req.admin.roles.includes("EMPLEADO")
     ) {
       throw new AppError("You do not have permission to register income", 403);
@@ -307,3 +308,100 @@ export async function descargarGastoPDF(req, res, next) {
     next(err);
   }
 }
+
+/* ============================================================
+   TRANSACTION UPDATE & DELETION HANDLERS
+   ============================================================ */
+
+/** Updates an income entry */
+export async function actualizarIngreso(req, res, next) {
+  try {
+    validateAdminAuthenticated(req);
+
+    if (
+      !req.admin.roles.includes("DUENO") &&
+      !req.admin.roles.includes("ENCARGADO")
+    ) {
+      throw new AppError("You do not have permission to edit income", 403);
+    }
+
+    const id = parseInt(req.params.id, 10);
+    const updated = await economiaService.actualizarIngreso(
+      req.gym.id,
+      id,
+      req.body,
+      req.admin
+    );
+
+    res.status(200).json({ ok: true, data: updated, message: "Ingreso actualizado exitosamente" });
+  } catch (err) {
+    logger.error(LOG_CONTEXT.REPORT, 'Error updating income', { gymId: req.gym.id, error: err.message });
+    next(err);
+  }
+}
+
+/** Deletes an income entry */
+export async function eliminarIngreso(req, res, next) {
+  try {
+    validateAdminAuthenticated(req);
+
+    if (
+      !req.admin.roles.includes("DUENO") &&
+      !req.admin.roles.includes("ENCARGADO")
+    ) {
+      throw new AppError("You do not have permission to delete income", 403);
+    }
+
+    const id = parseInt(req.params.id, 10);
+    await economiaService.eliminarIngreso(req.gym.id, id, req.admin);
+
+    res.status(200).json({ ok: true, message: "Ingreso eliminado exitosamente" });
+  } catch (err) {
+    logger.error(LOG_CONTEXT.REPORT, 'Error deleting income', { gymId: req.gym.id, error: err.message });
+    next(err);
+  }
+}
+
+/** Updates an expense entry */
+export async function actualizarGasto(req, res, next) {
+  try {
+    validateAdminAuthenticated(req);
+
+    if (!req.admin.roles.includes("DUENO")) {
+      throw new AppError("Only branch owners can edit expenses", 403);
+    }
+
+    const id = parseInt(req.params.id, 10);
+    const updated = await economiaService.actualizarGasto(
+      req.gym.id,
+      id,
+      req.body,
+      req.admin
+    );
+
+    res.status(200).json({ ok: true, data: updated, message: "Gasto actualizado exitosamente" });
+  } catch (err) {
+    logger.error(LOG_CONTEXT.REPORT, 'Error updating expense', { gymId: req.gym.id, error: err.message });
+    next(err);
+  }
+}
+
+/** Deletes an expense entry */
+export async function eliminarGasto(req, res, next) {
+  try {
+    validateAdminAuthenticated(req);
+
+    if (!req.admin.roles.includes("DUENO")) {
+      throw new AppError("Only branch owners can delete expenses", 403);
+    }
+
+    const id = parseInt(req.params.id, 10);
+    await economiaService.eliminarGasto(req.gym.id, id, req.admin);
+
+    res.status(200).json({ ok: true, message: "Gasto eliminado exitosamente" });
+  } catch (err) {
+    logger.error(LOG_CONTEXT.REPORT, 'Error deleting expense', { gymId: req.gym.id, error: err.message });
+    next(err);
+  }
+}
+

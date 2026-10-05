@@ -149,3 +149,96 @@ export async function estadisticasPorPeriodo(gymId, periodo) {
 
   return { ingresos, gastos };
 }
+
+/* ============================================================
+   TRANSACTION UPDATE & DELETION SERVICES
+   ============================================================ */
+
+/** Updates an existing income record */
+export async function actualizarIngreso(gymId, id, data, admin) {
+  if (!admin?.id) throw new AppError("Invalid administrator context", 400);
+  await validarPermisos(admin.id, gymId);
+
+  const existing = await economiaRepository.findIngresoById(id, gymId);
+  if (!existing) throw new AppError("Income record not found", 404);
+
+  const updated = await economiaRepository.updateIngreso(id, gymId, data);
+
+  await registrarOperacion({
+    adminId: admin.id,
+    gymId,
+    entidad: "INGRESO",
+    entidadId: id,
+    accion: "ACTUALIZAR",
+    detalles: data,
+  });
+
+  return updated;
+}
+
+/** Deletes an existing income record */
+export async function eliminarIngreso(gymId, id, admin) {
+  if (!admin?.id) throw new AppError("Invalid administrator context", 400);
+  await validarPermisos(admin.id, gymId);
+
+  const existing = await economiaRepository.findIngresoById(id, gymId);
+  if (!existing) throw new AppError("Income record not found", 404);
+
+  await economiaRepository.deleteIngreso(id, gymId);
+
+  await registrarOperacion({
+    adminId: admin.id,
+    gymId,
+    entidad: "INGRESO",
+    entidadId: id,
+    accion: "ELIMINAR",
+    detalles: { descripcion: existing.descripcion, importe: existing.importe },
+  });
+
+  return true;
+}
+
+/** Updates an existing expense record */
+export async function actualizarGasto(gymId, id, data, admin) {
+  if (!admin?.id) throw new AppError("Invalid administrator context", 400);
+  await validarPermisos(admin.id, gymId);
+
+  const existing = await economiaRepository.findGastoById(id, gymId);
+  if (!existing) throw new AppError("Expense record not found", 404);
+
+  const updated = await economiaRepository.updateGasto(id, gymId, data);
+
+  await registrarOperacion({
+    adminId: admin.id,
+    gymId,
+    entidad: "GASTO",
+    entidadId: id,
+    accion: "ACTUALIZAR",
+    detalles: data,
+  });
+
+  return updated;
+}
+
+/** Deletes an existing expense record */
+export async function eliminarGasto(gymId, id, admin) {
+  if (!admin?.id) throw new AppError("Invalid administrator context", 400);
+  await validarPermisos(admin.id, gymId);
+
+  const existing = await economiaRepository.findGastoById(id, gymId);
+  if (!existing) throw new AppError("Expense record not found", 404);
+
+  await economiaRepository.deleteGasto(id, gymId);
+
+  await registrarOperacion({
+    adminId: admin.id,
+    gymId,
+    entidad: "GASTO",
+    entidadId: id,
+    accion: "ELIMINAR",
+    detalles: { descripcion: existing.descripcion, importe: existing.importe },
+  });
+
+  return true;
+}
+

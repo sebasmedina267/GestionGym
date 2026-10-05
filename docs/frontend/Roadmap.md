@@ -19,8 +19,8 @@ The system has successfully implemented the **Administrative Backbone**:
 ## 2. UPCOMING FEATURES & MODULES
 
 ### A. Member Experience (Client App)
-- **Class Booking System:** Real-time reservations via the mobile-friendly client view.
-- **Member Dashboard:** Personal workout history, attendance tracking, and membership status.
+- **Class Booking System:** Implemented in the client web dashboard, including upcoming reservations and cancellation.
+- **Member Dashboard:** Gym information, available classes, profile management, and payment history are implemented. Attendance history and a richer membership-status view remain open.
 - **Digital Access Card:** QR-code based check-in system for facility entry.
 
 ### B. Communication & Notifications
@@ -37,10 +37,10 @@ The system has successfully implemented the **Administrative Backbone**:
 
 ## 3. TECHNICAL DEBT & OPTIMIZATION
 
-- **Unit & Integration Testing:** Expansion of the test suite (Jest/Cypress) to cover 90%+ of the business logic in the Service layer.
+- **Unit & Integration Testing:** Initial backend service/repository tests cover member booking, personal-data scoping, and transaction history; a frontend component test covers member payment history. Expand the suite toward broad service and integration coverage.
 - **API Versioning:** Implementation of `/api/v1/` prefixing to support legacy mobile apps as the backend evolves.
 - **Media Optimization:** Transition from local storage to **Cloudinary or AWS S3** for globally distributed asset delivery.
-- **Containerization:** Official **Docker** orchestration for seamless deployment across production and staging environments.
+- **Deployment Operations:** Docker Compose and backend health checks are available; production environments still need managed secrets, TLS/reverse-proxy configuration, and documented backup/restore procedures.
 
 ---
 

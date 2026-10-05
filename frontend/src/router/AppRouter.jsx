@@ -4,8 +4,6 @@ import ProtectedRoute from "../components/layout/ProtectedRoute";
 // Auth and Registration Pages
 import LoginPage from "../pages/Login/LoginPage";
 import RegisterPage from "../pages/Register/RegisterPageNew";
-import ForgotPasswordPage from "../pages/ForgotPassword/ForgotPasswordPage";
-import PasswordResetPage from "../pages/ForgotPassword/PasswordResetPage";
 import StripeCheckoutPage from "../pages/Stripe/StripeCheckoutPage";
 import SelectGymPage from "../pages/SelectGym/SelectGymPage";
 
@@ -13,7 +11,6 @@ import SelectGymPage from "../pages/SelectGym/SelectGymPage";
 import ClientOnboarding from "../pages/ClientOnboarding/ClientOnboarding";
 import ClientDashboard from "../pages/ClientDashboard/ClientDashboard";
 import ClientEnroll from "../pages/ClientDashboard/ClientEnroll";
-import ClientProfile from "../pages/ClientProfile/ClientProfile";
 
 // Dashboard and Management Pages
 import DashboardPage from "../pages/Dashboard/DashboardPage";
@@ -39,8 +36,6 @@ export default function AppRouter() {
         {/* --- Public Routes --- */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<PasswordResetPage />} />
 
         {/* Stripe Checkout flow for initial registration */}
         <Route path="/stripe-checkout" element={<StripeCheckoutPage />} />
@@ -73,16 +68,6 @@ export default function AppRouter() {
           element={
             <ProtectedRoute allowedType="USUARIO_FINAL">
               <ClientEnroll />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Client profile - manage personal info */}
-        <Route
-          path="/client/profile"
-          element={
-            <ProtectedRoute allowedType="USUARIO_FINAL">
-              <ClientProfile />
             </ProtectedRoute>
           }
         />

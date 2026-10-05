@@ -152,23 +152,21 @@ export async function getUserClasses(userId, status = 'upcoming') {
         g.nombre as gym_nombre,
         g.ciudad,
         COUNT(DISTINCT cc2.cliente_id) as inscritos_actuales,
-        CASE 
-          WHEN uf.id = ? THEN 1 
-          ELSE 0 
-        END as usuario_inscrito
+        1 as usuario_inscrito
      FROM usuarios_finales_gimnasios ufg
      JOIN gyms g ON ufg.gym_id = g.id
+     JOIN usuarios_finales uf ON uf.id = ufg.usuario_id
      JOIN clases c ON c.gym_id = g.id
      JOIN clases_horarios ch ON ch.clase_id = c.id
-     LEFT JOIN clientes_clases cc ON cc.clase_horario_id = ch.id
+     JOIN clientes cli ON cli.gym_id = g.id AND cli.email = uf.email
+     JOIN clientes_clases cc
+       ON cc.clase_horario_id = ch.id AND cc.cliente_id = cli.id
      LEFT JOIN clientes_clases cc2 ON cc2.clase_horario_id = ch.id
-     LEFT JOIN usuarios_finales uf ON uf.id = ?
      WHERE ufg.usuario_id = ? AND ufg.estado_inscripcion = 'ACTIVO'
-     AND cc.cliente_id IS NOT NULL
      AND ${timeCondition}
      GROUP BY ch.id
      ORDER BY ch.inicio DESC`,
-    [userId, userId, userId]
+    [userId]
   );
   return rows;
 }
@@ -176,10 +174,33 @@ export async function getUserClasses(userId, status = 'upcoming') {
 /**
  * Get available classes for a gym (user can enroll in)
  */
-export async function getAvailableClassesForGym(userId, gymId, includeEnrolled = false) {
-  const enrolledCondition = includeEnrolled
-    ? '1=1'
-    : `cc.cliente_id IS NULL`;
+export async function getAvailableClassesForGym(
+  userId,
+  gymId,
+  includeEnrolled = false,
+  isNativeClient = false
+) {
+  const enrollmentFilter = includeEnrolled
+    ? ''
+    : isNativeClient
+      ? `AND NOT EXISTS (
+        SELECT 1
+        FROM clientes_clases reserva_usuario
+        WHERE reserva_usuario.cliente_id = ?
+          AND reserva_usuario.clase_horario_id = ch.id
+      )`
+      : `AND NOT EXISTS (
+        SELECT 1
+        FROM clientes cliente_usuario
+        JOIN clientes_clases reserva_usuario
+          ON reserva_usuario.cliente_id = cliente_usuario.id
+        JOIN usuarios_finales usuario
+          ON usuario.email = cliente_usuario.email
+        WHERE usuario.id = ?
+          AND cliente_usuario.gym_id = g.id
+          AND reserva_usuario.clase_horario_id = ch.id
+      )`;
+  const params = includeEnrolled ? [gymId] : [gymId, userId];
 
   const [rows] = await pool.query(
     `SELECT 
@@ -200,9 +221,10 @@ export async function getAvailableClassesForGym(userId, gymId, includeEnrolled =
      LEFT JOIN clases_monitores cm ON cm.clase_id = c.id
      LEFT JOIN admins a ON a.id = cm.admin_id
      WHERE g.id = ? AND ch.inicio >= NOW()
+     ${enrollmentFilter}
      GROUP BY ch.id
      ORDER BY ch.inicio ASC`,
-    [gymId]
+    params
   );
   return rows;
 }
@@ -211,14 +233,12 @@ export async function getAvailableClassesForGym(userId, gymId, includeEnrolled =
  * Check if user is enrolled in a specific class
  */
 export async function isUserEnrolledInClass(userId, classScheduleId) {
-  // Note: clientes_clases uses cliente_id, not usuario_id
-  // We need to check if the user has a cliente record linked to their gyms
   const [rows] = await pool.query(
     `SELECT 1
      FROM clientes_clases cc
      JOIN clientes c ON c.id = cc.cliente_id
-     JOIN usuarios_finales_gimnasios ufg ON ufg.gym_id = c.gym_id
-     WHERE cc.clase_horario_id = ? AND ufg.usuario_id = ?`,
+     JOIN usuarios_finales uf ON uf.email = c.email
+     WHERE cc.clase_horario_id = ? AND uf.id = ?`,
     [classScheduleId, userId]
   );
   return !!rows[0];
@@ -237,7 +257,8 @@ export async function enrollUserInClass(userId, classScheduleId) {
     const [classRows] = await conn.query(
       `SELECT c.gym_id FROM clases_horarios ch
        JOIN clases c ON c.id = ch.clase_id
-       WHERE ch.id = ?`,
+       WHERE ch.id = ?
+       FOR UPDATE`,
       [classScheduleId]
     );
 
@@ -272,7 +293,7 @@ export async function enrollUserInClass(userId, classScheduleId) {
     } else {
       // Create cliente record from usuario_final data
       const [userRows] = await conn.query(
-        `SELECT nombre, apellido FROM usuarios_finales WHERE id = ?`,
+        `SELECT nombre, apellido, email FROM usuarios_finales WHERE id = ?`,
         [userId]
       );
 
@@ -281,9 +302,9 @@ export async function enrollUserInClass(userId, classScheduleId) {
       }
 
       const [insertResult] = await conn.query(
-        `INSERT INTO clientes (gym_id, nombre, apellido, tipo_usuario)
-         VALUES (?, ?, ?, 'USUARIO_APP')`,
-        [gymId, userRows[0].nombre, userRows[0].apellido]
+        `INSERT INTO clientes (gym_id, nombre, apellido, email, tipo_usuario)
+         VALUES (?, ?, ?, ?, 'USUARIO_APP')`,
+        [gymId, userRows[0].nombre, userRows[0].apellido, userRows[0].email]
       );
       clienteId = insertResult.insertId;
     }
@@ -338,8 +359,8 @@ export async function unenrollUserFromClass(userId, classScheduleId) {
   const [result] = await pool.query(
     `DELETE cc FROM clientes_clases cc
      JOIN clientes c ON c.id = cc.cliente_id
-     JOIN usuarios_finales_gimnasios ufg ON ufg.gym_id = c.gym_id
-     WHERE cc.clase_horario_id = ? AND ufg.usuario_id = ?`,
+     JOIN usuarios_finales uf ON uf.email = c.email
+     WHERE cc.clase_horario_id = ? AND uf.id = ?`,
     [classScheduleId, userId]
   );
   return result;
@@ -489,6 +510,7 @@ export async function getUserTransactions(userId, gymId = null, limit = 50, offs
                 p.importe,
                 p.fecha_pago,
                 p.metodo_pago,
+                p.pagado,
                 p.periodo_inicio,
                 p.periodo_fin,
                 CASE 
@@ -498,8 +520,9 @@ export async function getUserTransactions(userId, gymId = null, limit = 50, offs
                 END as tipo_transaccion
              FROM pagos p
              JOIN gyms g ON p.gym_id = g.id
-             JOIN usuarios_finales_gimnasios ufg ON ufg.gym_id = p.gym_id
-             WHERE ufg.usuario_id = ?`;
+             JOIN clientes c ON c.id = p.cliente_id AND c.gym_id = p.gym_id
+             JOIN usuarios_finales uf ON uf.email = c.email
+             WHERE uf.id = ?`;
 
   const params = [userId];
 
@@ -522,14 +545,15 @@ export async function getUserTransactionStats(userId) {
   const [rows] = await pool.query(
     `SELECT 
         COUNT(*) as total_transacciones,
-        SUM(p.importe) as total_gastado,
-        AVG(p.importe) as promedio_gasto,
-        MAX(p.fecha_pago) as ultima_transaccion,
+        COALESCE(SUM(CASE WHEN p.pagado = TRUE THEN p.importe ELSE 0 END), 0) as total_gastado,
+        COALESCE(AVG(CASE WHEN p.pagado = TRUE THEN p.importe END), 0) as promedio_gasto,
+        MAX(CASE WHEN p.pagado = TRUE THEN p.fecha_pago END) as ultima_transaccion,
         GROUP_CONCAT(DISTINCT g.nombre SEPARATOR ', ') as gyms
      FROM pagos p
      JOIN gyms g ON p.gym_id = g.id
-     JOIN usuarios_finales_gimnasios ufg ON ufg.gym_id = p.gym_id
-     WHERE ufg.usuario_id = ?`,
+     JOIN clientes c ON c.id = p.cliente_id AND c.gym_id = p.gym_id
+     JOIN usuarios_finales uf ON uf.email = c.email
+     WHERE uf.id = ?`,
     [userId]
   );
   return rows[0];
@@ -678,11 +702,49 @@ export async function updateNativeClientProfile(clienteId, data) {
 }
 
 export async function getNativeClientTransactions(clienteId, limit = 50, offset = 0) {
-  return [];
+  const [rows] = await pool.query(
+    `SELECT
+        p.id,
+        p.gym_id,
+        g.nombre as gym_nombre,
+        p.importe,
+        p.fecha_pago,
+        p.metodo_pago,
+        p.pagado,
+        p.periodo_inicio,
+        p.periodo_fin,
+        CASE
+          WHEN p.clase_id IS NOT NULL THEN 'CLASE'
+          WHEN p.precio_id IS NOT NULL THEN 'MEMBRESÍA'
+          ELSE 'OTRO'
+        END as tipo_transaccion
+     FROM pagos p
+     JOIN gyms g ON g.id = p.gym_id
+     JOIN clientes c ON c.id = p.cliente_id AND c.gym_id = p.gym_id
+     WHERE c.id = ?
+     ORDER BY p.fecha_pago DESC
+     LIMIT ? OFFSET ?`,
+    [clienteId, limit, offset]
+  );
+  return rows;
 }
 
 export async function getNativeClientTransactionStats(clienteId) {
-  return {
+  const [rows] = await pool.query(
+    `SELECT
+        COUNT(*) as total_transacciones,
+        COALESCE(SUM(CASE WHEN p.pagado = TRUE THEN p.importe ELSE 0 END), 0) as total_gastado,
+        COALESCE(AVG(CASE WHEN p.pagado = TRUE THEN p.importe END), 0) as promedio_gasto,
+        MAX(CASE WHEN p.pagado = TRUE THEN p.fecha_pago END) as ultima_transaccion,
+        g.nombre as gyms
+     FROM pagos p
+     JOIN clientes c ON c.id = p.cliente_id AND c.gym_id = p.gym_id
+     JOIN gyms g ON g.id = p.gym_id
+     WHERE c.id = ?
+     GROUP BY c.id, g.nombre`,
+    [clienteId]
+  );
+  return rows[0] || {
     total_transacciones: 0,
     total_gastado: 0,
     promedio_gasto: 0,

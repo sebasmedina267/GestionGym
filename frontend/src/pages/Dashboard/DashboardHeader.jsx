@@ -14,7 +14,7 @@ import "./Styles/DashboardHeader.css";
  * @param {Function} onExport - Handler for generating financial/operational reports.
  * @param {Function} onSync - Handler for manual data refresh.
  */
-export default function DashboardHeader({ gym, onExport, onSync }) {
+export default function DashboardHeader({ gym, onExport, onSync, syncing }) {
   return (
     <header className="dashboard-hero-header">
       <div>
@@ -33,6 +33,9 @@ export default function DashboardHeader({ gym, onExport, onSync }) {
           type="button"
           onClick={onExport}
         >
+          <span className="material-symbols-outlined" style={{ fontSize: "1.1rem", verticalAlign: "middle", marginRight: "4px" }}>
+            download
+          </span>
           Exportar
         </button>
         {/* Sync Action: Triggers multi-stream data refetch */}
@@ -40,8 +43,21 @@ export default function DashboardHeader({ gym, onExport, onSync }) {
           className="dashboard-hero-btn dashboard-hero-btn--primary"
           type="button"
           onClick={onSync}
+          disabled={syncing}
         >
-          Sincronizar
+          <span
+            className="material-symbols-outlined"
+            style={{
+              fontSize: "1.1rem",
+              verticalAlign: "middle",
+              marginRight: "4px",
+              animation: syncing ? "spin 1s linear infinite" : "none",
+              display: "inline-block"
+            }}
+          >
+            sync
+          </span>
+          {syncing ? "Sincronizando..." : "Sincronizar"}
         </button>
       </div>
     </header>

@@ -6,7 +6,7 @@ import PagosFiltros from "./PagosFiltros";
 import PagosTabla from "./PagosTabla";
 import PagosResumen from "./PagosResumen";
 import PagosModals from "./PagosModals";
-import { exportEconomiaPDF } from "../Economia/pdfUtils";
+import { exportPagosPDF } from "../Economia/pdfUtils";
 import "./Styles/PagosPage.css";
 
 /**
@@ -67,7 +67,17 @@ export default function PagosPage() {
               classStats={logic.classStats}
               metodoPagoStats={logic.metodoPagoStats}
               chartData={logic.chartData}
-              onExport={() => exportEconomiaPDF(pdfRef.current, `reporte_pagos_${logic.mes}.pdf`)}
+              onExport={() => {
+                const currentClase = logic.clases?.find((c) => String(c.id) === String(logic.claseId));
+                exportPagosPDF({
+                  gym: logic.gym,
+                  mes: logic.mes,
+                  claseNombre: currentClase?.nombre || "Clase",
+                  clasePrecio: logic.clasePrecio,
+                  estadoClase: logic.estadoClase,
+                  classStats: logic.classStats
+                }, `reporte_pagos_${currentClase?.nombre || 'clase'}_${logic.mes}.pdf`);
+              }}
             />
           </div>
         ) : (

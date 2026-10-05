@@ -10,7 +10,7 @@ export const crearPagoSchema = {
     fecha_pago: z.string().date(),
     periodo_inicio: z.string().date().optional(),
     periodo_fin: z.string().date().optional(),
-    metodo_pago: z.enum(['EFECTIVO', 'TARJETA', 'TRANSFERENCIA', 'CHEQUE', 'CRIPTOMONEDA']).optional(),
+    metodo_pago: z.enum(['EFECTIVO', 'TARJETA']).optional(),
   }),
 };
 
@@ -23,7 +23,7 @@ export const actualizarPagoSchema = {
     fecha_pago: z.string().date().optional(),
     periodo_inicio: z.string().date().optional(),
     periodo_fin: z.string().date().optional(),
-    metodo_pago: z.enum(['EFECTIVO', 'TARJETA', 'TRANSFERENCIA', 'CHEQUE', 'CRIPTOMONEDA']).optional(),
+    metodo_pago: z.enum(['EFECTIVO', 'TARJETA']).optional(),
   }),
   params: z.object({
     id: z.string().regex(/^\d+$/),

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useNotification } from "../../hooks/useNotification";
 import api from "../../api/axios";
@@ -13,17 +13,17 @@ export default function ClientProfile() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [transactions, setTransactions] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyError, setHistoryError] = useState("");
+  const [transactionStats, setTransactionStats] = useState(null);
   
   const [formData, setFormData] = useState({
     nombre: "",
     apellido: "",
   });
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     try {
       setLoading(true);
       const response = await api.get("/client/dashboard/profile");
@@ -39,7 +39,30 @@ export default function ClientProfile() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [notifyError]);
+
+  const fetchTransactions = useCallback(async () => {
+    try {
+      setHistoryLoading(true);
+      setHistoryError("");
+      const [historyResponse, statsResponse] = await Promise.all([
+        api.get("/client/dashboard/transactions", { params: { limit: 50 } }),
+        api.get("/client/dashboard/transactions/stats"),
+      ]);
+      setTransactions(historyResponse.data.data || []);
+      setTransactionStats(statsResponse.data.data || null);
+    } catch (err) {
+      console.error("Error fetching transaction history:", err);
+      setHistoryError("No pudimos cargar tu historial de pagos.");
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchProfile();
+    fetchTransactions();
+  }, [fetchProfile, fetchTransactions]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -52,7 +75,7 @@ export default function ClientProfile() {
       setSaving(true);
       await api.patch("/client/dashboard/profile", formData);
       success("Perfil actualizado con éxito");
-      fetchProfile();
+      await fetchProfile();
     } catch (err) {
       console.error("Error updating profile:", err);
       notifyError("Error al actualizar el perfil");
@@ -65,6 +88,18 @@ export default function ClientProfile() {
     logout();
     navigate("/login");
   };
+
+  const formatDate = (date) => {
+    if (!date) return "Fecha no disponible";
+    const parsedDate = new Date(date);
+    if (Number.isNaN(parsedDate.getTime())) return "Fecha no disponible";
+    return new Intl.DateTimeFormat("es-ES", { dateStyle: "medium" }).format(parsedDate);
+  };
+
+  const formatAmount = (amount) =>
+    new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(
+      Number(amount) || 0
+    );
 
   if (loading) {
     return (
@@ -149,15 +184,50 @@ export default function ClientProfile() {
           </form>
         </section>
 
-        {/* Transactions / History (Placeholder) */}
         <section className="client-profile-section mt-8">
-          <h2>Historial de Actividad</h2>
-          <div className="placeholder-card">
-            <div className="placeholder-icon">📈</div>
-            <p className="placeholder-text">
-              Próximamente podrás ver aquí tu historial de transacciones y compras en el gimnasio.
-            </p>
+          <div className="history-heading">
+            <h2>Historial de pagos</h2>
+            {transactionStats && (
+              <p className="history-total">
+                Total pagado: {formatAmount(transactionStats.total_gastado)}
+              </p>
+            )}
           </div>
+          {historyLoading ? (
+            <p className="history-message" role="status">Cargando historial...</p>
+          ) : historyError ? (
+            <div className="history-error" role="alert">
+              <p>{historyError}</p>
+              <button type="button" onClick={fetchTransactions} className="history-retry">
+                Reintentar
+              </button>
+            </div>
+          ) : transactions.length === 0 ? (
+            <p className="history-message">Todavía no tienes pagos registrados.</p>
+          ) : (
+            <div className="transaction-list">
+              {transactions.map((transaction) => (
+                <article className="transaction-card" key={transaction.id}>
+                  <div className="transaction-card__main">
+                    <div>
+                      <h3>{transaction.tipo_transaccion || "Pago"}</h3>
+                      <p>
+                        {transaction.gym_nombre || "Gimnasio"} ·{" "}
+                        {transaction.metodo_pago || "Método no disponible"}
+                      </p>
+                    </div>
+                    <strong>{formatAmount(transaction.importe)}</strong>
+                  </div>
+                  <div className="transaction-card__details">
+                    <span>{formatDate(transaction.fecha_pago)}</span>
+                    <span className={transaction.pagado ? "payment-status paid" : "payment-status pending"}>
+                      {transaction.pagado ? "Pagado" : "Pendiente"}
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
       </main>
     </div>

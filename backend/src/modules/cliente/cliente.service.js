@@ -137,7 +137,8 @@ export async function getAvailableClasses(admin, gymId, includeEnrolled = false)
   const classes = await clienteRepository.getAvailableClassesForGym(
     admin.id,
     gymId_num,
-    includeEnrolled
+    includeEnrolled,
+    Boolean(admin.gymId)
   );
   return classes;
 }

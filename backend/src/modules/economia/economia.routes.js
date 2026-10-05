@@ -6,7 +6,9 @@ import { validate } from '../../middlewares/validate.middleware.js';
 import * as economiaController from './economia.controller.js';
 import {
   crearIngresoSchema,
-  crearGastoSchema
+  crearGastoSchema,
+  actualizarIngresoSchema,
+  actualizarGastoSchema
 } from '../../schemas/economia.schemas.js';
 
 const router = Router();
@@ -51,10 +53,22 @@ router.post('/gastos', validate(crearGastoSchema), economiaController.crearGasto
 router.get('/ingresos', economiaController.listarIngresos);
 
 /** 
+ * Income Modification & Deletion
+ */
+router.put('/ingresos/:id', validate(actualizarIngresoSchema), economiaController.actualizarIngreso);
+router.delete('/ingresos/:id', economiaController.eliminarIngreso);
+
+/** 
  * Expense Listing
  * Retrieves a historical list of all recorded expenses for the branch.
  */
 router.get('/gastos', economiaController.listarGastos);
+
+/** 
+ * Expense Modification & Deletion
+ */
+router.put('/gastos/:id', validate(actualizarGastoSchema), economiaController.actualizarGasto);
+router.delete('/gastos/:id', economiaController.eliminarGasto);
 
 /**
  * PDF Reports
