@@ -5,6 +5,10 @@ import { registrarOperacion } from "../audit/audit.service.js";
 import { AppError } from "../../utils/AppError.js";
 import crypto from "crypto";
 import { pool } from "../../config/db.js";
+import { config } from "../../config/env.js";
+import { sendPasswordResetEmail } from "../../services/email.service.js";
+
+const PASSWORD_RESET_MESSAGE = "Si el correo está registrado, recibirás un enlace de recuperación.";
 
 /* ============================================================
    PASSWORD STRENGTH VALIDATION
@@ -181,7 +185,7 @@ export async function passwordReset({ token }) {
 /**
  * Generates a one-time password reset token for any user classification.
  * @param {string} email - The target identity for recovery.
- * @returns {Promise<Object>} Status message (and token for internal/testing).
+ * @returns {Promise<Object>} Generic status message.
  */
 export async function requestPasswordReset(email) {
   if (!email) throw new AppError("Email required", 400);
@@ -198,19 +202,29 @@ export async function requestPasswordReset(email) {
 
   if (!user) {
     // For security, don't confirm if email exists or not
-    return { mensaje: "If the email exists, you will receive a recovery link" };
+    return { mensaje: PASSWORD_RESET_MESSAGE };
   }
 
   const token = crypto.randomBytes(32).toString("hex");
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
   await authRepository.createPasswordResetToken({
     email,
-    token,
+    token: tokenHash,
     tipo_usuario,
   });
 
-  // In production, this token would be sent via email service
-  return { mensaje: "Recovery email sent", token };
+  const frontendUrl = config.frontendUrl.replace(/\/+$/, "");
+  const resetUrl = new URL("/reset-password", frontendUrl);
+  resetUrl.searchParams.set("token", token);
+  const nombre = [user.nombre, user.apellido].filter(Boolean).join(" ") || "usuario";
+
+  const emailSent = await sendPasswordResetEmail(email, nombre, resetUrl.toString());
+  if (!emailSent) {
+    await authRepository.invalidatePasswordResetToken(tokenHash);
+  }
+
+  return { mensaje: PASSWORD_RESET_MESSAGE };
 }
 
 /**
@@ -226,24 +240,10 @@ export async function resetPassword({ token, newPassword }) {
 
   validarPassword(newPassword);
 
-  const resetToken = await authRepository.findPasswordResetToken(token);
-  if (!resetToken) throw new AppError("Invalid or expired token", 400);
-
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
   const passwordHash = await hashPassword(newPassword);
-
-  // Update password based on user classification
-  if (resetToken.tipo_usuario === "ADMIN") {
-    const admin = await authRepository.findAdminByEmail(resetToken.email);
-    if (!admin) throw new AppError("Administrator not found", 404);
-    await authRepository.updatePassword(admin.id, passwordHash);
-  } else if (resetToken.tipo_usuario === "USUARIO_FINAL") {
-    const user = await authRepository.findUserFinalByEmail(resetToken.email);
-    if (!user) throw new AppError("User not found", 404);
-    await authRepository.updateUserFinalPassword(user.id, passwordHash);
-  }
-
-  // Consume the token (one-time use)
-  await authRepository.usePasswordResetToken(resetToken.id);
+  const updated = await authRepository.resetPasswordWithToken(tokenHash, passwordHash);
+  if (!updated) throw new AppError("Invalid or expired token", 400);
 
   return { mensaje: "Password updated successfully" };
 }

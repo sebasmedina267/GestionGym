@@ -12,19 +12,10 @@ import "./Styles/ForgotPasswordPage.css";
 export default function ForgotPasswordPage() {
   const navigate = useNavigate();
   const [submitted, setSubmitted] = useState(false);
-  const [email, setEmail] = useState("");
-
-  const handleSubmitSuccess = (userEmail) => {
-    setEmail(userEmail);
-    setSubmitted(true);
-  };
+  const handleSubmitSuccess = () => setSubmitted(true);
 
   const handleBackToLogin = () => {
     navigate("/login");
-  };
-
-  const handleGoToReset = () => {
-    navigate("/reset-password");
   };
 
   return (
@@ -58,20 +49,13 @@ export default function ForgotPasswordPage() {
               <div className="success-icon">
                 <span className="material-symbols-outlined">check_circle</span>
               </div>
-              <h2>Correo Enviado</h2>
+              <h2>Revisa tu correo</h2>
               <p>
-                Hemos enviado un enlace de recuperación a <strong>{email}</strong>
+                Si el correo está registrado, recibirás un enlace de recuperación.
               </p>
               <p className="success-instruction">
-                Por favor revisa tu bandeja de entrada y haz clic en el enlace proporcionado.
+                Revisa también la carpeta de spam. Si no llega el enlace, puedes volver a intentarlo más tarde.
               </p>
-              <button
-                type="button"
-                className="forgot-password-reset-btn"
-                onClick={handleGoToReset}
-              >
-                Tengo mi Token de Recuperación
-              </button>
               <button
                 type="button"
                 className="forgot-password-back-btn"

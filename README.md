@@ -16,7 +16,9 @@ Note: FitFlow is in active development. The web application includes member regi
 
 ## Production deployment
 
-Docker Compose requires `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`, `STRIPE_SECRET_KEY`, and `STRIPE_WEBHOOK_SECRET`; `DB_PORT` defaults to `3306`. Set these values in an untracked root `.env` file or in the deployment platform's secret manager. Use a `JWT_SECRET` with at least 32 characters and terminate HTTPS at the production reverse proxy. The backend health endpoint at `/health` also checks database connectivity.
+Docker Compose requires `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `FRONTEND_URL`, `SMTP_HOST`, `SMTP_USER`, and `SMTP_PASS`; `DB_PORT` defaults to `3306`, as does `SMTP_PORT` at `587`. Set these values in an untracked root `.env` file or in the deployment platform's secret manager. `FRONTEND_URL` must be the public HTTPS origin of the application; set `SMTP_FROM` if the sender should differ from the default. Use a `JWT_SECRET` with at least 32 characters and terminate HTTPS at the production reverse proxy. The backend health endpoint at `/health` also checks database connectivity.
+
+Apply `database/migrations/005_add_password_reset_tokens.sql` to existing installations before deploying the password recovery flow. Reset links expire after 30 minutes; only a SHA-256 hash of each token is stored, and each new request invalidates previous links for that email.
 
 ## Tests
 

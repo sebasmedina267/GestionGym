@@ -14,9 +14,7 @@ export const EMPTY_GYM_FORM = {
   direccion: "", 
   ciudad: "", 
   foto: "", 
-  urlWeb: "",
-  latitud: "",
-  longitud: ""
+  urlWeb: "" 
 };
 
 /**
@@ -37,8 +35,8 @@ export function useGymsLogic() {
   const isDueno = admin?.roles?.includes("DUENO");
 
   // --- Primary Data Queries ---
-  const { data: allGyms, loading, refetch } = useFetch("gyms/all");
-  const { data: myGyms, refetch: refetchMy } = useFetch("gyms");
+  const { data: allGyms, loading, refetch } = useFetch("/gyms/all");
+  const { data: myGyms, refetch: refetchMy } = useFetch("/gyms");
 
   // --- UI Visibility State ---
   const [openCreateGym, setOpenCreateGym] = useState(false);
@@ -81,20 +79,9 @@ export function useGymsLogic() {
     if (!createForm.nombre) newErrors.nombre = "El nombre de la sucursal es obligatorio";
     if (!createForm.direccion) newErrors.direccion = "La dirección es obligatoria";
     if (!createForm.ciudad) newErrors.ciudad = "La ciudad es obligatoria";
-    if (!createForm.latitud) newErrors.latitud = "La latitud es obligatoria";
-    if (!createForm.longitud) newErrors.longitud = "La longitud es obligatoria";
-    
-    // Validar que latitud y longitud sean números válidos
-    if (createForm.latitud && (isNaN(createForm.latitud) || createForm.latitud < -90 || createForm.latitud > 90)) {
-      newErrors.latitud = "La latitud debe estar entre -90 y 90";
-    }
-    if (createForm.longitud && (isNaN(createForm.longitud) || createForm.longitud < -180 || createForm.longitud > 180)) {
-      newErrors.longitud = "La longitud debe estar entre -180 y 180";
-    }
-    
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
-      addNotification("Por favor completa todos los campos requeridos correctamente", "error");
+      addNotification("Por favor completa todos los campos requeridos", "error");
       return;
     }
 
@@ -116,9 +103,7 @@ export function useGymsLogic() {
           nombre: createForm.nombre,
           direccion: createForm.direccion,
           ciudad: createForm.ciudad,
-          urlWeb: createForm.urlWeb,
-          latitud: parseFloat(createForm.latitud),
-          longitud: parseFloat(createForm.longitud)
+          urlWeb: createForm.urlWeb
         }
       }));
 

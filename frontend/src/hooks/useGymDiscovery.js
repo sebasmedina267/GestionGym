@@ -50,7 +50,7 @@ export function useGymDiscovery() {
    * Search for nearby gyms
    */
   const searchNearby = useCallback(
-    async (latitude, longitude, radiusKm = 5) => {
+    async (latitude, longitude, radiusKm = 100) => {
       setLoading(true);
       setError(null);
 
@@ -63,8 +63,17 @@ export function useGymDiscovery() {
           },
         });
 
-        setGyms(response.data.data);
-        return response.data.data;
+        const foundGyms = Array.isArray(response.data?.data)
+          ? [...response.data.data].sort((a, b) => {
+              if (a.distancia_km == null && b.distancia_km == null) return 0;
+              if (a.distancia_km == null) return 1;
+              if (b.distancia_km == null) return -1;
+              return a.distancia_km - b.distancia_km;
+            })
+          : [];
+
+        setGyms(foundGyms);
+        return foundGyms;
       } catch (err) {
         const errorMsg = err.response?.data?.message || "Failed to search gyms";
         setError(errorMsg);
@@ -157,19 +166,67 @@ export function useGymDiscovery() {
   }, []);
 
   /**
+   * Get all gyms sorted by distance when coordinates are available,
+   * or return the full catalog when geolocation is unavailable.
+   */
+  const getAllGyms = useCallback(
+    async (radiusKm = 100) => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await api.get("/client/gyms", {
+          params: {
+            radius: radiusKm,
+          },
+        });
+
+        const foundGyms = Array.isArray(response.data?.data)
+          ? [...response.data.data].sort((a, b) => {
+              if (a.distancia_km == null && b.distancia_km == null) return 0;
+              if (a.distancia_km == null) return 1;
+              if (b.distancia_km == null) return -1;
+              return a.distancia_km - b.distancia_km;
+            })
+          : [];
+
+        setGyms(foundGyms);
+        return foundGyms;
+      } catch (err) {
+        const errorMsg = err.response?.data?.message || "Failed to load gyms";
+        setError(errorMsg);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  /**
    * Search nearby gyms using current browser location
    */
   const searchNearbyFromCurrentLocation = useCallback(
     async (radiusKm = 5) => {
       try {
         const location = await getUserLocation();
-        await searchNearby(location.latitude, location.longitude, radiusKm);
+        const foundGyms = await searchNearby(location.latitude, location.longitude, radiusKm);
+
+        if (foundGyms.length > 0) {
+          return foundGyms;
+        }
       } catch (err) {
-        setError(err.message);
+        console.warn("Geolocation unavailable, falling back to all gyms:", err.message || err);
+      }
+
+      try {
+        return await getAllGyms(radiusKm);
+      } catch (err) {
+        setError(err.message || "No gyms available");
         throw err;
       }
     },
-    [getUserLocation, searchNearby]
+    [getUserLocation, getAllGyms, searchNearby]
   );
 
   return {
@@ -183,6 +240,7 @@ export function useGymDiscovery() {
     // Methods
     getUserLocation,
     searchNearby,
+    getAllGyms,
     searchNearbyFromCurrentLocation,
     getGymDetails,
     getGymClasses,

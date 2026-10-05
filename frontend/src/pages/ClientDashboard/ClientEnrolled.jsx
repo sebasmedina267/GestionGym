@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import api from "../../api/axios";
 import ClassEnrollModal from "./ClassEnrollModal";
@@ -181,27 +182,49 @@ export default function ClientEnrolled({ gym, onUnenroll }) {
           </div>
         </div>
 
-        {/* Logout */}
-        <button
-          onClick={logout}
-          className="flex items-center space-x-2 px-4 py-2 bg-[#111422] border border-[#1f2937] hover:bg-red-900/20 transition-colors rounded-lg text-sm font-medium"
-        >
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
+        <div className="flex items-center gap-3">
+          <Link
+            to="/client/profile"
+            className="flex items-center space-x-2 px-4 py-2 bg-[#111422] border border-[#1f2937] hover:bg-[#1f2937] transition-colors rounded-lg text-sm font-medium text-white"
           >
-            <path
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-            ></path>
-          </svg>
-          <span>Cerrar Sesión</span>
-        </button>
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zm-8 9a4 4 0 014-4h0a4 4 0 014 4v1H8v-1z"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+              ></path>
+            </svg>
+            <span>Mi perfil</span>
+          </Link>
+
+          <button
+            onClick={logout}
+            className="flex items-center space-x-2 px-4 py-2 bg-[#111422] border border-[#1f2937] hover:bg-red-900/20 transition-colors rounded-lg text-sm font-medium"
+          >
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+              ></path>
+            </svg>
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
       </header>
 
       {/* --- NAVIGATION --- */}

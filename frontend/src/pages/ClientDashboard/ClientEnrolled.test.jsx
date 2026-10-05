@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import api from "../../api/axios";
 import ClientEnrolled from "./ClientEnrolled";
@@ -57,13 +58,15 @@ describe("ClientEnrolled class enrollment", () => {
     });
 
     render(
-      <ClientEnrolled
-        gym={{
-          id: 12,
-          nombre: "FitFlow Centro",
-          direccion: "Calle Mayor 1",
-        }}
-      />
+      <MemoryRouter>
+        <ClientEnrolled
+          gym={{
+            id: 12,
+            nombre: "FitFlow Centro",
+            direccion: "Calle Mayor 1",
+          }}
+        />
+      </MemoryRouter>
     );
 
     fireEvent.click(screen.getAllByText("Clases")[0]);
@@ -90,13 +93,15 @@ describe("ClientEnrolled class enrollment", () => {
     });
 
     render(
-      <ClientEnrolled
-        gym={{
-          id: 12,
-          nombre: "FitFlow Centro",
-          direccion: "Calle Mayor 1",
-        }}
-      />
+      <MemoryRouter>
+        <ClientEnrolled
+          gym={{
+            id: 12,
+            nombre: "FitFlow Centro",
+            direccion: "Calle Mayor 1",
+          }}
+        />
+      </MemoryRouter>
     );
 
     fireEvent.click(screen.getAllByText("Máquinas")[0]);

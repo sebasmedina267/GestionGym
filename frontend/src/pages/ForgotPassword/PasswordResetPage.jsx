@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PasswordResetForm from "./PasswordResetForm";
 import "./Styles/PasswordResetPage.css";
 
@@ -7,13 +7,19 @@ import "./Styles/PasswordResetPage.css";
  * PasswordResetPage Component
  * 
  * Page where users can reset their password using a reset token.
- * Can be accessed via email link (with token in query param) or manually entering the token.
+ * Accepts email links and removes their token from the browser address bar.
  */
 export default function PasswordResetPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tokenFromURL = searchParams.get("token");
   const [resetSuccess, setResetSuccess] = useState(false);
+
+  useEffect(() => {
+    if (tokenFromURL) {
+      navigate("/reset-password", { replace: true });
+    }
+  }, [navigate, tokenFromURL]);
 
   const handleResetSuccess = () => {
     setResetSuccess(true);

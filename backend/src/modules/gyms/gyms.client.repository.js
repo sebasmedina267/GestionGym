@@ -29,10 +29,6 @@ export async function findGymsNearby(latitud, longitud, radiusKm = 5) {
     throw new AppError("Invalid coordinates", 400);
   }
 
-  // Use Haversine formula to calculate distance
-  // Formula: d = 2*R*arcsin(sqrt(sin²((lat2-lat1)/2) + cos(lat1)*cos(lat2)*sin²((lon2-lon1)/2)))
-  // Simplified: R ≈ 6371 km
-  
   const [rows] = await pool.query(
     `SELECT 
         g.id,
@@ -46,16 +42,12 @@ export async function findGymsNearby(latitud, longitud, radiusKm = 5) {
         g.horario_fin,
         g.telefono,
         g.email_contacto,
-        -- Calculate distance in kilometers
         (6371 * acos(cos(radians(?)) * cos(radians(g.latitud)) * 
          cos(radians(g.longitud) - radians(?)) + 
          sin(radians(?)) * sin(radians(g.latitud)))) AS distancia_km,
-        -- Count of active members
         (SELECT COUNT(*) FROM usuarios_finales_gimnasios 
          WHERE gym_id = g.id AND estado_inscripcion = 'ACTIVO') AS miembros_activos,
-        -- Count of available classes
         (SELECT COUNT(*) FROM clases WHERE gym_id = g.id) AS total_clases,
-        -- Count of machines
         (SELECT COUNT(*) FROM maquinas WHERE gym_id = g.id) AS total_maquinas
      FROM gyms g
      WHERE g.latitud IS NOT NULL 
@@ -66,6 +58,71 @@ export async function findGymsNearby(latitud, longitud, radiusKm = 5) {
      ORDER BY distancia_km ASC
      LIMIT 50`,
     [latitud, longitud, latitud, latitud, longitud, latitud, radiusKm]
+  );
+
+  return rows;
+}
+
+export async function findAllGymsWithDistance(latitud = null, longitud = null, radiusKm = 100) {
+  const hasCoords = Number.isFinite(latitud) && Number.isFinite(longitud);
+
+  if (hasCoords) {
+    if (latitud < -90 || latitud > 90 || longitud < -180 || longitud > 180) {
+      throw new AppError("Invalid coordinates", 400);
+    }
+
+    const [rows] = await pool.query(
+      `SELECT 
+          g.id,
+          g.nombre,
+          g.direccion,
+          g.ciudad,
+          g.foto,
+          g.latitud,
+          g.longitud,
+          g.horario_inicio,
+          g.horario_fin,
+          g.telefono,
+          g.email_contacto,
+          (6371 * acos(cos(radians(?)) * cos(radians(g.latitud)) * 
+           cos(radians(g.longitud) - radians(?)) + 
+           sin(radians(?)) * sin(radians(g.latitud)))) AS distancia_km,
+          (SELECT COUNT(*) FROM usuarios_finales_gimnasios 
+           WHERE gym_id = g.id AND estado_inscripcion = 'ACTIVO') AS miembros_activos,
+          (SELECT COUNT(*) FROM clases WHERE gym_id = g.id) AS total_clases,
+          (SELECT COUNT(*) FROM maquinas WHERE gym_id = g.id) AS total_maquinas
+       FROM gyms g
+       WHERE g.latitud IS NOT NULL 
+         AND g.longitud IS NOT NULL
+       HAVING distancia_km <= ?
+       ORDER BY distancia_km ASC
+       LIMIT 200`,
+      [latitud, longitud, latitud, radiusKm]
+    );
+
+    return rows;
+  }
+
+  const [rows] = await pool.query(
+    `SELECT 
+        g.id,
+        g.nombre,
+        g.direccion,
+        g.ciudad,
+        g.foto,
+        g.latitud,
+        g.longitud,
+        g.horario_inicio,
+        g.horario_fin,
+        g.telefono,
+        g.email_contacto,
+        NULL AS distancia_km,
+        (SELECT COUNT(*) FROM usuarios_finales_gimnasios 
+         WHERE gym_id = g.id AND estado_inscripcion = 'ACTIVO') AS miembros_activos,
+        (SELECT COUNT(*) FROM clases WHERE gym_id = g.id) AS total_clases,
+        (SELECT COUNT(*) FROM maquinas WHERE gym_id = g.id) AS total_maquinas
+     FROM gyms g
+     ORDER BY g.nombre ASC`
   );
 
   return rows;

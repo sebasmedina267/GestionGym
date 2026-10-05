@@ -75,7 +75,12 @@ router.post(
 /**
  * Execute the password reset using the provided token/OTP
  */
-router.post('/password-reset', validate(passwordResetSchema), authController.passwordReset);
+router.post(
+  '/password-reset',
+  passwordResetLimiter,
+  validate(passwordResetSchema),
+  authController.passwordReset
+);
 
 // --- End User (Mobile App) Routes ---
 

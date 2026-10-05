@@ -4,6 +4,24 @@ import { useAuth } from "../../hooks/useAuth";
 import api from "../../api/axios";
 import "./ClientEnroll.css";
 
+const DEFAULT_GYM_PRICE = 39;
+
+const normalizeGymPrice = (value) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_GYM_PRICE;
+};
+
+const formatGymLocation = (gym) => {
+  if (!gym) return "Dirección no disponible";
+
+  const locationParts = [gym.direccion, gym.ciudad, gym.pais]
+    .filter(Boolean)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  return locationParts.length > 0 ? locationParts.join(", ") : "Dirección no disponible";
+};
+
 /**
  * ClientEnroll Component
  * 
@@ -50,21 +68,26 @@ export default function ClientEnroll() {
       setEnrolling(true);
       setError(null);
 
+      const selectedPrice = Number(selectedPlanData.price);
+      const amountInCents = Math.round(selectedPrice * 100);
+
       // Create payment intent
       const paymentResponse = await api.post("/stripe/create-payment-intent", {
         gymId,
         type: "MEMBERSHIP",
         plan: selectedPlan,
-        amount: gym.precio_cuota_mensual,
+        amount: amountInCents,
         description: `Membresía ${selectedPlan} - ${gym.nombre}`,
       });
 
-      const { clientSecret } = paymentResponse.data.data;
+      const responseData = paymentResponse?.data?.data ?? paymentResponse?.data ?? {};
+      const clientSecret = responseData.clientSecret;
 
-      // Redirect to Stripe checkout
-      // You can either use Stripe's redirect or embed a Stripe form
-      // For now, we'll redirect to the Stripe checkout page
-      window.location.href = `/stripe-checkout?clientSecret=${clientSecret}&gymId=${gymId}`;
+      if (!clientSecret) {
+        throw new Error("No se recibió la clave de pago del servidor");
+      }
+
+      window.location.href = `/stripe-checkout?clientSecret=${clientSecret}&gymId=${gymId}&plan=${encodeURIComponent(selectedPlan)}&amount=${amountInCents}`;
     } catch (err) {
       console.error("Error initiating enrollment:", err);
       setError(
@@ -110,11 +133,13 @@ export default function ClientEnroll() {
     );
   }
 
+  const monthlyBasePrice = normalizeGymPrice(gym.precio_cuota_mensual);
+
   const plans = [
     {
       id: "monthly",
       name: "Plan Mensual",
-      price: gym.precio_cuota_mensual,
+      price: monthlyBasePrice,
       duration: "1 mes",
       description: "Acceso ilimitado durante 30 días",
       features: [
@@ -127,7 +152,7 @@ export default function ClientEnroll() {
     {
       id: "quarterly",
       name: "Plan Trimestral",
-      price: (gym.precio_cuota_mensual * 3 * 0.9).toFixed(2), // 10% discount
+      price: Number((monthlyBasePrice * 3 * 0.9).toFixed(2)),
       duration: "3 meses",
       description: "Acceso ilimitado durante 90 días (Ahorra 10%)",
       features: [
@@ -141,7 +166,7 @@ export default function ClientEnroll() {
     {
       id: "annual",
       name: "Plan Anual",
-      price: (gym.precio_cuota_mensual * 12 * 0.8).toFixed(2), // 20% discount
+      price: Number((monthlyBasePrice * 12 * 0.8).toFixed(2)),
       duration: "12 meses",
       description: "Acceso ilimitado durante 365 días (Ahorra 20%)",
       features: [
@@ -155,6 +180,7 @@ export default function ClientEnroll() {
   ];
 
   const selectedPlanData = plans.find((p) => p.id === selectedPlan);
+  const gymLocation = formatGymLocation(gym);
 
   return (
     <div className="enroll-container">
@@ -184,7 +210,7 @@ export default function ClientEnroll() {
                 <h1>{gym.nombre}</h1>
                 <div className="gym-info-details">
                   <p className="detail">
-                    <strong>📍 Ubicación:</strong> {gym.direccion}, {gym.ciudad}
+                    <strong>📍 Ubicación:</strong> {gymLocation}
                   </p>
                   <p className="detail">
                     <strong>⏰ Horario:</strong> {gym.horario_inicio} - {gym.horario_fin}

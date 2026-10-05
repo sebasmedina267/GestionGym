@@ -24,7 +24,7 @@ const ForgotPasswordForm = ({ onSubmitSuccess }) => {
       const response = await passwordResetRequest(email);
       
       if (response.status === 200 || response.status === 201) {
-        onSubmitSuccess(email);
+        onSubmitSuccess();
       }
     } catch (err) {
       const errorMsg = 

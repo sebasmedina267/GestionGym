@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js";
+import api from "../../../api/axios";
 import { confirmOwnerPayment, createBranchAfterPayment, createOwnerSubscriptionPayment, createBranchSubscriptionPayment } from "../../../api/stripe.api";
+import { useAuth } from "../../../hooks/useAuth";
 
 /**
  * useStripeCheckout Hook
@@ -45,13 +47,20 @@ export const useStripeCheckout = () => {
   // Stripe SDK hooks for card handling
   const stripe = useStripe();
   const elements = useElements();
+  const { admin } = useAuth();
   
   // Router navigation
   const navigate = useNavigate();
   const location = useLocation();
+  const searchParams = new URLSearchParams(location.search || "");
+  const gymIdFromQuery = searchParams.get("gymId");
+  const clientSecretFromQuery = searchParams.get("clientSecret");
+  const selectedPlan = searchParams.get("plan") || "monthly";
+  const amountFromQuery = Number(searchParams.get("amount") || 0);
   
   // Determine payment type based on route
   const isBranchPayment = location.pathname === "/branch-payment";
+  const isClientMembership = location.pathname === "/stripe-checkout" && Boolean(gymIdFromQuery && clientSecretFromQuery);
   
   /**
    * Payment data - contains sensitive Stripe information
@@ -105,7 +114,24 @@ export const useStripeCheckout = () => {
         setLoadingConfig(true);
         let data = null;
         
-        if (isBranchPayment) {
+        if (isClientMembership) {
+          const email = admin?.email || sessionStorage.getItem('pendingClientEmail') || 'cliente@fitflow.local';
+          const planLabels = {
+            monthly: 'Plan Mensual',
+            quarterly: 'Plan Trimestral',
+            annual: 'Plan Anual',
+          };
+
+          data = {
+            email,
+            clientSecret: clientSecretFromQuery,
+            type: 'CLIENT_MEMBERSHIP',
+            gymId: gymIdFromQuery,
+            plan: selectedPlan,
+            planLabel: planLabels[selectedPlan] || 'Membresía FitFlow',
+            amount: amountFromQuery || 3900,
+          };
+        } else if (isBranchPayment) {
           // New branch payment flow
           const stored = sessionStorage.getItem('branchPaymentData');
           if (stored) data = JSON.parse(stored);
@@ -175,7 +201,7 @@ export const useStripeCheckout = () => {
     };
 
     initPayment();
-  }, [isBranchPayment, location.state, navigate]);
+  }, [admin?.email, clientSecretFromQuery, gymIdFromQuery, amountFromQuery, isBranchPayment, isClientMembership, location.state, navigate, selectedPlan]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -252,7 +278,12 @@ export const useStripeCheckout = () => {
         try {
           console.log("💾 Guardando confirmación de pago en backend...");
           
-          if (isBranchPayment) {
+          if (isClientMembership) {
+            await api.post(`/client/dashboard/gyms/${paymentData.gymId}/enroll`, {
+              metodoPago: "STRIPE",
+              plan: paymentData.plan,
+            });
+          } else if (isBranchPayment) {
             await createBranchAfterPayment({
               nombre: paymentData.branchData.nombre,
               direccion: branchForm.direccion,
@@ -274,6 +305,10 @@ export const useStripeCheckout = () => {
           setProcessing(false);
           
           setTimeout(() => {
+            if (isClientMembership) {
+              navigate("/client/dashboard", { state: { fromPayment: true } });
+              return;
+            }
             navigate(isBranchPayment ? "/admins" : "/login", { state: { fromPayment: true } });
           }, 3000);
         } catch (err) {
@@ -311,6 +346,7 @@ export const useStripeCheckout = () => {
     loadingConfig,
     branchForm,
     isBranchPayment,
+    isClientMembership,
     handleSubmit,
     handleBranchFormChange,
   };

@@ -382,35 +382,89 @@ export async function getGymsForUser(userId) {
    MODERN RECOVERY REPOSITORY
    ============================================================ */
 
-/** Creates a security token for password recovery (Modern). */
+/** Creates a hashed security token for password recovery (Modern). */
 export async function createPasswordResetToken({ email, token, tipo_usuario = 'ADMIN' }) {
-  const expiracion = new Date(Date.now() + 1000 * 60 * 30); // 30 minutes
-  const [result] = await pool.query(
-    `INSERT INTO password_reset_tokens (email, token, tipo_usuario, fecha_expiracion)
-     VALUES (?, ?, ?, ?)`,
-    [email, token, tipo_usuario, expiracion]
-  );
-  return result.insertId;
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    await connection.query(
+      `UPDATE password_reset_tokens
+       SET usado = 1, fecha_uso = NOW()
+       WHERE email = ? AND usado = 0`,
+      [email]
+    );
+    const expiracion = new Date(Date.now() + 1000 * 60 * 30);
+    const [result] = await connection.query(
+      `INSERT INTO password_reset_tokens (email, token, tipo_usuario, fecha_expiracion)
+       VALUES (?, ?, ?, ?)`,
+      [email, token, tipo_usuario, expiracion]
+    );
+    await connection.commit();
+    return result.insertId;
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 }
 
-/** Finds a valid, unused recovery token. */
-export async function findPasswordResetToken(token) {
-  const [rows] = await pool.query(
-    `SELECT * FROM password_reset_tokens 
-     WHERE token = ? AND usado = 0 AND fecha_expiracion > NOW()`,
-    [token]
-  );
-  return rows[0];
-}
-
-/** Invalidates a recovery token after use. */
-export async function usePasswordResetToken(tokenId) {
+/** Invalidates a recovery token when delivery fails. */
+export async function invalidatePasswordResetToken(tokenHash) {
   await pool.query(
-    `UPDATE password_reset_tokens 
-     SET usado = 1, fecha_uso = NOW()
-     WHERE id = ?`,
-    [tokenId]
+    `UPDATE password_reset_tokens SET usado = 1, fecha_uso = NOW() WHERE token = ? AND usado = 0`,
+    [tokenHash]
   );
+}
+
+/** Changes a password and consumes its token atomically. */
+export async function resetPasswordWithToken(tokenHash, passwordHash) {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [tokens] = await connection.query(
+      `SELECT id, email, tipo_usuario FROM password_reset_tokens
+       WHERE token = ? AND usado = 0 AND fecha_expiracion > NOW()
+       FOR UPDATE`,
+      [tokenHash]
+    );
+    const resetToken = tokens[0];
+    if (!resetToken) {
+      await connection.rollback();
+      return false;
+    }
+
+    const table = resetToken.tipo_usuario === 'ADMIN'
+      ? 'admins'
+      : resetToken.tipo_usuario === 'USUARIO_FINAL'
+        ? 'usuarios_finales'
+        : null;
+    if (!table) {
+      await connection.rollback();
+      return false;
+    }
+
+    const [updated] = await connection.query(
+      `UPDATE ${table} SET password = ? WHERE email = ? AND activo = 1`,
+      [passwordHash, resetToken.email]
+    );
+    if (updated.affectedRows !== 1) {
+      await connection.rollback();
+      return false;
+    }
+
+    await connection.query(
+      `UPDATE password_reset_tokens SET usado = 1, fecha_uso = NOW() WHERE id = ?`,
+      [resetToken.id]
+    );
+    await connection.commit();
+    return true;
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 }
 
 /** Updates client password. */
@@ -455,4 +509,3 @@ export async function findClienteNativeById(id) {
   );
   return rows[0];
 }
-

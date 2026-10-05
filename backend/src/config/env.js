@@ -11,6 +11,10 @@ const requiredProductionVariables = [
   ['JWT_SECRET', process.env.JWT_SECRET],
   ['STRIPE_SECRET_KEY', process.env.STRIPE_SECRET_KEY],
   ['STRIPE_WEBHOOK_SECRET', process.env.STRIPE_WEBHOOK_SECRET],
+  ['SMTP_HOST', process.env.SMTP_HOST],
+  ['SMTP_USER', process.env.SMTP_USER],
+  ['SMTP_PASS', process.env.SMTP_PASS],
+  ['FRONTEND_URL', process.env.FRONTEND_URL],
 ];
 const missingProductionVariables = requiredProductionVariables
   .filter(([, value]) => !value)
@@ -49,6 +53,7 @@ export const config = {
   jwtSecret: process.env.JWT_SECRET || 'super_secret_fitflow',
   stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
+  frontendUrl: process.env.FRONTEND_URL || process.env.APP_URL || 'http://localhost:5173',
   stripePrices: {
     ownerSubscription: 9200, // €92 EUR
     branchSubscription: 4500, // €45 EUR

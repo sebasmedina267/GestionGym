@@ -40,8 +40,41 @@ function validarId(id) {
 }
 
 /* ============================================================
-   NEARBY GYMS SEARCH
+   ALL GYMS / NEARBY SEARCH
    ============================================================ */
+
+export async function getAllGyms(req, res, next) {
+  try {
+    const { lat, lng, radius } = req.query;
+
+    if (lat && lng) {
+      const coords = validarCoordinadas(lat, lng);
+      const radiusKm = radius ? Math.min(Math.max(parseFloat(radius), 1), 100) : 100;
+
+      const gyms = await gymsClientService.getAllGymsWithDistance(
+        coords.lat,
+        coords.lng,
+        radiusKm
+      );
+
+      return res.status(200).json({
+        ok: true,
+        data: gyms,
+        count: gyms.length,
+      });
+    }
+
+    const gyms = await gymsClientService.getAllGymsWithDistance();
+
+    return res.status(200).json({
+      ok: true,
+      data: gyms,
+      count: gyms.length,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
 
 /**
  * Find gyms near user's location

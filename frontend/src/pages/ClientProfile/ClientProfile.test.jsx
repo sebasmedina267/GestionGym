@@ -2,6 +2,8 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import api from "../../api/axios";
+import { AuthContext } from "../../context/AuthContext";
+import AppRouter from "../../router/AppRouter";
 import ClientProfile from "./ClientProfile";
 
 const notificationMocks = vi.hoisted(() => ({
@@ -69,5 +71,31 @@ describe("ClientProfile payment history", () => {
     expect(screen.getByText("MEMBRESÍA")).toBeInTheDocument();
     expect(screen.getByText("Pagado")).toBeInTheDocument();
     expect(screen.getByText(/Total pagado:/)).toHaveTextContent(/42,00\s?€/);
+  });
+
+  it("renders the client profile page at the protected route /client/profile", async () => {
+    window.history.pushState({}, "", "/client/profile");
+    vi.mocked(api.get).mockImplementation((url) => {
+      if (url === "/client/dashboard/profile") {
+        return Promise.resolve({
+          data: { data: { nombre: "Ana", apellido: "García", email: "ana@example.com" } },
+        });
+      }
+      if (url === "/client/dashboard/transactions") {
+        return Promise.resolve({ data: { data: [] } });
+      }
+      if (url === "/client/dashboard/transactions/stats") {
+        return Promise.resolve({ data: { data: { total_gastado: 0 } } });
+      }
+      return Promise.resolve({ data: { data: [] } });
+    });
+
+    render(
+      <AuthContext.Provider value={{ admin: { tipo: "USUARIO_FINAL" }, loading: false }}>
+        <AppRouter />
+      </AuthContext.Provider>
+    );
+
+    expect(await screen.findByText("Mi Perfil")).toBeInTheDocument();
   });
 });

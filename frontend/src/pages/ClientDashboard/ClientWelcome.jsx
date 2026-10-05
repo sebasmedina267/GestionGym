@@ -46,7 +46,7 @@ export default function ClientWelcome() {
 
           // Search nearby gyms
           const response = await api.get("/client/gyms/near", {
-            params: { latitude, longitude, radius: 10 },
+            params: { lat: latitude, lng: longitude, radius: 100 },
           });
 
           const foundGyms = response.data?.data || [];

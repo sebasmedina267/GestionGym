@@ -9,7 +9,8 @@ const StripeCheckoutView = ({
   success, 
   loadingConfig,
   branchForm, 
-  isBranchPayment, 
+  isBranchPayment,
+  isClientMembership,
   handleSubmit, 
   handleBranchFormChange 
 }) => {
@@ -31,9 +32,11 @@ const StripeCheckoutView = ({
         </div>
         <h2 className="text-3xl font-bold text-white">¡Pago Completado!</h2>
         <p className="text-on-surface-variant-midnight">
-          {isBranchPayment 
-            ? `La sucursal ${paymentData?.branchData?.nombre} ha sido activada correctamente.`
-            : "Tu suscripción ha sido activada correctamente. Ahora puedes empezar a gestionar tu gimnasio."}
+          {isClientMembership
+            ? "Tu membresía ha quedado activada correctamente. Ya puedes entrar a tu panel del gimnasio."
+            : isBranchPayment 
+              ? `La sucursal ${paymentData?.branchData?.nombre} ha sido activada correctamente.`
+              : "Tu suscripción ha sido activada correctamente. Ahora puedes empezar a gestionar tu gimnasio."}
         </p>
         <div className="pt-4">
           <div className="flex items-center justify-center gap-3 text-primary-midnight animate-pulse">
@@ -45,9 +48,10 @@ const StripeCheckoutView = ({
     );
   }
 
-  const priceLabel = isBranchPayment ? "€45.00" : "€92.00"; 
-  const periodLabel = isBranchPayment ? "EUR / AÑO" : "EUR / AÑO";
-  const planName = isBranchPayment ? "Nueva Sucursal" : "Plan Pro Anual";
+  const amountValue = isClientMembership ? (Number(paymentData?.amount || 0) / 100) : (isBranchPayment ? 45 : 92);
+  const priceLabel = isClientMembership ? `€${amountValue.toFixed(2)}` : isBranchPayment ? "€45.00" : "€92.00";
+  const periodLabel = isBranchPayment ? "EUR / AÑO" : isClientMembership ? "EUR / MES" : "EUR / AÑO";
+  const planName = isClientMembership ? (paymentData?.planLabel || "Membresía FitFlow") : isBranchPayment ? "Nueva Sucursal" : "Plan Pro Anual";
 
   return (
     <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -76,7 +80,7 @@ const StripeCheckoutView = ({
           
           <div className="pt-6 border-t border-white/5 space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-on-surface-variant-midnight">{isBranchPayment ? 'Activación Sucursal' : 'Suscripción anual'}</span>
+              <span className="text-on-surface-variant-midnight">{isClientMembership ? 'Membresía del cliente' : isBranchPayment ? 'Activación Sucursal' : 'Suscripción anual'}</span>
               <span className="text-white font-bold">{priceLabel}</span>
             </div>
             <div className="flex justify-between items-center">

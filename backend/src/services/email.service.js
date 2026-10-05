@@ -40,7 +40,7 @@ function getTransport() {
   _transport = nodemailer.createTransport({
     host,
     port: Number(config.smtp?.port || process.env.SMTP_PORT || 587),
-    secure: false, // Use STARTTLS
+    secure: Number(config.smtp?.port || process.env.SMTP_PORT || 587) === 465,
     auth: {
       user: config.smtp?.user || process.env.SMTP_USER,
       pass: config.smtp?.pass || process.env.SMTP_PASS,
@@ -171,12 +171,18 @@ export async function sendTemporaryPassword(email, nombre, password) {
  *
  * @param {string} email   - Recipient email.
  * @param {string} nombre  - Recipient name.
- * @param {string} token   - The one-time reset token.
  * @param {string} resetUrl - Full URL of the reset form (e.g. https://app.fitflow.io/reset-password?token=xxx)
  * @returns {Promise<boolean>}
  */
-export async function sendPasswordResetEmail(email, nombre, token, resetUrl) {
+export async function sendPasswordResetEmail(email, nombre, resetUrl) {
   const subject = '🔑 FitFlow — Recuperación de contraseña';
+  const safeName = nombre.replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  })[character]);
 
   const html = `
     <!DOCTYPE html>
@@ -206,11 +212,9 @@ export async function sendPasswordResetEmail(email, nombre, token, resetUrl) {
       <div class="wrap">
         <div class="header"><h1>🔑 FitFlow</h1></div>
         <div class="body">
-          <p>Hola, <strong>${nombre}</strong> 👋</p>
+          <p>Hola, <strong>${safeName}</strong> 👋</p>
           <p>Recibimos una solicitud para restablecer tu contraseña.</p>
           ${resetUrl ? `<p><a href="${resetUrl}" class="btn">Restablecer contraseña</a></p>` : ''}
-          <p>O usa este token directamente en la aplicación:</p>
-          <div class="token-box">${token}</div>
           <div class="warning">⏱️ Este enlace expira en 30 minutos. Si no solicitaste este cambio, ignora este mensaje.</div>
         </div>
         <div class="footer">FitFlow Management System</div>
@@ -219,5 +223,10 @@ export async function sendPasswordResetEmail(email, nombre, token, resetUrl) {
     </html>
   `;
 
-  return sendMail({ to: email, subject, html });
+  return sendMail({
+    to: email,
+    subject,
+    html,
+    text: `Hola ${nombre},\n\nRecibimos una solicitud para restablecer tu contraseña. Abre este enlace en los próximos 30 minutos:\n${resetUrl}\n\nSi no solicitaste este cambio, ignora este mensaje.`,
+  });
 }

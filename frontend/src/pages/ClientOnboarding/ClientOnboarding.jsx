@@ -35,7 +35,7 @@ export default function ClientOnboarding() {
 
   const handleSearchNearby = useCallback(async () => {
     try {
-      await searchNearbyFromCurrentLocation(5);
+      await searchNearbyFromCurrentLocation(100);
     } catch (err) {
       console.error("Error searching gyms:", err);
     }
@@ -56,6 +56,17 @@ export default function ClientOnboarding() {
       console.error("Error fetching gym details:", err);
     }
   };
+
+  const handleEnroll = useCallback(() => {
+    if (!selectedGym) return;
+
+    navigate("/client/enroll", {
+      state: {
+        gymId: selectedGym.id,
+        gymName: selectedGym.nombre,
+      },
+    });
+  }, [navigate, selectedGym]);
 
   return (
     <div className="client-onboarding">
@@ -135,7 +146,7 @@ export default function ClientOnboarding() {
 
                           <div className="gym-card__stats">
                             <span className="stat">
-                              📍 {gym.distancia_km.toFixed(1)} km
+                              📍 {typeof gym.distancia_km === "number" ? `${gym.distancia_km.toFixed(1)} km` : "Sin ubicación"}
                             </span>
                             <span className="stat">👥 {gym.miembros_activos} miembros</span>
                             <span className="stat">💪 {gym.total_maquinas} máquinas</span>
@@ -203,8 +214,12 @@ export default function ClientOnboarding() {
                       </ul>
                     </div>
 
-                    <button className="btn btn--primary btn--block">
-                      Ver más detalles
+                    <button
+                      className="btn btn--primary btn--block"
+                      onClick={handleEnroll}
+                      type="button"
+                    >
+                      Apuntarme a este Gym
                     </button>
                   </div>
                 </div>

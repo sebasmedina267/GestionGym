@@ -11,6 +11,17 @@ import * as gymsClientController from "./gyms.client.controller.js";
 const router = Router();
 
 /**
+ * GET /api/client/gyms
+ * Get all gyms, sorted by distance if geolocation is provided.
+ *
+ * Query params:
+ *   lat: User latitude (optional)
+ *   lng: User longitude (optional)
+ *   radius: Max radius in km (optional, default: 100)
+ */
+router.get("/", gymsClientController.getAllGyms);
+
+/**
  * GET /api/client/gyms/near
  * Find gyms near user's location
  * 

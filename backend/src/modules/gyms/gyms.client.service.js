@@ -21,10 +21,22 @@ export async function findNearbyGyms(latitud, longitud, radiusKm = 5) {
     radiusKm
   );
 
-  // Round distance to 2 decimal places for display
   return gyms.map((gym) => ({
     ...gym,
     distancia_km: parseFloat(gym.distancia_km?.toFixed(2) || 0),
+  }));
+}
+
+export async function getAllGymsWithDistance(latitud = null, longitud = null, radiusKm = 100) {
+  const gyms = await gymsClientRepository.findAllGymsWithDistance(
+    latitud,
+    longitud,
+    radiusKm
+  );
+
+  return gyms.map((gym) => ({
+    ...gym,
+    distancia_km: gym.distancia_km == null ? null : parseFloat(gym.distancia_km?.toFixed(2) || 0),
   }));
 }
 
